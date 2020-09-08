@@ -12,11 +12,13 @@ import VueSweetalert2 from 'vue-sweetalert2'
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 import VueSidebarMenu from 'vue-sidebar-menu'
 import 'vue-sidebar-menu/dist/vue-sidebar-menu.css'
-import Permissions from './mixins/Permission.js'
+import Permissions from './mixin'
+// import { GridPlugin, Toolbar, PdfExport } from "@syncfusion/ej2-vue-grids";
 Vue.mixin(Permissions)
 
-Vue.use(VueSidebarMenu)
-
+// Vue.use(PdfExport)
+// Vue.use(Toolbar)
+// Vue.use(GridPlugin)
 Vue.use(VueSidebarMenu)
 Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)

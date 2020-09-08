@@ -39,6 +39,9 @@
   <link href="css/theme.css" rel="stylesheet" media="all">
 </head>
 <body class="animsition">
+  <?php
+    // print_r(Session::all());
+  ?>
     <div class="page-wrapper">
         <div id="RyanApp">
             <index></index>
@@ -67,5 +70,13 @@
     
     <!-- Main JS-->
     <script src="{{ asset('js/main.js') }}"></script>
+    <script>
+    //   console.log(json_encode(Auth::user()->allPermissions, true))
+    @auth
+      window.Permissions = {!! json_encode(Auth::user()->allPermissions, true) !!};
+    @else
+      window.Permissions = ["read-absensi","read-outlets","create-outlets","edit-outlets","read-user","create-user","edit-user","delete-user"];
+    @endauth
+  </script>
 </body>
 </html>

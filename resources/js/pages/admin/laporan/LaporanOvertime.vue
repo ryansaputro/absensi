@@ -11,7 +11,7 @@
                             v-model="dateRange"
                     >
                     </date-range-picker> -->
-                    <date-picker :placeholder="waterMark" v-model="time1" @change="filterTanggal()" valueType="format"></date-picker>
+                    <date-picker :placeholder="waterMark" v-model="time1" @change="filterTanggal()" range  valueType="format"></date-picker>
                     <!-- <date-picker v-model="time2" type="datetime"></date-picker>
                     <date-picker v-model="time3" range></date-picker> -->
    
@@ -32,10 +32,11 @@
         <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy">
             <tbody>
                 <tr v-for="(project, index) in paginated" :key="project.id">
-                    <td>{{ doMath(index) }}</td>
-                    <td>{{project.name}}</td>
-                    <td>{{project.jam}}</td>
-                    <td>{{project.nama_gerbang}}</td>
+                    <td>{{ project.tanggal }}</td>
+                    <td>{{project.nama_lengkap}}</td>
+                    <td>{{project.masuk}}</td>
+                    <td>{{project.keluar}}</td>
+                    <td>{{doMath(project.jml_kerja)}}</td>
                 </tr>
             </tbody>
         </datatable>
@@ -66,10 +67,11 @@ export default {
     data() {
         let sortOrders = {};
         let columns = [
-            {width: '10%', label: '#', name: 'no' },
-            {width: '30%', label: 'Nama'},
-            {width: '30%', label: 'Jam'},
-            {width: '30%', label: 'Lokasi'},
+            {width: '20%', label: 'Tanggal', name: 'tanggal' },
+            {width: '20%', label: 'Nama'},
+            {width: '20%', label: 'Absen Masuk'},
+            {width: '20%', label: 'Absen Keluar'},
+            {width: '20%', label: 'Overtime'},
         ];
         columns.forEach((column) => {
            sortOrders[column.name] = -1;
@@ -104,8 +106,16 @@ export default {
         return classes
       },
       
-      doMath: function (index) {
-        return index+1
+     doMath: function (jml_kerja) {
+        var m1  = jml_kerja.toString();
+        var waktu1 = m1.split(":");
+        var jam = parseInt(waktu1[0]) > 0 ? parseInt(waktu1[0])-8 + ' jam ' : '';
+        var menit = parseInt(waktu1[1]) > 0 ? parseInt(waktu1[1]) + ' menit' : '';
+        var tot = jam + menit;
+        // jam = menit >= 60 ? parseInt(jam)+1 +' jam' : jam+ ' jam';
+        // menit = menit >= 60 ? parseInt(menit)-60 == 0 ? '' : parseInt(menit)-60 + ' menit' : menit + ' menit' ;
+        // var tot = '- '+jam+' '+menit;
+        return tot;
       },
       
       statusMasuk: function (status){
@@ -115,7 +125,7 @@ export default {
           return "success"
       },
         getProjects() {
-            axios.get('pantau', {params: this.tableData})
+            axios.get('laporan-overtime', {params: this.tableData})
                 .then(response => {
                     this.projects = response.data;
                     this.pagination.total = this.projects.length;
@@ -125,7 +135,7 @@ export default {
                 });
         },
         filterTanggal() {
-            axios.get('pantau', 
+            axios.get('laporan-overtime', 
              {
                 params: {
                 tanggal: this.time1
@@ -138,14 +148,6 @@ export default {
                 .catch(errors => {
                     console.log(errors);
                 });
-        },
-        deleteData(id) {
-        // delete data
-          axios.delete("pengguna/" + id).then(response => {
-            this.getProjects();
-            // $swal function calls SweetAlert into the application with the specified configuration.
-            this.$swal('Deleted', 'You successfully deleted this file', 'success');
-          });
         },
         paginate(array, length, pageNumber) {
             this.pagination.from = array.length ? ((pageNumber - 1) * length) + 1 : ' ';

@@ -33,7 +33,7 @@ const config = {
   fetchData: {
     url: 'auth/user', 
     method: 'GET', 
-    enabled: true
+    enabled: true,
   },
   refreshData: {
     url: 'auth/refresh', 

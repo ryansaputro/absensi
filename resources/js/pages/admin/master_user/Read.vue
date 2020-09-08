@@ -4,7 +4,7 @@
         <div class="tableFilters m-b-30">
           <div class="row">
             <div class="col-md-2">
-              <router-link class="btn btn-primary w-100" to="pengguna/create">+ Tambah</router-link>
+              <router-link v-if="$can('read-absensi')" class="btn btn-primary w-100" to="pengguna/create">+ Tambah</router-link>
             </div>
             <div class="col-md-4">
               <input class="input form-control" type="text" v-model="search" placeholder="Search Table"
@@ -92,7 +92,6 @@ export default {
                 .then(response => {
                     this.projects = response.data;
                     this.pagination.total = this.projects.length;
-                    console.log(response.data)
                 })
                 .catch(errors => {
                     console.log(errors);

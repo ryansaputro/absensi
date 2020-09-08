@@ -16,7 +16,10 @@
                     <date-picker v-model="time3" range></date-picker> -->
    
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
+                <button @click="downloadWithCSS">Download PDF</button>
+            </div>
+            <div class="col-md-3">
               <div class="control pull-right">
                 <div class="select form-control">
                     <select v-model="length" @change="resetPagination()">
@@ -36,7 +39,8 @@
                     <td>{{project.nama_lengkap}}</td>
                     <td>{{project.masuk}}</td>
                     <td>{{project.keluar}}</td>
-                    <td>{{doMath(project.jml_kerja)}}</td>
+                    <td style="color:red;">{{doMath(project.masuk)}}</td>
+                    <td style="color:red;">{{doKeluar(project.keluar)}}</td>
                 </tr>
             </tbody>
         </datatable>
@@ -47,7 +51,6 @@
       </div>
     </div>
 </template>
-
 <script>
 import Datatable from '../../../components/Datatables.vue';
 import Pagination from '../../../components/Pagination.vue';
@@ -57,6 +60,7 @@ import DatePicker from 'vue2-datepicker';
 import 'vue2-datepicker/index.css';
 //you need to import the CSS manually (in case you want to override it)
 import 'vue2-daterange-picker/dist/vue2-daterange-picker.css'
+import jsPDF from 'jspdf' 
 
 export default {
     // name:{disabled_dates},
@@ -69,9 +73,10 @@ export default {
         let columns = [
             {width: '20%', label: 'Tanggal', name: 'tanggal' },
             {width: '20%', label: 'Nama'},
-            {width: '20%', label: 'Absen Masuk'},
-            {width: '20%', label: 'Absen Keluar'},
-            {width: '20%', label: 'Durasi Kerja'},
+            {width: '15%', label: 'Absen Masuk'},
+            {width: '15%', label: 'Absen Keluar'},
+            {width: '15%', label: 'Terlambat'},
+            {width: '15%', label: 'Pulang Awal'},
         ];
         columns.forEach((column) => {
            sortOrders[column.name] = -1;
@@ -96,35 +101,51 @@ export default {
             },
             time1: null,
             waterMark : new Date().toISOString().slice(0,10),
+            toolbarOptions: ['PdfExport'],
         }
     },
     methods: {
-      dateFormat (classes, date) {
-        if (!classes.disabled) {
-          classes.disabled = date.getTime() < new Date()
-        }
-        return classes
-      },
+    // toolbarClick(args) {
+    //     if (args.item.id === 'Grid_pdfexport') { // 'Grid_pdfexport' -> Grid component id + _ + toolbar item name
+    //         this.$refs.grid.pdfExport();
+    //     }
+    // },
+    // dateFormat (classes, date) {
+    //     if (!classes.disabled) {
+    //       classes.disabled = date.getTime() < new Date()
+    //     }
+    //     return classes
+    // },
       
-      doMath: function (jml_kerja) {
-        var m1  = jml_kerja.toString();
+    doMath: function (masuk) {
+        var m1  = masuk.toString();
         var waktu1 = m1.split(":");
-        var jam = parseInt(waktu1[0]) > 0 ? parseInt(waktu1[0]) + ' jam ' : '';
-        var menit = parseInt(waktu1[1]) > 0 ? parseInt(waktu1[1]) + ' menit' : '';
-        var tot = jam + menit;
-        // jam = menit >= 60 ? parseInt(jam)+1 +' jam' : jam+ ' jam';
-        // menit = menit >= 60 ? parseInt(menit)-60 == 0 ? '' : parseInt(menit)-60 + ' menit' : menit + ' menit' ;
-        // var tot = '- '+jam+' '+menit;
+        var jamMasuk = waktu1[0]-8 < 0 ? 0 : waktu1[0]-8;
+        var menitMasuk = parseInt(waktu1[1]);
+        var tot = jamMasuk+ ' Jam '+ menitMasuk +' Menit';
+        tot = jamMasuk == 0 ? '0 menit' : tot;
         return tot;
       },
       
-      statusMasuk: function (status){
-          if(status == 'Terlambat')
-          return "danger"
-          else
-          return "success"
+    doKeluar: function (keluar) {
+        // var tot = ( new Date("1970-1-1 17:00") - new Date("1970-1-1 16:54") ) / 1000 / 60 / 60 ;
+        var date1 = new Date("1970-1-1 17:00");
+        var date2 = new Date("1970-1-1 "+keluar)
+        var res = Math.abs(date1 - date2) / 1000
+
+        // get hours        
+         var hours = Math.floor(res / 3600) % 24;        
+        //  document.write("<br>Difference (Hours): "+hours);  
+         
+         // get minutes
+        var minutes = Math.floor(res / 60) % 60;
+        hours = isNaN(hours) ? '' : hours <= 0 ? '' : hours+ ' Jam '
+        minutes = isNaN(minutes) ? '' : minutes + ' Menit';
+        var tot = hours + minutes ;
+        return tot;
       },
-        getProjects() {
+      
+    getProjects() {
             axios.get('laporan-terlambat', {params: this.tableData})
                 .then(response => {
                     this.projects = response.data;
@@ -134,7 +155,7 @@ export default {
                     console.log(errors);
                 });
         },
-        filterTanggal() {
+    filterTanggal() {
             axios.get('laporan-terlambat', 
              {
                 params: {
@@ -149,33 +170,48 @@ export default {
                     console.log(errors);
                 });
         },
-        deleteData(id) {
-        // delete data
-          axios.delete("pengguna/" + id).then(response => {
-            this.getProjects();
-            // $swal function calls SweetAlert into the application with the specified configuration.
-            this.$swal('Deleted', 'You successfully deleted this file', 'success');
-          });
-        },
-        paginate(array, length, pageNumber) {
+    paginate(array, length, pageNumber) {
             this.pagination.from = array.length ? ((pageNumber - 1) * length) + 1 : ' ';
             this.pagination.to = pageNumber * length > array.length ? array.length : pageNumber * length;
             this.pagination.prevPage = pageNumber > 1 ? pageNumber : '';
             this.pagination.nextPage = array.length > this.pagination.to ? pageNumber + 1 : '';
             return array.slice((pageNumber - 1) * length, pageNumber * length);
         },
-        resetPagination() {
+    resetPagination() {
             this.pagination.currentPage = 1;
             this.pagination.prevPage = '';
             this.pagination.nextPage = '';
         },
-        sortBy(key) {
+    sortBy(key) {
             this.resetPagination();
             this.sortKey = key;
             this.sortOrders[key] = this.sortOrders[key] * -1;
         },
-        getIndex(array, key, value) {
+    getIndex(array, key, value) {
             return array.findIndex(i => i[key] == value)
+        },
+    download() {
+            const doc = new jsPDF();
+            const contentHtml = this.$refs.content.innerHTML;
+            doc.fromHTML(contentHtml, 15, 15, {
+                width: 170
+            });
+            doc.save("sample.pdf");
+        },
+    downloadWithCSS() {
+            var doc = new jsPDF('p', 'pt', 'A4');
+        //     margins = {
+        //         top: 80,
+        //         bottom: 60,
+        //         left: 40,
+        //         width: 522
+        //     };
+        
+        // doc.fromHTML(this.$refs.testHtml, margins.left, margins.top,{
+        //     'width' : margins.width
+        // });
+        
+        doc.save('test.pdf');
         },
     },
     computed: {
@@ -218,3 +254,6 @@ export default {
     }
 };
 </script>
+<style>
+@import url("https://cdn.syncfusion.com/ej2/material.css");
+</style>

@@ -22,6 +22,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 //auth
 Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
+        Route::get('checkUser', 'HomeController@checkUser');
+
         // Below mention routes are public, user can access those without any restriction.
         // Create New User
         Route::post('register', 'AuthController@register');
@@ -31,7 +33,8 @@ Route::prefix('v1')->group(function () {
         // // Refresh the JWT Token
         Route::get('refresh', 'AuthController@refresh');
         
-        Route::middleware('auth:api')->group(function () {
+        Route::middleware(['auth:api', 'jwt.verify'])->group(function () {
+            Route::get('users', 'UserController@getAuthenticatedUser');
             // Get user info
             Route::get('user', 'AuthController@user');
             // Logout user from application
@@ -47,26 +50,32 @@ Route::prefix('v1')->group(function () {
         // menambahkan route untuk person
         Route::get('/dashboard','HomeController@index');
         Route::post('/absen','HomeController@absen');
-        Route::get('/list-absensi','HomeController@listAbsensi');
+        Route::post('/get-absen','HomeController@getAbsen');
         Route::get('/lacak','HomeController@lacak');
         Route::get('/pantau','HomeController@pantau');
         Route::get('/telat','HomeController@telat');
-        Route::get('/provinsi','PersonController@provinsi');
-        Route::get('/divisi','PersonController@divisi');
-        Route::get('/kota','PersonController@kota');
-        Route::get('/kecamatan','PersonController@kecamatan');
-        Route::get('/kelurahan','PersonController@kelurahan');
-    
         Route::get('/laporan-terlambat','ReportController@laporanTerlambat');
-    
-    
-        Route::prefix('pengguna')->group(function () {
+        Route::get('/laporan-overtime','ReportController@laporanOvertime');
+        Route::get('/laporan-semua','ReportController@laporanSemua');
+    });
+
+    Route::middleware('permission:read-absensi')->group(function () {
+        Route::get('/list-absensi','HomeController@listAbsensi');
+    });
+
+    Route::middleware('permission:read-user|create-user|edit-user|delete-user')->group(function () {
+        Route::prefix('pengguna')->group(function() {
             Route::get('/','PersonController@all');
             Route::get('/{id}','PersonController@show');
             Route::post('/create','PersonController@store');
             Route::put('/{id}','PersonController@update');
             Route::delete('/{id}','PersonController@delete');
         });
+            Route::get('/provinsi','PersonController@provinsi');
+            Route::get('/divisi','PersonController@divisi');
+            Route::get('/kota','PersonController@kota');
+            Route::get('/kecamatan','PersonController@kecamatan');
+            Route::get('/kelurahan','PersonController@kelurahan');
 
     });
 });

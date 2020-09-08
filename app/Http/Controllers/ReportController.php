@@ -75,6 +75,122 @@ class ReportController extends Controller
         return ['data' => $projects, 'draw' => $request->input('draw')];
     }
 
+    public function laporanOvertime(Request $request)
+    {
+        if ( $request->input('tanggal') ) {
+            $a = DB::table('view_absensi')
+                    ->whereBetween('tanggal', $request->input('tanggal'))
+                    ->where(function ($query) {
+                        $query->where('masuk', '<', '08:00')
+                            ->where('keluar', '>', '17:00');
+                    })
+                    ->get();
+            return $a;
+    	}
+        if ( $request->input('client') ) {
+            $a = DB::table('view_absensi')
+                    ->where('tanggal', date('Y-m-d'))
+                    ->where(function ($query) {
+                        $query->where('masuk', '<', '08:00')
+                            ->where('keluar', '>', '17:00');
+                    })
+                    ->get();
+            return $a;
+    	}
+
+        $columns = ['absensi.id', 'tanggal', 'name'];
+
+        $length = $request->input('length');
+        $column = $request->input('column'); //Index
+        $dir = $request->input('dir');
+        $searchValue = $request->input('search');
+
+        $query = DB::table('view_absensi')
+                    ->where('tanggal', date('Y-m-d'))
+                    ->where(function ($query) {
+                        $query->where('masuk', '<', '08:00')
+                            ->where('keluar', '>', '17:00');
+                    })
+                    ->get();
+
+        if ($searchValue) {
+            $query->where(function($query) use ($searchValue) {
+                $query->where('nama_lengkap', 'like', '%' . $searchValue . '%')
+                ->orWhere('nama_lengkap', 'like', '%' . $searchValue . '%');
+            });
+        }
+
+        $projects = $query->paginate($length);
+        return ['data' => $projects, 'draw' => $request->input('draw')];
+    }
+
+    public function laporanSemua(Request $request)
+    {
+        $karyawan = User::all();
+        // $absen = DB::table('view_absensi')->select('nama_lengkap', 'masuk')->get();//->pluck('masuk', 'nama_lengkap')->toArray();
+        $dataAbsen = [];
+        $absen = DB::table('view_absensi')->select('nama_lengkap', 'masuk', 'tanggal')->get();
+        foreach($absen AS $k => $v){
+            $dataAbsen[$v->nama_lengkap][$v->tanggal] = $v->masuk; 
+        }
+        if ( $request->input('tanggal') ) {
+            $absen = DB::table('view_absensi')->select('nama_lengkap', 'masuk', 'tanggal')->whereBetween('tanggal', $request->input('tanggal'))->get();
+            // foreach($absen AS $k => $v){
+            //     $dataAbsen[$v->nama_lengkap][$v->tanggal] = $v->masuk; 
+            // }
+            $a = DB::table('view_absensi')
+                    ->whereBetween('tanggal', $request->input('tanggal'))
+                    // ->where(function ($query) {
+                    //     $query->where('masuk', '<', '08:00')
+                    //         ->where('keluar', '>', '17:00');
+                    // })
+                    ->get();
+            // return $a;
+            return [$a, 'karyawan' => $karyawan,'absen'=> $dataAbsen];
+    	}
+        if ( $request->input('client') ) {
+            $absen = DB::table('view_absensi')->select('nama_lengkap', 'masuk', 'tanggal')->where('tanggal', date('Y-m-d'))->get();
+            // foreach($absen AS $k => $v){
+            //     $dataAbsen[$v->nama_lengkap][$v->tanggal] = $v->masuk; 
+            // }
+            $a = DB::table('view_absensi')
+                    ->where('tanggal', date('Y-m-d'))
+                    // ->where(function ($query) {
+                    //     $query->where('masuk', '<', '08:00')
+                    //         ->where('keluar', '>', '17:00');
+                    // })
+                    ->get();
+            // return $a;
+            return [$a, 'karyawan' => $karyawan,'absen'=> $dataAbsen];
+    	}
+
+        $columns = ['absensi.id', 'tanggal', 'name'];
+
+        $length = $request->input('length');
+        $column = $request->input('column'); //Index
+        $dir = $request->input('dir');
+        $searchValue = $request->input('search');
+
+        $query = DB::table('view_absensi')
+                    ->where('tanggal', date('Y-m-d'))
+                    // ->where(function ($query) {
+                    //     $query->where('masuk', '<', '08:00')
+                    //         ->where('keluar', '>', '17:00');
+                    // })
+                    ->get();
+
+        if ($searchValue) {
+            $query->where(function($query) use ($searchValue) {
+                $query->where('nama_lengkap', 'like', '%' . $searchValue . '%')
+                ->orWhere('nama_lengkap', 'like', '%' . $searchValue . '%');
+            });
+        }
+
+        $projects = $query->paginate($length);
+        
+        return ['data' => $projects, 'karyawan' => $karyawan,'absen'=> $absen, 'draw' => $request->input('draw')];
+    }
+
      /**
      * Dashboard telat
      *

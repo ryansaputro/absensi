@@ -83,12 +83,12 @@
                                 title: 'Laporan Terlambat & PLA'
                             },
                             {
-                                href: '/laporan-diganti-sore',
-                                title: 'Laporan Diganti Sore'
-                            },
-                            {
                                 href: '/laporan-overtime',
                                 title: 'Laporan Overtime'
+                            },
+                            {
+                                href: '/laporan-semua',
+                                title: 'Laporan Absensi'
                             },
                         ]
                     },

@@ -8,6 +8,7 @@ use App\User;
 use App\Absensi;
 use DB;
 use Auth;
+use JWTAuth;
 
 class HomeController extends Controller
 {
@@ -29,6 +30,18 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
+    /**
+     * Get authenticated user
+     */
+    public function checkUser(Request $request)
+    {
+        dd(JWTAuth::user());
+        $user = User::find(Auth::user()->id);
+        return response()->json([
+            'status' => 'success',
+            'data' => $user
+        ]);
+    }
     public function index(Request $request)
     {
         if ( $request->input('client') ) {
@@ -88,6 +101,15 @@ class HomeController extends Controller
                 ->get();
 
         return ['data' => $data, 'data2' => $grafikPerdivisi];
+    }
+
+    public function getAbsen(){
+        $data = DB::table('view_absensi')->get();
+        $absen = [];
+        foreach($data AS $k => $v){
+            $absen[$v->nama_lengkap][$v->tanggal] = $v->masuk;
+        }
+        return response()->json(['data' => $absen]);
     }
 
     public function absen(Request $request){

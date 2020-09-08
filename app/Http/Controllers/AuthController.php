@@ -5,6 +5,7 @@ use Auth;
 use Validator;
 use App\User;
 use JWTAuth;
+use Session;
 
 class AuthController extends Controller
 {
@@ -59,7 +60,8 @@ class AuthController extends Controller
                 ], 400);
         }
         return response([
-                'status' => 'success'
+                'status' => 'success',
+                'token' => $token
             ])
             ->header('Authorization', $token);
     }
@@ -80,11 +82,38 @@ class AuthController extends Controller
     public function user(Request $request)
     {
         $user = User::find(Auth::user()->id);
+        // $setSession = Session::put($user);
         return response()->json([
             'status' => 'success',
-            'data' => $user
+            'data' => json_encode(Auth::user()->allPermissions, true)
         ]);
     }
+
+    public function getAuthenticatedUser()
+    {
+            try {
+
+                    if (! $user = JWTAuth::parseToken()->authenticate()) {
+                            return response()->json(['user_not_found'], 404);
+                    }
+
+            } catch (Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
+
+                    return response()->json(['token_expired'], $e->getStatusCode());
+
+            } catch (Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+
+                    return response()->json(['token_invalid'], $e->getStatusCode());
+
+            } catch (Tymon\JWTAuth\Exceptions\JWTException $e) {
+
+                    return response()->json(['token_absent'], $e->getStatusCode());
+
+            }
+
+            return response()->json(compact('user'));
+    }
+    
     /**
      * Refresh JWT token
      */

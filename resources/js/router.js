@@ -15,6 +15,7 @@ import Pantau from './pages/admin/pantau/Read'
 import LaporanTerlambat from './pages/admin/laporan/LaporanTerlambat'
 import LaporanDigantiSore from './pages/admin/laporan/LaporanDigantiSore'
 import LaporanOvertime from './pages/admin/laporan/LaporanOvertime'
+import LaporanSemua from './pages/admin/laporan/LaporanSemua'
 // Routes
 const routes = [
     {
@@ -102,6 +103,14 @@ const routes = [
         path: '/laporan-overtime',
         name: 'Laporan Overtime',
         component: LaporanOvertime,
+        meta: {
+            auth: true
+        }
+    },
+    {
+        path: '/laporan-semua',
+        name: 'Laporan Absensi',
+        component: LaporanSemua,
         meta: {
             auth: true
         }

@@ -40,21 +40,47 @@
     },
     methods: {
       login(){
+        // var app = this
+        // axios.post('/auth/login', {
+        //   email: app.email,
+        //   password: app.password,
+        // })
+        // .then(res => {
+        //   this.$swal('Login Sukses', 'Anda akan dialihkan ke halaman dashboard', 'success');
+        //   const redirectTo = 'dashboard'
+        //   this.$router.push({name: redirectTo})
+        // })
+        // .catch(error => {
+        //   this.$swal('Login Gagal', 'Cek kembali username dan password', 'error');
+        // })
+        var redirect = this.$auth.redirect()
         var app = this
-        axios.post('/auth/login', {
-          email: app.email,
-          password: app.password,
+        this.$auth.login({
+          data: {
+            email: app.email,
+            password: app.password
+          },
+          success: function(data) {
+            // handle redirection
+            app.success = true
+            window.Permissions = ["read-absensi","read-outlets","create-outlets","edit-outlets","read-user","create-user","edit-user","delete-user"];
+            const redirectTo = 'dashboard'
+            this.$swal('Login Sukses', 'Anda akan dialihkan ke halaman dashboard', 'success');
+            this.$router.push({name: redirectTo})
+          },
+          error: function(error) {
+            this.$swal('Login Gagal', 'Cek kembali username dan password', 'error');
+            app.has_error = true
+            app.error = res.response.data.error
+          },
+          catch: function() {
+            this.$swal('Login Gagal', 'Cek kembali username dan password', 'error');
+          },
+          rememberMe: true,
+          fetchUser: true
         })
-        .then(res => {
-          this.$swal('Login Sukses', 'Anda akan dialihkan ke halaman dashboard', 'success');
-          const redirectTo = 'dashboard'
-          this.$router.push({name: redirectTo})
-
-        })
-        .catch(error => {
-          this.$swal('Login Gagal', 'Cek kembali username dan password', 'error');
-        })
-      },
-    }
+      }
+    },
+    
   } 
 </script>

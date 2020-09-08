@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Spatie\Permission\Traits\HasRoles;
+use Auth;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -48,6 +49,15 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+    public function getAllPermissionsAttribute() {
+    $permissions = [];
+        foreach (Permission::all() as $permission) {
+        if (Auth::user()->can($permission->name)) {
+            $permissions[] = $permission->name;
+        }
+        }
+        return $permissions;
     }
     // public function role() {
     //     return $this->belongsTo(Role::class);

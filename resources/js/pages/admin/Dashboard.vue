@@ -156,7 +156,6 @@
                     }
                     var $tooltips = tooltipItem.yLabel;
                     var dt = tooltipItem.yLabel.toString().split('.');
-                    console.log(dt);
                     var jam = dt[0] != 0 ? parseInt(dt[0]) +' Jam ': '';
                     var menit = typeof dt[1] !== 'undefined' ? dt[1] != 0 ? dt[1].length == 1 ? dt[1]+ '0 Menit' : dt[1]+ ' Menit'  : '' : '';
                     var labeldata = jam + menit
