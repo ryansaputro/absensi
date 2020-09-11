@@ -75,21 +75,34 @@
                         icon: 'fa fa-eye'
                     },
                     {
+                        href: '/data-kehadiran',
+                        title: 'Data Kehadiran',
+                        icon: 'fa fa-calendar'
+                    },
+                    {
                         title: 'Laporan',
                         icon: 'fa fa-book',
                         child: [
                             {
-                                href: '/laporan-terlambat',
-                                title: 'Laporan Terlambat & PLA'
+                                href: '/laporan-absensi',
+                                title: 'Laporan Kehadiran'
                             },
                             {
-                                href: '/laporan-overtime',
-                                title: 'Laporan Overtime'
+                                href: '/rekap-absensi',
+                                title: 'Rekap Absensi'
                             },
-                            {
-                                href: '/laporan-semua',
-                                title: 'Laporan Absensi'
-                            },
+                            // {
+                            //     href: '/laporan-terlambat',
+                            //     title: 'Laporan Terlambat & PLA'
+                            // },
+                            // {
+                            //     href: '/laporan-overtime',
+                            //     title: 'Laporan Overtime'
+                            // },
+                            // {
+                            //     href: '/laporan-semua',
+                            //     title: 'Laporan Absensi'
+                            // },
                         ]
                     },
                     {
@@ -100,14 +113,14 @@
                                 href: '/pengguna',
                                 title: 'Karyawan'
                             },
-                            {
-                                href: '/lokasi',
-                                title: 'Lokasi'
-                            },
-                            {
-                                href: '/jadwal_libur',
-                                title: 'Jadwal Libur Tahunan'
-                            }
+                            // {
+                            //     href: '/lokasi',
+                            //     title: 'Lokasi'
+                            // },
+                            // {
+                            //     href: '/jadwal_libur',
+                            //     title: 'Jadwal Libur Tahunan'
+                            // }
                         ]
                     }
                 ]

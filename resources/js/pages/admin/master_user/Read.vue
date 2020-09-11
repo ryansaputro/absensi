@@ -26,9 +26,12 @@
         <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy">
             <tbody>
                 <tr v-for="(project, index) in paginated" :key="project.id">
-                    <td>{{ doMath(index) }}</td>
                     <td>{{project.no_ktp}}</td>
                     <td>{{project.nama_lengkap}}</td>
+                    <td>{{project.jabatan}}</td>
+                    <td>{{project.bagian_divisi}}</td>
+                    <td>{{project.tgl_masuk}}</td>
+                    <td>{{project.masa_kerja}}</td>
                     <td>
                       <router-link class="btn btn-primary btn-xs" :to="'/pengguna/'+project.id">Edit</router-link>
                       <button class="btn btn-danger btn-xs" v-on:click="deleteData(project.id)">Delete</button>
@@ -55,10 +58,13 @@ export default {
     data() {
         let sortOrders = {};
         let columns = [
-            {width: '10%', label: '#', name: 'no' },
-            {width: '30%', label: 'KTP', name: 'ktp'},
-            {width: '30%', label: 'Nama Lengkap', name: 'nama_lengkap' },
-            {width: '30%', label: 'Aksi', name: 'action'}
+            {label: 'NIK', name: 'nik'},
+            {label: 'Nama', name: 'nama_lengkap' },
+            {label: 'Jabatan', name: 'jabatan' },
+            {label: 'Bagian', name: 'bagian' },
+            {label: 'Tgl Msk', name: 'tgl_msk' },
+            {label: 'Masa Kontrak', name: 'masa_kontrak' },
+            {label: 'Aksi', name: 'action'}
         ];
         columns.forEach((column) => {
            sortOrders[column.name] = -1;

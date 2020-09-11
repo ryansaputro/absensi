@@ -36,7 +36,7 @@ class ReportController extends Controller
                             ->OrWhere('keluar', '<', '17:00');
                     })
                     ->get();
-            return $a;
+            return ['data' => $a, 'data2' => json_encode($a), 'draw' => $request->input('draw')];
     	}
         if ( $request->input('client') ) {
             $a = DB::table('view_absensi')
@@ -46,7 +46,7 @@ class ReportController extends Controller
                             ->OrWhere('keluar', '<', '17:00');
                     })
                     ->get();
-            return $a;
+            return ['data' => $a, 'data2' => json_encode($a), 'draw' => $request->input('draw')];
     	}
 
         $columns = ['absensi.id', 'tanggal', 'name'];
@@ -72,7 +72,7 @@ class ReportController extends Controller
         }
 
         $projects = $query->paginate($length);
-        return ['data' => $projects, 'draw' => $request->input('draw')];
+        return ['data' => $projects, 'data2' => json_encode($projects), 'draw' => $request->input('draw')];
     }
 
     public function laporanOvertime(Request $request)
@@ -126,42 +126,120 @@ class ReportController extends Controller
 
     public function laporanSemua(Request $request)
     {
-        $karyawan = User::all();
-        // $absen = DB::table('view_absensi')->select('nama_lengkap', 'masuk')->get();//->pluck('masuk', 'nama_lengkap')->toArray();
+        
         $dataAbsen = [];
-        $absen = DB::table('view_absensi')->select('nama_lengkap', 'masuk', 'tanggal')->get();
-        foreach($absen AS $k => $v){
-            $dataAbsen[$v->nama_lengkap][$v->tanggal] = $v->masuk; 
+        $dataKeluar = [];
+        $searchValue = $request->input('search');
+        $tgl = is_array($request->input('tanggal'));
+
+        if ( $request->input('tanggal')[0] != null && $request->input('tanggal')[1] != null ) {
+            $absen = DB::table('view_absensi')
+            ->select(DB::raw('COUNT(masuk) AS kehadiran'), 'users.nik_pegawai AS no_ktp', 'users.id AS id_user','view_absensi.nama_lengkap', 'masuk', 'keluar', 'tanggal', DB::raw('DATE_FORMAT(tanggal, "%Y-%c-%e") as tgl'))
+            ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
+            ->where('users.id', '<>', '5')
+            ->groupBy('users.id');
+
+            $status = DB::table('absen_tambahan')
+            ->select(DB::raw('COUNT(id_karyawan) AS jml'), 'id_karyawan', 'status')
+            ->groupBy('status','id_karyawan');
+
+            if($tgl == TRUE){
+                $absen->whereBetween('tanggal', $request->input('tanggal'));
+                $status->whereBetween(DB::raw('DATE(tanggal)'), $request->input('tanggal'));
+            }else{
+                $absen->where('tanggal', $request->input('tanggal'));
+                $status->where(DB::raw('DATE(tanggal)'), $request->input('tanggal'));
+            }
+            
+            $karyawan = User::where('users.id', '<>', '5')->get();
+            
+            if ($searchValue) {
+                $absen->where(function($absen) use ($searchValue) {
+                    $absen->where('view_absensi.nama_lengkap', 'like', '%' . $searchValue . '%')
+                    ->orWhere('users.nik_pegawai', 'like', '%' . $searchValue . '%');
+                });
+
+                $karyawan = User::where('nama_lengkap', 'like', '%' . $searchValue . '%')
+                    ->orWhere('nik_pegawai', 'like', '%' . $searchValue . '%')->get();
+
+            }
+
+            $absen = $absen->get();
+            $status = $status->get();
+
+            if(count($status) > 0){
+                foreach($status AS $k => $v){
+                    $statusMasuk[$v->id_karyawan][$v->status] = $v->jml;  
+                }
+            }else{
+                    $statusMasuk[][] = '';
+            }
+
+            $jml = [];
+            foreach($absen AS $k => $v){
+                $dataAbsen[$v->tgl][$v->id_user] = $v->masuk; 
+                $dataKeluar[$v->tgl][$v->id_user] = $v->keluar; 
+                $jml[$v->id_user] = $v->kehadiran;
+            }
+
+
+            return ['statusMasuk' => $statusMasuk, 'karyawan' => $karyawan,'absen'=> $dataAbsen, 'keluar'=> $dataKeluar, 'kehadiran' => $jml];
         }
-        if ( $request->input('tanggal') ) {
-            $absen = DB::table('view_absensi')->select('nama_lengkap', 'masuk', 'tanggal')->whereBetween('tanggal', $request->input('tanggal'))->get();
-            // foreach($absen AS $k => $v){
-            //     $dataAbsen[$v->nama_lengkap][$v->tanggal] = $v->masuk; 
-            // }
-            $a = DB::table('view_absensi')
-                    ->whereBetween('tanggal', $request->input('tanggal'))
-                    // ->where(function ($query) {
-                    //     $query->where('masuk', '<', '08:00')
-                    //         ->where('keluar', '>', '17:00');
-                    // })
-                    ->get();
-            // return $a;
-            return [$a, 'karyawan' => $karyawan,'absen'=> $dataAbsen];
-    	}
-        if ( $request->input('client') ) {
-            $absen = DB::table('view_absensi')->select('nama_lengkap', 'masuk', 'tanggal')->where('tanggal', date('Y-m-d'))->get();
-            // foreach($absen AS $k => $v){
-            //     $dataAbsen[$v->nama_lengkap][$v->tanggal] = $v->masuk; 
-            // }
-            $a = DB::table('view_absensi')
-                    ->where('tanggal', date('Y-m-d'))
-                    // ->where(function ($query) {
-                    //     $query->where('masuk', '<', '08:00')
-                    //         ->where('keluar', '>', '17:00');
-                    // })
-                    ->get();
-            // return $a;
-            return [$a, 'karyawan' => $karyawan,'absen'=> $dataAbsen];
+        
+
+        if ( $request->input('client') || ($request->input('search'))) {
+
+            $karyawan = User::where('users.id', '<>', '5')->get();
+
+            $absen = DB::table('view_absensi')->select(DB::raw('COUNT(masuk) AS kehadiran'), 'users.nik_pegawai AS no_ktp', 'users.id AS id_user','view_absensi.nama_lengkap', 'masuk', 'keluar', 'tanggal', DB::raw('DATE_FORMAT(tanggal, "%Y-%c-%e") as tgl'))
+            ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
+            ->where('tanggal', date('Y-m-d'))
+            // ->where('users.id', '<>', '5')
+            ->groupBy('users.id');
+            
+            $status = DB::table('absen_tambahan')
+            ->select(DB::raw('COUNT(id_karyawan) AS jml'), 'id_karyawan', 'status')
+            ->groupBy('status','id_karyawan');
+
+            if($tgl == TRUE){
+                // $absen->whereBetween('tanggal', $request->input('tanggal'));
+                $status->whereBetween(DB::raw('DATE(tanggal)'), $request->input('tanggal'));
+            }else{
+                // $absen->where('tanggal', $request->input('tanggal'));
+                $status->where(DB::raw('DATE(tanggal)'), $request->input('tanggal'));
+            }
+
+
+            if ($searchValue) {
+                $absen->where(function($absen) use ($searchValue) {
+                    $absen->where('view_absensi.nama_lengkap', 'like', '%' . $searchValue . '%')
+                    ->orWhere('users.nik_pegawai', 'like', '%' . $searchValue . '%');
+                });
+
+                $karyawan = User::where('nama_lengkap', 'like', '%' . $searchValue . '%')
+                    ->orWhere('nik_pegawai', 'like', '%' . $searchValue . '%')->get();
+
+            }
+
+            $absen = $absen->get();
+            $status = $status->get();
+            $jml = [];
+
+            if(count($status) > 0){
+                foreach($status AS $k => $v){
+                    $statusMasuk[$v->id_karyawan][$v->status] = $v->jml;  
+                }
+            }else{
+                    $statusMasuk[][] = '';
+            }
+
+            foreach($absen AS $k => $v){
+                $dataAbsen[$v->tgl][$v->id_user] = $v->masuk; 
+                $dataKeluar[$v->tgl][$v->id_user] = $v->keluar; 
+                $jml[$v->id_user] = $v->kehadiran;
+            }
+
+            return ['statusMasuk' => $statusMasuk, 'karyawan' => $karyawan,'absen'=> $dataAbsen, 'keluar'=> $dataKeluar, 'kehadiran' => $jml];
     	}
 
         $columns = ['absensi.id', 'tanggal', 'name'];
@@ -173,10 +251,6 @@ class ReportController extends Controller
 
         $query = DB::table('view_absensi')
                     ->where('tanggal', date('Y-m-d'))
-                    // ->where(function ($query) {
-                    //     $query->where('masuk', '<', '08:00')
-                    //         ->where('keluar', '>', '17:00');
-                    // })
                     ->get();
 
         if ($searchValue) {
@@ -279,7 +353,6 @@ class ReportController extends Controller
 
     }
 
-
     public function lacak(Request $request)
     {
         if ( $request->input('tanggal') ) {
@@ -372,37 +445,153 @@ class ReportController extends Controller
         return ['data' => $projects, 'draw' => $request->input('draw')];
     }
 
-    public function listAbsensi(Request $request)
+    // public function listAbsensi(Request $request)
+    // {
+    //     if ( $request->input('tanggal') ) {
+    //         // $a =  DB::table('absensi')
+    //         //         ->select(DB::raw('DATE(tanggal) AS tanggal'), 'name', DB::raw("IF(HOUR(tanggal) < '12:00:00', 'MASUK', 'KELUAR') AS status_absen"),'id_karyawan', DB::raw('MIN(DATE_FORMAT(tanggal, "%H:%i")) AS jam'), DB::raw('MAX(DATE_FORMAT(tanggal, "%H:%i")) AS keluar'))
+    //         //         ->join('users', 'users.id', '=', 'id_karyawan')
+    //         //         ->where(DB::raw('DATE(tanggal)'), $request->tanggal)
+    //         //         ->groupBy('id_karyawan')
+    //         //         ->get();
+
+    //         $a =   DB::table('view_absensi')->whereIn('tanggal', $request->tanggal)->where('nama_lengkap', '<>', 'agus')->get();
+
+    //         return $a;
+    // 	}
+    //     if ( $request->input('client') ) {
+    //         $a = DB::table('view_absensi')->where('tanggal', date('Y-m-d'))->where('nama_lengkap', '<>', 'agus')
+    //                 ->get();
+    //         return $a;
+    // 	}
+
+    //     $columns = ['absensi.id', 'tanggal', 'name'];
+
+    //     $length = $request->input('length');
+    //     $column = $request->input('column'); //Index
+    //     $dir = $request->input('dir');
+    //     $searchValue = $request->input('search');
+
+    //     $query = DB::table('view_absensi')->where('tanggal', date('Y-m-d'))->where('nama_lengkap', '<>', 'agus')->get();
+
+    //     if ($searchValue) {
+    //         $query->where(function($query) use ($searchValue) {
+    //             $query->where('name', 'like', '%' . $searchValue . '%')
+    //             ->orWhere('name', 'like', '%' . $searchValue . '%');
+    //         });
+    //     }
+
+    //     $projects = $query->paginate($length);
+    //     return ['data' => $projects, 'draw' => $request->input('draw')];
+    // }
+
+    public function exportExcel(Request $request)
     {
+        // $data = DB::table('users')
+        //         ->select('users.nik_pegawai', 'users.nama_lengkap', 
+        //         DB::raw('COUNT((view_absensi.masuk)) AS kehadiran'), 
+        //         DB::raw("IF(absen_tambahan.status = 'S', COUNT(DISTINCT(status)), '0') AS sakit"), 
+        //         DB::raw("IF(absen_tambahan.status = 'I', COUNT(DISTINCT(status)), '0') AS ijin"), 
+        //         DB::raw("IF(absen_tambahan.status = 'A', COUNT(DISTINCT(status)), '0') AS alasan"), 
+        //         DB::raw("IF(absen_tambahan.status = 'C', COUNT(DISTINCT(status)), '0') AS cuti")
+        //         )
+        //         ->leftJoin('view_absensi', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
+        //         ->leftJoin('absen_tambahan', 'users.id', '=', 'absen_tambahan.id_karyawan')
+        //         ->where('users.id', '<>', '5')
+        //         ->groupBy('users.id', 'view_absensi.tanggal')
+        //         ->whereBetween('view_absensi.tanggal', $request->input('tanggal'))
+        //         ->distinct()
+        //         // ->OrWhereBetween(DB::raw('DATE(absen_tambahan.tanggal)'), $request->input('tanggal'))
+        //         ->get();
+            $tgl = is_array($request->input('tanggal'));
+            $karyawan = User::where('users.id', '<>', '5')->get();
+
+            $absen = DB::table('view_absensi')->select(DB::raw('COUNT(masuk) AS kehadiran'), 'users.nik_pegawai AS no_ktp', 'users.id AS id_user','view_absensi.nama_lengkap', 'masuk', 'keluar', 'tanggal', DB::raw('DATE_FORMAT(tanggal, "%Y-%c-%e") as tgl'))
+            ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
+            ->where('users.id', '<>', '5')
+            ->groupBy('users.id');
+            
+            $status = DB::table('absen_tambahan')
+            ->select(DB::raw('COUNT(id_karyawan) AS jml'), 'id_karyawan', 'status')
+            ->groupBy('status','id_karyawan');
+
+            if($tgl == TRUE){
+                $absen->whereBetween('tanggal', $request->input('tanggal'));
+                $status->whereBetween(DB::raw('DATE(tanggal)'), $request->input('tanggal'));
+            }else{
+                $absen->where('tanggal', $request->input('tanggal'));
+                $status->where(DB::raw('DATE(tanggal)'), $request->input('tanggal'));
+            }
+
+
+            // if ($searchValue) {
+            //     $absen->where(function($absen) use ($searchValue) {
+            //         $absen->where('view_absensi.nama_lengkap', 'like', '%' . $searchValue . '%')
+            //         ->orWhere('users.nik_pegawai', 'like', '%' . $searchValue . '%');
+            //     });
+
+            //     $karyawan = User::where('nama_lengkap', 'like', '%' . $searchValue . '%')
+            //         ->orWhere('nik_pegawai', 'like', '%' . $searchValue . '%')->get();
+
+            // }
+
+            $absen = $absen->pluck('kehadiran', 'id_user')->toArray();
+            $status = $status->get();
+            $data = [];
+
+            if(count($status) > 0){
+                foreach($status AS $k => $v){
+                    $statusMasuk[$v->id_karyawan][$v->status] = $v->jml;  
+                }
+            }else{
+                    $statusMasuk[][] = '';
+            }
+
+            foreach($karyawan AS $k => $v){
+                $ijin = !empty($statusMasuk[$v->id]['I']) ? $statusMasuk[$v->id]['I'] : 0;
+                $sakit = !empty($statusMasuk[$v->id]['S']) ? $statusMasuk[$v->id]['S'] : 0;
+                $alpha = !empty($statusMasuk[$v->id]['A']) ? $statusMasuk[$v->id]['A'] : 0;
+                $cuti = !empty($statusMasuk[$v->id]['C']) ? $statusMasuk[$v->id]['C'] : 0;
+                $jml_absen = !empty($absen[$v->id]) ? $absen[$v->id] : 0;
+                $data[] = array("nama_lengkap" => $v->nama_lengkap, "nik_pegawai" => $v->nik_pegawai, "sakit" => $sakit, "ijin" => $ijin, "alasan" => $alpha, "cuti" => $cuti, "kehadiran" => $jml_absen);
+            }
+
+
+        return response()->json($data);
+    }
+    
+    public function laporanKehadiran(Request $request){
         if ( $request->input('tanggal') ) {
-            $a =  DB::table('absensi')
-                    ->select('name', DB::raw("IF(HOUR(tanggal) < '12:00:00', 'MASUK', 'KELUAR') AS status_absen"),'id_karyawan', DB::raw('MIN(DATE_FORMAT(tanggal, "%H:%i")) AS jam'), DB::raw('MAX(DATE_FORMAT(tanggal, "%H:%i")) AS keluar'))
-                    ->join('users', 'users.id', '=', 'id_karyawan')
-                    ->where(DB::raw('DATE(tanggal)'), $request->tanggal)
-                    ->groupBy('id_karyawan')
+            $a =  DB::table('view_absensi')
+                    ->select('view_absensi.*', 'users.nik_pegawai AS no_ktp')
+                    ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
+                    ->whereBetween('tanggal', $request->input('tanggal'))
+                    ->where('users.id', '<>', '5')
+                    ->orderBy('tanggal', 'DESC')
                     ->get();
             return $a;
     	}
         if ( $request->input('client') ) {
-            $a = DB::table('absensi')
-                    ->select('name', DB::raw("IF(HOUR(tanggal) < '12:00:00', 'MASUK', 'KELUAR') AS status_absen"),'id_karyawan', DB::raw('MIN(DATE_FORMAT(tanggal, "%H:%i")) AS jam'), DB::raw('MAX(DATE_FORMAT(tanggal, "%H:%i")) AS keluar'))
-                    ->join('users', 'users.id', '=', 'id_karyawan')
-                    ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
-                    ->groupBy('id_karyawan')
+            $a = DB::table('view_absensi')
+                    ->select('view_absensi.*', 'users.nik_pegawai AS no_ktp')
+                    ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
+                    ->where('tanggal', date('Y-m-d'))
+                    ->where('users.id', '<>', '5')
+                    ->orderBy('tanggal', 'DESC')
                     ->get();
             return $a;
     	}
 
-        $columns = ['absensi.id', 'tanggal', 'name'];
+        $columns = ['absensi.id', 'tanggal', 'nama_lengkap'];
 
         $length = $request->input('length');
         $column = $request->input('column'); //Index
         $dir = $request->input('dir');
         $searchValue = $request->input('search');
 
-        $query = DB::table('absensi')->select('absensi.id', 'tanggal', 'name', DB::raw("IF(HOUR(tanggal) < '12:00:00', 'MASUK', 'KELUAR') AS status_absen"))
+        $query = DB::table('absensi')->select('absensi.id', 'tanggal', 'nama_lengkap', DB::raw("IF(HOUR(tanggal) < '12:00:00', 'MASUK', 'KELUAR') AS status_absen"))
                 ->join('users', 'users.id', '=', 'id_karyawan')
-                ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))->orderBy($columns[$column], $dir)
+                ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))//->orderBy($columns[$column], $dir)
                 ->whereIn('absensi.id', function($query){
                         $query->select(DB::raw('MAX(id)'))
                         ->from('absensi')
@@ -412,8 +601,8 @@ class ReportController extends Controller
 
         if ($searchValue) {
             $query->where(function($query) use ($searchValue) {
-                $query->where('name', 'like', '%' . $searchValue . '%')
-                ->orWhere('name', 'like', '%' . $searchValue . '%');
+                $query->where('nama_lengkap', 'like', '%' . $searchValue . '%')
+                ->orWhere('nama_lengkap', 'like', '%' . $searchValue . '%');
             });
         }
 

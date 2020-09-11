@@ -75,7 +75,7 @@ class HomeController extends Controller
      */
     public function telat(Request $request){
         $data = DB::table('absensi')
-                ->select('users.name AS first_name', 'absensi.tanggal', 
+                ->select('users.nama_lengkap', 'absensi.tanggal', 
                     DB::raw('DATE_FORMAT(tanggal, "%H.%i") AS jam'), 
                     DB::raw('DATE_FORMAT(TIMEDIFF(tanggal, CONCAT(CURDATE(), " 08:00:00")), "%H.%i") AS selisih_jam'),
                     DB::raw('CONCAT(MOD(HOUR(TIMEDIFF(tanggal,CONCAT(CURDATE(), " 08:00:00"))), 24), " Jam ",
@@ -86,7 +86,7 @@ class HomeController extends Controller
                 ->whereIn('absensi.id', function($query){
                         $query->select(DB::raw('MIN(id)'))
                         ->from('absensi')
-                        // ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
+                        ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
                         ->groupBy('id_karyawan')
                         ->orderBy('tanggal', 'DESC');
                     })
@@ -96,7 +96,7 @@ class HomeController extends Controller
                 ->select(DB::raw('COUNT(DISTINCT(absensi.id_karyawan)) AS jumlah'), 'nama_divisi')
                 ->join('users', 'users.id', '=', 'absensi.id_karyawan')
                 ->join('divisi', 'divisi.id', '=', 'users.id_divisi')
-                // ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
+                ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
                 ->groupBy('id_divisi')
                 ->get();
 
@@ -146,7 +146,7 @@ class HomeController extends Controller
                     ]);
                     $message = "absen berhasil";
                 }else{
-                    $message = "harap berdiri agak jauh dari gerbang";
+                    $message = "data absensi anda sudah tercatat ke dalam sistem. harap berdiri agak jauh dari gerbang";
                 }
             }else{
                 $create = Absensi::create([
@@ -171,34 +171,34 @@ class HomeController extends Controller
     {
         if ( $request->input('tanggal') ) {
             return DB::table('absensi')
-                    ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'name', 'nama_gerbang')
+                    ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'nama_lengkap', 'nama_gerbang')
                     ->join('gate','absensi.id_gate', '=', 'gate.id')
                     ->join('users', 'users.id', '=', 'id_karyawan')
                     ->where(DB::raw('DATE(tanggal)'), $request->tanggal)->get();
     	}
         if ( $request->input('client') ) {
             return DB::table('absensi')
-                    ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'name', 'nama_gerbang')
+                    ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'nama_lengkap', 'nama_gerbang')
                     ->join('gate','absensi.id_gate', '=', 'gate.id')
                     ->join('users', 'users.id', '=', 'id_karyawan')
                     ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))->get();
     	}
 
-        $columns = ['absensi.id', 'tanggal', 'name'];
+        $columns = ['absensi.id', 'tanggal', 'nama_lengkap'];
 
         $length = $request->input('length');
         $column = $request->input('column'); //Index
         $dir = $request->input('dir');
         $searchValue = $request->input('search');
 
-        $query = DB::table('absensi')->select('absensi.id', 'tanggal', 'name')
+        $query = DB::table('absensi')->select('absensi.id', 'tanggal', 'nama_lengkap')
                 ->join('users', 'users.id', '=', 'id_karyawan')
                 ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))->orderBy($columns[$column], $dir);
 
         if ($searchValue) {
             $query->where(function($query) use ($searchValue) {
-                $query->where('name', 'like', '%' . $searchValue . '%')
-                ->orWhere('name', 'like', '%' . $searchValue . '%');
+                $query->where('nama_lengkap', 'like', '%' . $searchValue . '%')
+                ->orWhere('nama_lengkap', 'like', '%' . $searchValue . '%');
             });
         }
 
@@ -210,7 +210,7 @@ class HomeController extends Controller
     {
         if ( $request->input('tanggal') ) {
             return DB::table('absensi')
-                    ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'name', 'nama_gerbang')
+                    ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'nama_lengkap', 'nama_gerbang')
                     ->join('gate','absensi.id_gate', '=', 'gate.id')
                     ->join('users', 'users.id', '=', 'id_karyawan')
                     ->where(DB::raw('DATE(tanggal)'), $request->tanggal)
@@ -224,7 +224,7 @@ class HomeController extends Controller
     	}
         if ( $request->input('client') ) {
             return DB::table('absensi')
-                    ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'name', 'nama_gerbang')
+                    ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'nama_lengkap', 'nama_gerbang')
                     ->join('gate','absensi.id_gate', '=', 'gate.id')
                     ->join('users', 'users.id', '=', 'id_karyawan')
                     ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
@@ -237,21 +237,21 @@ class HomeController extends Controller
                     ->get();
     	}
 
-        $columns = ['absensi.id', 'tanggal', 'name'];
+        $columns = ['absensi.id', 'tanggal', 'nama_lengkap'];
 
         $length = $request->input('length');
         $column = $request->input('column'); //Index
         $dir = $request->input('dir');
         $searchValue = $request->input('search');
 
-        $query = DB::table('absensi')->select('absensi.id', 'tanggal', 'name')
+        $query = DB::table('absensi')->select('absensi.id', 'tanggal', 'nama_lengkap')
                 ->join('users', 'users.id', '=', 'id_karyawan')
                 ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))->orderBy($columns[$column], $dir);
 
         if ($searchValue) {
             $query->where(function($query) use ($searchValue) {
-                $query->where('name', 'like', '%' . $searchValue . '%')
-                ->orWhere('name', 'like', '%' . $searchValue . '%');
+                $query->where('nama_lengkap', 'like', '%' . $searchValue . '%')
+                ->orWhere('nama_lengkap', 'like', '%' . $searchValue . '%');
             });
         }
 
@@ -262,34 +262,36 @@ class HomeController extends Controller
     public function listAbsensi(Request $request)
     {
         if ( $request->input('tanggal') ) {
-            $a =  DB::table('absensi')
-                    ->select('name', DB::raw("IF(HOUR(tanggal) < '12:00:00', 'MASUK', 'KELUAR') AS status_absen"),'id_karyawan', DB::raw('MIN(DATE_FORMAT(tanggal, "%H:%i")) AS jam'), DB::raw('MAX(DATE_FORMAT(tanggal, "%H:%i")) AS keluar'))
-                    ->join('users', 'users.id', '=', 'id_karyawan')
-                    ->where(DB::raw('DATE(tanggal)'), $request->tanggal)
-                    ->groupBy('id_karyawan')
+            $a =  DB::table('view_absensi')
+                    ->select('view_absensi.*', 'users.nik_pegawai AS no_ktp')
+                    ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
+                    ->where('tanggal', $request->input('tanggal'))
+                    ->where('users.id', '<>', '5')
+                    ->orderBy('tanggal', 'DESC')
                     ->get();
             return $a;
     	}
         if ( $request->input('client') ) {
-            $a = DB::table('absensi')
-                    ->select('name', DB::raw("IF(HOUR(tanggal) < '12:00:00', 'MASUK', 'KELUAR') AS status_absen"),'id_karyawan', DB::raw('MIN(DATE_FORMAT(tanggal, "%H:%i")) AS jam'), DB::raw('MAX(DATE_FORMAT(tanggal, "%H:%i")) AS keluar'))
-                    ->join('users', 'users.id', '=', 'id_karyawan')
-                    ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
-                    ->groupBy('id_karyawan')
+            $a = DB::table('view_absensi')
+                    ->select('view_absensi.*', 'users.nik_pegawai AS no_ktp')
+                    ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
+                    ->where('tanggal', date('Y-m-d'))
+                    ->where('users.id', '<>', '5')
+                    ->orderBy('tanggal', 'DESC')
                     ->get();
             return $a;
     	}
 
-        $columns = ['absensi.id', 'tanggal', 'name'];
+        $columns = ['absensi.id', 'tanggal', 'nama_lengkap'];
 
         $length = $request->input('length');
         $column = $request->input('column'); //Index
         $dir = $request->input('dir');
         $searchValue = $request->input('search');
 
-        $query = DB::table('absensi')->select('absensi.id', 'tanggal', 'name', DB::raw("IF(HOUR(tanggal) < '12:00:00', 'MASUK', 'KELUAR') AS status_absen"))
+        $query = DB::table('absensi')->select('absensi.id', 'tanggal', 'nama_lengkap', DB::raw("IF(HOUR(tanggal) < '12:00:00', 'MASUK', 'KELUAR') AS status_absen"))
                 ->join('users', 'users.id', '=', 'id_karyawan')
-                ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))->orderBy($columns[$column], $dir)
+                ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))//->orderBy($columns[$column], $dir)
                 ->whereIn('absensi.id', function($query){
                         $query->select(DB::raw('MAX(id)'))
                         ->from('absensi')
@@ -299,8 +301,8 @@ class HomeController extends Controller
 
         if ($searchValue) {
             $query->where(function($query) use ($searchValue) {
-                $query->where('name', 'like', '%' . $searchValue . '%')
-                ->orWhere('name', 'like', '%' . $searchValue . '%');
+                $query->where('nama_lengkap', 'like', '%' . $searchValue . '%')
+                ->orWhere('nama_lengkap', 'like', '%' . $searchValue . '%');
             });
         }
 

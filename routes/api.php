@@ -46,10 +46,10 @@ Route::prefix('v1')->group(function () {
 
     });
 
+    Route::post('/absen','HomeController@absen');
     Route::group(['middleware' => ['auth']], function() {
         // menambahkan route untuk person
         Route::get('/dashboard','HomeController@index');
-        Route::post('/absen','HomeController@absen');
         Route::post('/get-absen','HomeController@getAbsen');
         Route::get('/lacak','HomeController@lacak');
         Route::get('/pantau','HomeController@pantau');
@@ -57,8 +57,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/laporan-terlambat','ReportController@laporanTerlambat');
         Route::get('/laporan-overtime','ReportController@laporanOvertime');
         Route::get('/laporan-semua','ReportController@laporanSemua');
+        Route::get('/export-excel','ReportController@exportExcel');
     });
 
+    Route::get('/laporan-kehadiran','ReportController@laporanKehadiran');
     Route::middleware('permission:read-absensi')->group(function () {
         Route::get('/list-absensi','HomeController@listAbsensi');
     });
@@ -78,5 +80,19 @@ Route::prefix('v1')->group(function () {
             Route::get('/kelurahan','PersonController@kelurahan');
 
     });
+
+    Route::get('data-kehadiran/get-data-nik','DataKehadiranController@getDataNik');
+    // middleware('permission:read-user|create-user|edit-user|delete-user')->
+    // Route::group(function () {
+        Route::prefix('data-kehadiran')->group(function() {
+            Route::get('/','DataKehadiranController@all');
+            Route::get('/get-nik','DataKehadiranController@getNik');
+            Route::get('/{id}','DataKehadiranController@show');
+            Route::post('/create','DataKehadiranController@store');
+            Route::put('/{id}','DataKehadiranController@update');
+            Route::delete('/{id}','DataKehadiranController@delete');
+        });
+
+    // });
 });
 

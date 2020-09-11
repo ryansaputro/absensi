@@ -3,7 +3,7 @@
       <div class="user-data m-b-30 p-3">
         <div class="tableFilters m-b-30">
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-5">
               <!-- <input class="input form-control" type="text" v-model="search" placeholder="Search Table"
                    @input="resetPagination()"> -->
                     <!-- <date-range-picker
@@ -16,10 +16,14 @@
                     <date-picker v-model="time3" range></date-picker> -->
    
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
+                <input class="input form-control input-sm" type="text" @input="filterTanggal()" v-model="search" placeholder="Cari Karyawan">
+            </div>
+            <div class="col-md-2"><button @click="downloadWithCSS" class="btn btn-sm btn-primary">Download PDF</button></div>
+            <div class="col-md-2">
               <div class="control pull-right">
-                <div class="select form-control">
-                    <select v-model="length" @change="resetPagination()">
+                <div>
+                    <select  class="select form-control" v-model="length" @change="resetPagination()">
                         <option value="10">10</option>
                         <option value="20">20</option>
                         <option value="30">30</option>
@@ -45,11 +49,11 @@
                     @next="++pagination.currentPage">
         </pagination> -->
         <div style="overflow-x:auto;">
-        <table class="table table-bordered table-hover">
+        <table class="table table-bordered table-hover" id="my-table">
             <thead>
                 <tr>
                     <th>Nama</th>
-                    <th style="min-width:100px;font-size:12px;" v-for="(tgl, index) in tanggal">{{tgl}}</th>
+                    <th style="min-width:120px;font-size:12px;" v-for="(tgl, index) in tanggal">{{tgl}}</th>
                 </tr>
             </thead>
             <tbody>
@@ -58,7 +62,7 @@
                         {{project.nama_lengkap}}
                     </td>
                     <td v-for="(tgl, index) in tanggal">
-                        <span style="color:green;font-size:12px;">IN : </span> <br> <span style="color:red;font-size:12px;">OUT :17:00</span>
+                        <span style="color:green;font-size:12px;">IN : {{typeof(jamMasuk[tgl]) !== 'undefined' ? typeof(jamMasuk[tgl][project.id]) !== 'undefined' ? jamMasuk[tgl][project.id] : 'tdk absen' : 'tdk absen'}}</span> <br> <span style="color:red;font-size:12px;">OUT : {{typeof(jamMasuk[tgl]) !== 'undefined' ? typeof(jamKeluar[tgl][project.id]) !== 'undefined' ? jamKeluar[tgl][project.id] : 'tdk absen' : 'tdk absen'}}</span>
                     </td>
                 </tr>
             </tbody>
@@ -67,7 +71,7 @@
       </div>
     </div>
 </template>
-
+<script src="https://unpkg.com/jspdf-autotable@3.5.12/dist/jspdf.plugin.autotable.js"></script>
 <script>
 import Datatable from '../../../components/Datatables.vue';
 import Pagination from '../../../components/Pagination.vue';
@@ -77,6 +81,9 @@ import DatePicker from 'vue2-datepicker';
 import 'vue2-datepicker/index.css';
 //you need to import the CSS manually (in case you want to override it)
 import 'vue2-daterange-picker/dist/vue2-daterange-picker.css'
+import jsPDF from 'jspdf' 
+import 'jspdf-autotable'
+import autoTable from 'jspdf-autotable'
 
 export default {
     // name:{disabled_dates},
@@ -103,6 +110,7 @@ export default {
             projects: [],
             absen:[],
             jamMasuk:[],
+            jamKeluar:[],
             columns: columns,
             sortKey: 'first_name',
             sortOrders: sortOrders,
@@ -119,7 +127,8 @@ export default {
                 from: '',
                 to: ''
             },
-            time1: null,
+            // time1: null,
+            time1: moment(new Date()).format('YYYY-M-D'),
             waterMark : new Date().toISOString().slice(0,10),
         }
     },
@@ -130,6 +139,16 @@ export default {
         }
         return classes
       },
+       downloadWithCSS() {
+        const doc = new jsPDF()
+        var header = function (data) {
+            doc.text("Laporan Absensi", data.settings.margin.left, 10);
+        };
+
+        autoTable(doc, {didDrawPage : header, html: '#my-table'});
+        // autoTable(doc, { html: '#my-table' })
+        doc.save('laporan-absensi.pdf')
+        },
       
       doMath: function (jml_kerja) {
         var m1  = jml_kerja.toString();
@@ -146,48 +165,48 @@ export default {
           console.log(nama)
       },
       
-      statusMasuk: function (status){
-          if(status == 'Terlambat')
-          return "danger"
-          else
-          return "success"
-      },
         getProjects() {
             axios.get('laporan-semua', {params: this.tableData})
                 .then(response => {
+                    console.log(this.time1)
                     this.projects = response.data.karyawan;
                     this.absen = response.data.absen;
                     var now = new Date();
-                    var start = new Date('2020-09-01'),
-                    end = new Date('2020-09-20'),
-                    year = start.getFullYear(),
-                    month = start.getMonth(),
-                    day = start.getDate(),
-                    dates = [start];
-                    var newDate = ['2020-09-01'];
+                    var start = new Date(),
+                    end = new Date();
+                   
+                    var dateArray = [];
+                    var currentDate = moment(start);
+                    var stopDate = moment(end);
+                    while (currentDate <= stopDate) {
+                        dateArray.push( moment(currentDate).format('YYYY-M-D') )
+                        currentDate = moment(currentDate).add(1, 'days');
+                    }
 
-                while(dates[dates.length-1] < end) {
-                dates.push(new Date(year, month, ++day));
-                    newDate.push(year+'-'+month+'-'+day)
-                }
+                    var absenMasuk = [];
+                    var absenKeluar = [];
+                    var idx = [];
+                    var idy = [];
 
-                var absenMasuk = [];
-                $.each(response.data.absen, function(k,v){
-                    $.each(v, function(x,y){
-                        var idx = x.replace('-', '');
-                        idx = idx.replace('-', '');
-                        absenMasuk[k][idx] = 'a';
-                        // console.log(idx)
-
+                    $.each(response.data.absen, function(k,v){
+                        $.each(v, function(x,y){
+                            idx[x] = y;
+                            absenMasuk[k] = new Array(2);
+                            absenMasuk[k] = idx;
+                        })
                     })
 
-                })
-                // this.jamMasuk = absenMasuk;
-                console.log(absenMasuk)
-                
-                this.tanggal = newDate;
-                    
-                    // this.pagination.total = this.projects.length;
+                    $.each(response.data.keluar, function(k,v){
+                        $.each(v, function(x,y){
+                            idy[x] = y;
+                            absenKeluar[k] = new Array(2);
+                            absenKeluar[k] = idy;
+                        })
+                    })
+                        this.jamMasuk = absenMasuk;
+                        this.jamKeluar = absenKeluar;
+                        this.tanggal = dateArray;
+                        
                 })
                 .catch(errors => {
                     console.log(errors);
@@ -197,12 +216,52 @@ export default {
             axios.get('laporan-semua', 
              {
                 params: {
-                tanggal: this.time1
+                tanggal: this.time1,
+                search: this.search
                 }
             })
                 .then(response => {
-                    this.projects = response.data;
-                    this.pagination.total = this.projects.length;
+                    var waktu = this.time1;
+                    var cekArr = Array.isArray(waktu);
+                    console.log(cekArr);
+
+                    this.projects = response.data.karyawan;
+                    this.absen = response.data.absen;
+                    var now = new Date();
+                    var start = cekArr == true ? new Date(waktu[0]) : new Date();
+                    var end = cekArr == true ? new Date(waktu[1]) : new Date();
+                   
+                    var dateArray = [];
+                    var currentDate = moment(start);
+                    var stopDate = moment(end);
+                    while (currentDate <= stopDate) {
+                        dateArray.push( moment(currentDate).format('YYYY-M-D') )
+                        currentDate = moment(currentDate).add(1, 'days');
+                    }
+
+                    var absenMasuk = [];
+                    var absenKeluar = [];
+                    var idx = [];
+                    var idy = [];
+
+                    $.each(response.data.absen, function(k,v){
+                        $.each(v, function(x,y){
+                            idx[x] = y;
+                            absenMasuk[k] = new Array(2);
+                            absenMasuk[k] = idx;
+                        })
+                    })
+
+                    $.each(response.data.keluar, function(k,v){
+                        $.each(v, function(x,y){
+                            idy[x] = y;
+                            absenKeluar[k] = new Array(2);
+                            absenKeluar[k] = idy;
+                        })
+                    })
+                        this.jamMasuk = absenMasuk;
+                        this.jamKeluar = absenKeluar;
+                        this.tanggal = dateArray;
                 })
                 .catch(errors => {
                     console.log(errors);

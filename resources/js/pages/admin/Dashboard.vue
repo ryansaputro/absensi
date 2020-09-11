@@ -115,7 +115,7 @@
           });
 
           this.name = response.data.data.map(data => {
-            return data.first_name;
+            return data.nama_lengkap;
           });
 
           // // telat per divisi

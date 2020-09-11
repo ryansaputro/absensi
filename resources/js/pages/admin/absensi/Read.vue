@@ -32,12 +32,12 @@
         <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy">
             <tbody>
                 <tr v-for="(project, index) in paginated" :key="project.id">
-                    <td>{{ doMath(index) }}</td>
-                    <td>{{project.name}}</td>
-                    <td>{{project.jam}}</td>
+                    <td>{{ project.no_ktp }}</td>
+                    <td>{{project.nama_lengkap}}</td>
+                    <td>{{project.masuk}}</td>
                     <!-- <td>{{project.jam <= '12:00' ? project.jam : '-'}}</td> -->
                     <!-- <td>{{project.keluar >= '12.01' ? project.keluar : '-'}}</td> -->
-                    <td>{{project.keluar > project.jam ? project.keluar : '-'}}</td>
+                    <td>{{project.keluar}}</td>
                     <td>{{project.jam >= '08:00' ? 'Terlambat' : 'Tepat'}}</td>
                 </tr>
             </tbody>
@@ -69,7 +69,7 @@ export default {
     data() {
         let sortOrders = {};
         let columns = [
-            {width: '20%', label: '#', name: 'no' },
+            {width: '20%', label: 'NIK', name: 'no' },
             {width: '20%', label: 'Nama'},
             {width: '20%', label: 'Jam Masuk'},
             {width: '20%', label: 'Jam Keluar'},

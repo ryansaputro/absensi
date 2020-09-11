@@ -32,17 +32,17 @@ class PersonController extends Controller
     {
 
         if ( $request->input('client') ) {
-    	    return User::select('id', 'nama_lengkap', 'no_ktp', 'created_at')->get();
+    	    return User::select('id', 'nama_lengkap', 'nik_pegawai AS no_ktp', 'created_at', 'jabatan', 'bagian_divisi', 'tgl_masuk', 'masa_kerja')->where('id', '<>', '5')->get();
     	}
 
-        $columns = ['nama_lengkap', 'no_ktp', 'created_at'];
+        $columns = ['nama_lengkap', 'nik_pegawai', 'created_at', 'jabatan', 'bagian_divisi', 'tgl_masuk', 'masa_kerja'];
 
         $length = $request->input('length');
         $column = $request->input('column'); //Index
         $dir = $request->input('dir');
         $searchValue = $request->input('search');
 
-        $query = User::select('id', 'nama_lengkap', 'no_ktp', 'created_at')->orderBy($columns[$column], $dir);
+        $query = User::select('id', 'nama_lengkap', 'nik_pegawai AS no_ktp', 'created_at', 'jabatan', 'bagian_divisi', 'tgl_masuk', 'masa_kerja')->where('id', '<>', '5')->orderBy($columns[$column], $dir);
 
         if ($searchValue) {
             $query->where(function($query) use ($searchValue) {

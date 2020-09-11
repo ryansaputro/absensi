@@ -16,10 +16,11 @@
                     <date-picker v-model="time3" range></date-picker> -->
    
             </div>
-            <div class="col-md-6">
+            <div class="col-md-2"><button @click="downloadWithCSS" class="btn btn-sm btn-primary">Download PDF</button></div>
+            <div class="col-md-4">
               <div class="control pull-right">
-                <div class="select form-control">
-                    <select v-model="length" @change="resetPagination()">
+                <div>
+                    <select class="select form-control" v-model="length" @change="resetPagination()">
                         <option value="10">10</option>
                         <option value="20">20</option>
                         <option value="30">30</option>
@@ -29,7 +30,7 @@
             </div>
           </div>
         </div>
-        <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy">
+        <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy" id="my-table">
             <tbody>
                 <tr v-for="(project, index) in paginated" :key="project.id">
                     <td>{{ project.tanggal }}</td>
@@ -48,6 +49,7 @@
     </div>
 </template>
 
+<script src="https://unpkg.com/jspdf-autotable@3.5.12/dist/jspdf.plugin.autotable.js"></script>
 <script>
 import Datatable from '../../../components/Datatables.vue';
 import Pagination from '../../../components/Pagination.vue';
@@ -57,6 +59,10 @@ import DatePicker from 'vue2-datepicker';
 import 'vue2-datepicker/index.css';
 //you need to import the CSS manually (in case you want to override it)
 import 'vue2-daterange-picker/dist/vue2-daterange-picker.css'
+import jsPDF from 'jspdf' 
+import 'jspdf-autotable'
+import autoTable from 'jspdf-autotable'
+
 
 export default {
     // name:{disabled_dates},
@@ -105,6 +111,17 @@ export default {
         }
         return classes
       },
+
+    downloadWithCSS() {
+        const doc = new jsPDF()
+        var header = function (data) {
+            doc.text("Laporan Overtime", data.settings.margin.left, 10);
+        };
+
+        autoTable(doc, {didDrawPage : header, html: '#my-table'});
+        // autoTable(doc, { html: '#my-table' })
+        doc.save('laporan-overtime.pdf')
+        },
       
      doMath: function (jml_kerja) {
         var m1  = jml_kerja.toString();

@@ -16,6 +16,11 @@ import LaporanTerlambat from './pages/admin/laporan/LaporanTerlambat'
 import LaporanDigantiSore from './pages/admin/laporan/LaporanDigantiSore'
 import LaporanOvertime from './pages/admin/laporan/LaporanOvertime'
 import LaporanSemua from './pages/admin/laporan/LaporanSemua'
+import LaporanAbsensi from './pages/admin/laporan/LaporanAbsensi'
+import RekapAbsensi from './pages/admin/laporan/RekapAbsensi'
+import ListDataKehadiran from './pages/admin/data_kehadiran/Read'
+import UpdateDataKehadiran from './pages/admin/data_kehadiran/Update'
+import NewDataKehadiran from './pages/admin/data_kehadiran/Create'
 // Routes
 const routes = [
     {
@@ -84,9 +89,49 @@ const routes = [
         }
     },
     {
+        path: '/data-kehadiran',
+        name: 'Data Kehadiran',
+        component: ListDataKehadiran,
+        meta: {
+            auth: true
+        }
+    },
+    {
+        path: '/data-kehadiran/create',
+        name: 'Data Kehadiran Baru',
+        component: NewDataKehadiran,
+        meta: {
+            auth: true
+        }
+    },
+    {
+        path: '/data-kehadiran/:id',
+        name: 'Update Data Kehadiran',
+        component: UpdateDataKehadiran,
+        meta: {
+            auth: true
+        }
+    },
+    {
         path: '/laporan-terlambat',
         name: 'Laporan Terlambat & PLA',
         component: LaporanTerlambat,
+        meta: {
+            auth: true
+        }
+    },
+    {
+        path: '/laporan-absensi',
+        name: 'Laporan Absensi',
+        component: LaporanAbsensi,
+        meta: {
+            auth: true
+        }
+    },
+    {
+        path: '/rekap-absensi',
+        name: 'Rekap Absensi',
+        component: RekapAbsensi,
         meta: {
             auth: true
         }

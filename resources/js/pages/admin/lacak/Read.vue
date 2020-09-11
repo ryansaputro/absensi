@@ -33,7 +33,7 @@
             <tbody>
                 <tr v-for="(project, index) in paginated" :key="project.id">
                     <td>{{ doMath(index) }}</td>
-                    <td>{{project.name}}</td>
+                    <td>{{project.nama_lengkap}}</td>
                     <td>{{project.jam}}</td>
                     <td>{{project.nama_gerbang}}</td>
                 </tr>

@@ -17,12 +17,12 @@
    
             </div>
             <div class="col-md-3">
-                <button @click="downloadWithCSS">Download PDF</button>
+                <button @click="downloadWithCSS" class="btn btn-sm btn-primary">Download PDF</button>
             </div>
             <div class="col-md-3">
               <div class="control pull-right">
-                <div class="select form-control">
-                    <select v-model="length" @change="resetPagination()">
+                <div>
+                    <select class="select form-control" v-model="length" @change="resetPagination()">
                         <option value="10">10</option>
                         <option value="20">20</option>
                         <option value="30">30</option>
@@ -32,7 +32,7 @@
             </div>
           </div>
         </div>
-        <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy">
+        <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy" id="my-table">
             <tbody>
                 <tr v-for="(project, index) in paginated" :key="project.id">
                     <td>{{ project.tanggal }}</td>
@@ -51,6 +51,7 @@
       </div>
     </div>
 </template>
+<script src="https://unpkg.com/jspdf-autotable@3.5.12/dist/jspdf.plugin.autotable.js"></script>
 <script>
 import Datatable from '../../../components/Datatables.vue';
 import Pagination from '../../../components/Pagination.vue';
@@ -61,6 +62,8 @@ import 'vue2-datepicker/index.css';
 //you need to import the CSS manually (in case you want to override it)
 import 'vue2-daterange-picker/dist/vue2-daterange-picker.css'
 import jsPDF from 'jspdf' 
+import 'jspdf-autotable'
+import autoTable from 'jspdf-autotable'
 
 export default {
     // name:{disabled_dates},
@@ -83,6 +86,7 @@ export default {
         });
         return {
             projects: [],
+            exportPDF: [],
             columns: columns,
             sortKey: 'first_name',
             sortOrders: sortOrders,
@@ -148,7 +152,8 @@ export default {
     getProjects() {
             axios.get('laporan-terlambat', {params: this.tableData})
                 .then(response => {
-                    this.projects = response.data;
+                    this.projects = response.data.data;
+                    this.exportPDF = response.data.data2;
                     this.pagination.total = this.projects.length;
                 })
                 .catch(errors => {
@@ -163,7 +168,8 @@ export default {
                 }
             })
                 .then(response => {
-                    this.projects = response.data;
+                    this.projects = response.data.data;
+                    this.exportPDF = response.data.data2;
                     this.pagination.total = this.projects.length;
                 })
                 .catch(errors => {
@@ -199,19 +205,16 @@ export default {
             doc.save("sample.pdf");
         },
     downloadWithCSS() {
-            var doc = new jsPDF('p', 'pt', 'A4');
-        //     margins = {
-        //         top: 80,
-        //         bottom: 60,
-        //         left: 40,
-        //         width: 522
-        //     };
-        
-        // doc.fromHTML(this.$refs.testHtml, margins.left, margins.top,{
-        //     'width' : margins.width
-        // });
-        
-        doc.save('test.pdf');
+        var datas = JSON.parse(this.exportPDF);
+        var datas = JSON.stringify(datas);
+        const doc = new jsPDF()
+        var header = function (data) {
+            doc.text("Laporan Terlambat & PLA", data.settings.margin.left, 10);
+        };
+
+        autoTable(doc, {didDrawPage : header, html: '#my-table'});
+        // autoTable(doc, { html: '#my-table' })
+        doc.save('laporan-terlambat-dan-pla.pdf')
         },
     },
     computed: {
