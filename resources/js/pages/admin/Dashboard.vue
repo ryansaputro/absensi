@@ -64,7 +64,7 @@
                   Loading...
                 </div> -->
                 <div v-show="chart != null">
-                  <canvas id="ChartTelatPerDivisi"></canvas>
+                  <canvas id="KehadiranBandung"></canvas>
                 </div>
               </div>
           </div>
@@ -79,7 +79,7 @@
                   Loading...
                 </div> -->
                 <div v-show="chart != null">
-                  <canvas id="ChartTelatPerDivisi"></canvas>
+                  <canvas id="KehadiranSurabaya"></canvas>
                 </div>
               </div>
           </div>
@@ -132,22 +132,17 @@
             return (data.jml);
           });
 
-          var nil = [];
+          var nli = [];
           $.each(response.data.data4, function(k, v){
-              nil.push(v);
+            nli[k] = v;
           });
-          this.kehadiran = nil;
-          console.log(nil);
-          // this.kehadiran = response.data.data4.map(data => {
-          //   return data.kehadiran;
-          // });
-          //   // values = (this.kehadiran);
-          //   console.log(this.kehadiran)
-            // console.log(response.data.data4)
+          this.kehadiran = nli;
+          // console.log(this.kehadiran['bandung']['x']);
 
           var TelatDatangChart = document.getElementById('TelatDatangChart');
           var cty = document.getElementById('PulangAwalChart');
-          var ChartTelatPerDivisi = document.getElementById('ChartTelatPerDivisi');
+          var KehadiranBandung = document.getElementById('KehadiranBandung');
+          var KehadiranSurabaya = document.getElementById('KehadiranSurabaya');
 
          var coloR = [];
 
@@ -191,63 +186,88 @@
                         stacked: true,
                         
                     }]
-                }
+                }, 
+                // legend: {
+                //   display: false
+                // // },
+                // // tooltips: {
+                // //     callbacks: {
+                // //       label: function(tooltipItem) {
+                // //               return tooltipItem.yLabel;
+                // //       }
+                // //     }
+                // // }
             }
           });
 
-          //telat perdivisi
-          this.chart = new Chart(ChartTelatPerDivisi,{
+          var hadir = typeof(this.kehadiran['bandung']['kehadiran']) !== 'undefined' ? this.kehadiran['bandung']['kehadiran'] : 0;
+          var sakit = typeof(this.kehadiran['bandung']['S']) !== 'undefined' ? this.kehadiran['bandung']['S'] : 0;
+          var ijin = typeof(this.kehadiran['bandung']['I']) !== 'undefined' ? this.kehadiran['bandung']['I'] : 0;
+          var alpa = typeof(this.kehadiran['bandung']['A']) !== 'undefined' ? this.kehadiran['bandung']['A'] : 0;
+          var cuti = typeof(this.kehadiran['bandung']['C']) !== 'undefined' ? this.kehadiran['bandung']['C'] : 0;
+          
+          this.chart = new Chart(KehadiranBandung,{
             type: 'bar',
             data: {
               labels: ['kehadiran', 'sakit', 'ijin', 'alpha', 'cuti'],
               datasets: [
                 {
-                  // label: ['kehadiran', 'sakit', 'ijin', 'alpha', 'cuti'],
+                  label: 'Data Kehadiran',
                   backgroundColor: ['rgb(0 123 255)', 'rgb(63 81 181)', 'rgb(220 53 69)', 'rgb(239 255 1)', 'rgb(214 96 27)'],
                   borderColor: 'rgb(54, 162, 235)',
                   hoverBackgroundColor: 'rgb(2 171 2 / 91%)',
                   hoverBorderColor:"white",
-                  // fill: true,
-                  data: this.kehadiran
+                  fill: true,
+                  data: [hadir, sakit, ijin, alpa, cuti]
                 }
               ]
             },
             options: {
-              // tooltips: {
-              //   callbacks: {
-              //     label: function(tooltipItem, data) {
-              //       var label = data.datasets[tooltipItem.datasetIndex].label || '';
-                    
-              //       if (label) {
-              //         label += ': ';
-              //       }
-              //       var $tooltips = tooltipItem.yLabel;
-              //       var dt = tooltipItem.yLabel.toString().split('.');
-              //       console.log(dt);
-              //       var jam = dt[0] != 0 ? parseInt(dt[0]) +' Jam ': '';
-              //       var menit = typeof dt[1] !== 'undefined' ? dt[1] != 0 ? dt[1].length == 1 ? dt[1]+ '0 Menit' : dt[1]+ ' Menit'  : '' : '';
-              //       var labeldata = jam + menit
-              //       label +=labeldata
-                    
-              //       return label;
-              //     }
-              //   }
-              // },
-              // legend: {
-              //     display: true,
-              //     labels: {
-              //         fontColor: 'rgb(255, 99, 132)'
-              //     }
-              // },
-              //   scales: {
-              //       xAxes: [{
-              //           stacked: true,
-              //       }],
-              //       yAxes: [{
-              //           stacked: true,
-                        
-              //       }]
-              //   }
+              legend: {
+                  display: false
+              },
+              tooltips: {
+                  callbacks: {
+                    label: function(tooltipItem) {
+                            return tooltipItem.yLabel;
+                    }
+                  }
+              }
+            }
+          });
+
+          var hadir = typeof(this.kehadiran['surabaya']['kehadiran']) !== 'undefined' ? this.kehadiran['surabaya']['kehadiran'] : 0;
+          var sakit = typeof(this.kehadiran['surabaya']['S']) !== 'undefined' ? this.kehadiran['surabaya']['S'] : 0;
+          var ijin = typeof(this.kehadiran['surabaya']['I']) !== 'undefined' ? this.kehadiran['surabaya']['I'] : 0;
+          var alpa = typeof(this.kehadiran['surabaya']['A']) !== 'undefined' ? this.kehadiran['surabaya']['A'] : 0;
+          var cuti = typeof(this.kehadiran['surabaya']['C']) !== 'undefined' ? this.kehadiran['surabaya']['C'] : 0;
+          
+          this.chart = new Chart(KehadiranSurabaya,{
+            type: 'bar',
+            data: {
+              labels: ['kehadiran', 'sakit', 'ijin', 'alpha', 'cuti'],
+              datasets: [
+                {
+                  backgroundColor: ['rgb(0 123 255)', 'rgb(63 81 181)', 'rgb(220 53 69)', 'rgb(239 255 1)', 'rgb(214 96 27)'],
+                  borderColor: 'rgb(54, 162, 235)',
+                  hoverBackgroundColor: 'rgb(2 171 2 / 91%)',
+                  hoverBorderColor:"white",
+                  fill: true,
+                  data: [hadir, sakit, ijin, alpa, cuti]
+                }
+              ]
+            },
+            options: {
+              legend: {
+                  display: false
+              },
+              tooltips: {
+                  callbacks: {
+                    label: function(tooltipItem) {
+                            return tooltipItem.yLabel;
+                    }
+                  }
+              }
             }
           });
 

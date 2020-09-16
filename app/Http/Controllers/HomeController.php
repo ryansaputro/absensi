@@ -98,6 +98,7 @@ class HomeController extends Controller
         //         ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
         //         ->groupBy('users.kantor')
         //         ->get();
+        $kantor = ['bandung', 'surabaya'];
         $data = User::select(DB::raw('COUNT(kantor) AS jumlah'), 'kantor')->groupBy('kantor')->where('id', '<>', '5')->get();//->pluck('jumlah', 'kantor')->toArray();
         
         $grafikPerdivisi = DB::table('absensi')
@@ -111,34 +112,38 @@ class HomeController extends Controller
         $isac = DB::table('absen_tambahan')
                 ->select(
                     DB::raw('COUNT(status) AS jml'),
-                    'status'
+                    'status', 'kantor'
                     )
                 ->join('users', 'users.id', '=', 'absen_tambahan.id_karyawan')
-                ->where(DB::raw('DATE(tanggal)'), '2020-09-08')
-                ->where('users.kantor', 'bandung')
-                // ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
-                ->groupBy('status')
+                // ->where(DB::raw('DATE(tanggal)'), '2020-09-08')
+                ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
+                ->groupBy('status', 'kantor')
                 ->get();
 
         $absensi = DB::table('view_absensi')
-                    ->select(DB::raw('COUNT(tanggal) AS kehadiran'))
-                    ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
-                    ->where('tanggal', '2020-09-10')
-                    ->where('users.kantor', 'bandung')
-                    // ->where('tanggal', date('Y-m-d'))
-                    ->value('kehadiran');
-        // $jenis = [];
-        $jenis['kehadiran'] = $absensi;
-        foreach($isac AS $k => $v){
-                $jenis[$v->status] = $v->jml;
-
-                
+                ->select(DB::raw('COUNT(tanggal) AS kehadiran'), 'kantor')
+                ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
+                // ->where('tanggal', '2020-09-10')
+                ->where('tanggal', date('Y-m-d'))
+                ->groupBy('kantor')
+                ->pluck('kehadiran', 'kantor')
+                ->toArray();
+        $jenis = [];
+        foreach($kantor AS $k => $v){
+            if(array_key_exists($v, $absensi)){
+                $jenis[$v]['kehadiran'] = $absensi[$v];
+            }else{
+                $jenis[$v]['kehadiran'] = 0;
             }
+
+        }
+        
+        if(count($isac) > 0){
+            foreach($isac AS $k => $v){
+                $jenis[$v->kantor][$v->status] = $v->jml;
+            }
+        }
             
-            // $dataAll = array("kehadiran" => $absensi, $jenis);
-        // dd($jenis);
-
-
         return ['data' => $data, 'data2' => $grafikPerdivisi, 'data3' => $isac, 'data4' => $jenis];
     }
 
