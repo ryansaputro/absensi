@@ -9,6 +9,11 @@
               <p v-if="error == 'login_error'">Validation Errors.</p>
               <p v-else>Error, unable to connect with these credentials.</p>
             </div>
+
+            <div class="alert alert-danger" v-if="has_error && !success">
+              <p v-if="error == 'login_error'">Validation Errors.</p>
+              <p v-else>Error, unable to connect with these credentials.</p>
+            </div>
             <form autocomplete="off" @submit.prevent="login" method="post">
               <div class="form-group">
                 <label for="email">E-mail</label>
@@ -34,8 +39,9 @@
       return {
         email: null,
         password: null,
-        error: false,
-        has_error: false
+        success: false,
+        has_error: false,
+        error: ''
       }
     },
     methods: {
@@ -46,41 +52,72 @@
         //   password: app.password,
         // })
         // .then(res => {
-        //   this.$swal('Login Sukses', 'Anda akan dialihkan ke halaman dashboard', 'success');
+        //   // this.$swal('Login Sukses', 'Anda akan dialihkan ke halaman dashboard', 'success');
+        //   app.success = true
         //   const redirectTo = 'dashboard'
         //   this.$router.push({name: redirectTo})
         // })
         // .catch(error => {
         //   this.$swal('Login Gagal', 'Cek kembali username dan password', 'error');
         // })
+
+       
         var redirect = this.$auth.redirect()
         var app = this
-        this.$auth.login({
+        
+         this.$auth.login({
           data: {
             email: app.email,
             password: app.password
           },
-          success: function(data) {
+          success: function() {
             // handle redirection
             app.success = true
-            window.Permissions = ["read-absensi","read-outlets","create-outlets","edit-outlets","read-user","create-user","edit-user","delete-user"];
             const redirectTo = 'dashboard'
-            this.$swal('Login Sukses', 'Anda akan dialihkan ke halaman dashboard', 'success');
             this.$router.push({name: redirectTo})
+            
           },
-          error: function(error) {
-            this.$swal('Login Gagal', 'Cek kembali username dan password', 'error');
+          error: function() {
+            // console.log("error")
             app.has_error = true
             app.error = res.response.data.error
           },
-          catch: function() {
-            this.$swal('Login Gagal', 'Cek kembali username dan password', 'error');
-          },
           rememberMe: true,
           fetchUser: true
+        }).then(res => {
+          // console.info(res.data.data);
+          if(localStorage.setItem('user', res.data.data)){
+            location.reload(true);
+          }
+          
+
+          // console.log(localStorage)
         })
+        .catch(error => {
+          this.$swal('Login Gagal', 'Cek kembali username dan password', 'error');
+        })
+        // try {
+        //     this.$auth.login({
+        //       data: {
+        //         email: app.email,
+        //         password: app.password
+        //       }, 
+        //         rememberMe: true,
+        //         fetchUser: true
+        //   });
+        //   const redirectTo = 'dashboard'
+        //   this.$router.push({name: redirectTo})
+        // }
+        // catch (err) {
+        //     alert(`Error: ${err}`)
+        // }
       }
     },
+    created() {
+      localStorage.removeItem('user');
+      localStorage.removeItem('auth_token_default');
+      console.log(localStorage)
+    }
     
   } 
 </script>

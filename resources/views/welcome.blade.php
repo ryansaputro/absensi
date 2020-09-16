@@ -19,6 +19,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;1,300&display=swap" rel="stylesheet">
   <!-- Styles -->
   <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+  <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
 
   <!--Cool Admin-->
   <link href="{{ asset('css/font-face.css') }}" rel="stylesheet" media="all">
@@ -72,11 +73,11 @@
     <script src="{{ asset('js/main.js') }}"></script>
     <script>
     //   console.log(json_encode(Auth::user()->allPermissions, true))
-    @auth
-      window.Permissions = {!! json_encode(Auth::user()->allPermissions, true) !!};
-    @else
-      window.Permissions = ["read-absensi","read-outlets","create-outlets","edit-outlets","read-user","create-user","edit-user","delete-user"];
-    @endauth
+    // @auth
+    //   window.Permissions = {!! json_encode(Auth::user()->allPermissions, true) !!};
+    // @else
+    //   window.Permissions = ["read-absensi","read-outlets","create-outlets","edit-outlets","read-user","create-user","edit-user","delete-user"];
+    // @endauth
   </script>
 </body>
 </html>

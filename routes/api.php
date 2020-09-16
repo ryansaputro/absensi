@@ -65,7 +65,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/list-absensi','HomeController@listAbsensi');
     });
 
-    Route::middleware('permission:read-user|create-user|edit-user|delete-user')->group(function () {
+    // Route::middleware('permission:read-pengguna|create-pengguna|edit-pengguna|delete-pengguna')->group(function () {
         Route::prefix('pengguna')->group(function() {
             Route::get('/','PersonController@all');
             Route::get('/{id}','PersonController@show');
@@ -79,7 +79,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/kecamatan','PersonController@kecamatan');
             Route::get('/kelurahan','PersonController@kelurahan');
 
-    });
+    // });
 
     Route::get('data-kehadiran/get-data-nik','DataKehadiranController@getDataNik');
     // middleware('permission:read-user|create-user|edit-user|delete-user')->

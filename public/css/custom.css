@@ -1,0 +1,123 @@
+.v-sidebar-menu{
+    margin-top: 90px !important;
+    background-color: #e5e5e5 !important;
+}
+
+.v-sidebar-menu .vsm--link_level-1.vsm--link_exact-active, .v-sidebar-menu .vsm--link_level-1.vsm--link_active{
+    /* margin-left: 25px !important; */
+    background: green !important;
+    width: 200px;
+    border-radius: 15px;
+    box-shadow: 3px 3px 3px #949393;
+    color: #fff !important;
+    padding: 5px 15px;
+}
+
+.v-sidebar-menu .vsm--link_level-1 .vsm--icon {
+    background-color: #e5e5e500 !important;
+}
+
+.v-sidebar-menu .vsm--link {
+    color: #000 !important;
+    margin-left: 20px !important;
+}
+
+.main-content {
+    background-color: #fff !important;
+}
+
+.navbar {
+    background: rgb(255, 255, 255) !important;
+    height: 115px !important;
+    color: rgb(0, 17, 0) !important;
+    position: fixed !important;
+    margin-bottom: 100px !important;
+    z-index: 2 !important;
+    width: 82% !important;
+    left: 250px !important;
+    border-top-left-radius: 50px !important;
+    border-bottom: 1px solid #e0e0e0 !important;
+}
+
+.main-content {
+    padding-top:90px !important;
+}
+
+.page-container {
+    padding-left:285px;
+}
+
+.upper-sidebar {
+    position: fixed;
+    z-index: 1;
+    height: 89px;
+    background: #e5e5e5;
+    left: 0px;
+    width: 25%;
+}
+
+.logo {
+    width: 200px;
+    position: absolute;
+    left: 20px;
+    top: 15px;
+}
+
+.v-sidebar-menu {
+    width:250px !important;
+    top:85px !important;
+}
+
+.router-link-exact-active.active.vsm--link.vsm--link_level-1.vsm--link_active.vsm--link_exact-active {
+    box-shadow: unset !important;
+    -webkit-box-shadow: unset !important;
+}
+
+.vsm--toggle-btn {
+    display: none !important;
+}
+
+a.nav-link:hover{
+    background-color: green;
+    color:#fff !important;
+}
+
+a.nav-link {
+    font-weight: 500;
+    border-radius: 13px;
+    color: rgb(0, 0, 0) !important;
+    padding: 7px 10px;
+    width: 115px;
+    margin-right: 50px;
+    text-align: center;
+}
+
+.v-sidebar-menu .vsm--link_hover, .v-sidebar-menu .vsm--link:hover {
+    background-color: #02ab02 !important;
+    width: 200px;
+    border-radius: 15px;
+    box-shadow: 3px 3px 3px #949393;
+    color: #fff !important;
+    padding: 5px 10px;
+}
+
+.v-sidebar-menu .vsm--link {
+    padding: 5px 10px !important;
+    margin-top: 5px;
+    margin-bottom: 5px;
+
+}
+
+.v-sidebar-menu .vsm--dropdown .vsm--list {
+    background-color: #d4d4d4 !important;
+}
+
+.v-sidebar-menu.vsm_expanded .vsm--item_open .vsm--link_level-1 {
+    color: #fff !important;
+    background-color: green !important;
+    width: 200px;
+    border-radius: 15px;
+    box-shadow: 3px 3px 3px #949393;
+    color: #fff !important;
+    padding: 5px 10px;
+}

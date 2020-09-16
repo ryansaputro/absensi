@@ -4,7 +4,7 @@
         <div class="tableFilters m-b-30">
           <div class="row">
             <div class="col-md-2">
-              <router-link v-if="$can('read-absensi')" class="btn btn-primary w-100" to="pengguna/create">+ Tambah</router-link>
+              <router-link v-if="$can('read-pengguna')" class="btn btn-primary w-100" to="pengguna/create">+ Tambah</router-link>
             </div>
             <div class="col-md-4">
               <input class="input form-control" type="text" v-model="search" placeholder="Search Table"
@@ -33,8 +33,8 @@
                     <td>{{project.tgl_masuk}}</td>
                     <td>{{project.masa_kerja}}</td>
                     <td>
-                      <router-link class="btn btn-primary btn-xs" :to="'/pengguna/'+project.id">Edit</router-link>
-                      <button class="btn btn-danger btn-xs" v-on:click="deleteData(project.id)">Delete</button>
+                      <router-link v-if="$can('edit-pengguna')" class="btn btn-primary btn-xs" :to="'/pengguna/'+project.id">Edit</router-link>
+                      <button v-if="$can('delete-pengguna')" class="btn btn-danger btn-xs" v-on:click="deleteData(project.id)">Delete</button>
                     </td>
                 </tr>
             </tbody>

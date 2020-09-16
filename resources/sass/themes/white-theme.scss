@@ -19,6 +19,8 @@ $dropdown-bg: #e3e3e3;
       &.vsm--link_exact-active,
       &.vsm--link_active {
         box-shadow: 3px 0px 0px 0px $primary-color inset;
+        border-top-right-radius: 80px;
+        background-color: #4285f4 ;
         & .vsm--icon {
           color: $icon-active-color;
           background-color: $icon-active-bg;
@@ -91,6 +93,8 @@ $dropdown-bg: #e3e3e3;
     .vsm--link_level-1.vsm--link_active,
     .vsm--link_level-1.vsm--link_exact-active {
       box-shadow: -3px 0px 0px 0px $primary-color inset;
+      border-top-right-radius: 80px;
+      background-color: #4285f4 ;
     }
   }
 

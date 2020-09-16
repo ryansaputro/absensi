@@ -4,8 +4,10 @@ use Illuminate\Http\Request;
 use Auth;
 use Validator;
 use App\User;
+use App\Role;
 use JWTAuth;
 use Session;
+use DB;
 
 class AuthController extends Controller
 {
@@ -52,17 +54,18 @@ class AuthController extends Controller
         // }
         // return response()->json(['error' => 'login_error'], 200);
         $credentials = $request->only('email', 'password');
-        if ( ! $token = JWTAuth::attempt($credentials)) {
+        if ( ! $token = $this->guard()->attempt($credentials)) {
+        // if ( ! $token = JWTAuth::attempt($credentials)) {
                 return response([
                     'status' => 'error',
                     'error' => 'invalid.credentials',
                     'msg' => 'Invalid Credentials.'
-                ], 400);
+                ], 401);
         }
         return response([
                 'status' => 'success',
                 'token' => $token
-            ])
+        ],200)
             ->header('Authorization', $token);
     }
     /**
@@ -82,10 +85,19 @@ class AuthController extends Controller
     public function user(Request $request)
     {
         $user = User::find(Auth::user()->id);
+        $permission = DB::table('role_has_permissions')
+                ->select('permissions.name')
+                ->join('permissions', 'permissions.id', '=', 'role_has_permissions.permission_id')
+                ->join('roles', 'roles.id', '=', 'role_has_permissions.role_id')
+                ->join('model_has_roles', 'model_has_roles.role_id', '=', 'roles.id')
+                // ->where('model_id', $user)
+                ->pluck('name')->toArray();
+
+
         // $setSession = Session::put($user);
         return response()->json([
             'status' => 'success',
-            'data' => json_encode(Auth::user()->allPermissions, true)
+            'data' => json_encode($permission, true)
         ]);
     }
 
@@ -119,6 +131,8 @@ class AuthController extends Controller
      */
     public function refresh()
     {
+        // dd(JWTAuth::getToken());
+        // JWTAuth::removeToken('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC8xMjcuMC4wLjE6ODAwMFwvYXBpXC92MVwvYXV0aFwvcmVmcmVzaCIsImlhdCI6MTYwMDE0NDgyMCwiZXhwIjoxNjAwMTQ4NDk3LCJuYmYiOjE2MDAxNDQ4OTcsImp0aSI6Ik5IdFpBemRGMmdpcDZTTlciLCJzdWIiOjUsInBydiI6Ijg3ZTBhZjFlZjlmZDE1ODEyZmRlYzk3MTUzYTE0ZTBiMDQ3NTQ2YWEifQ.2oNTodzSiUmg7hhSiyacXJgn9JYYiek3tnXK_d5odLs')
         if ($token = $this->guard()->refresh()) {
             return response()
                 ->json(['status' => 'successs'], 200)

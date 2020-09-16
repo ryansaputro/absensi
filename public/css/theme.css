@@ -288,7 +288,7 @@ section {
 }
 .page-container {
     background: #e5e5e5;
-    padding-left: 350px;
+    padding-left: 250px;
 }
 
 @media (max-width: 991px) {
@@ -3952,6 +3952,8 @@ section {
     border: 1px solid #e5e5e5;
     background: #fff;
     padding-top: 44px;
+    border-radius: 15px;
+    box-shadow: 1px 1px 1px 1px #acacac;
 }
 
 .user-data .title-3 {

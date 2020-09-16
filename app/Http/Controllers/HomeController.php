@@ -74,33 +74,72 @@ class HomeController extends Controller
      *
      */
     public function telat(Request $request){
-        $data = DB::table('absensi')
-                ->select('users.nama_lengkap', 'absensi.tanggal', 
-                    DB::raw('DATE_FORMAT(tanggal, "%H.%i") AS jam'), 
-                    DB::raw('DATE_FORMAT(TIMEDIFF(tanggal, CONCAT(CURDATE(), " 08:00:00")), "%H.%i") AS selisih_jam'),
-                    DB::raw('CONCAT(MOD(HOUR(TIMEDIFF(tanggal,CONCAT(CURDATE(), " 08:00:00"))), 24), " Jam ",
-                            MINUTE(TIMEDIFF(tanggal,CONCAT(CURDATE(), " 08:00:00"))), " Menit ") AS deskripsi')
-                    )
-                ->join('users', 'users.id', '=', 'absensi.id_karyawan')
-                ->where(DB::raw('DATE_FORMAT(tanggal, "%H:%i")'), '>', '08:00')
-                ->whereIn('absensi.id', function($query){
-                        $query->select(DB::raw('MIN(id)'))
-                        ->from('absensi')
-                        ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
-                        ->groupBy('id_karyawan')
-                        ->orderBy('tanggal', 'DESC');
-                    })
-                ->get();
-                
+        // $data = DB::table('absensi')
+        //         ->select('users.nama_lengkap', 'absensi.tanggal', 
+        //             DB::raw('DATE_FORMAT(tanggal, "%H.%i") AS jam'), 
+        //             DB::raw('DATE_FORMAT(TIMEDIFF(tanggal, CONCAT(CURDATE(), " 08:00:00")), "%H.%i") AS selisih_jam'),
+        //             DB::raw('CONCAT(MOD(HOUR(TIMEDIFF(tanggal,CONCAT(CURDATE(), " 08:00:00"))), 24), " Jam ",
+        //                     MINUTE(TIMEDIFF(tanggal,CONCAT(CURDATE(), " 08:00:00"))), " Menit ") AS deskripsi')
+        //             )
+        //         ->join('users', 'users.id', '=', 'absensi.id_karyawan')
+        //         ->where(DB::raw('DATE_FORMAT(tanggal, "%H:%i")'), '>', '08:00')
+        //         ->whereIn('absensi.id', function($query){
+        //                 $query->select(DB::raw('MIN(id)'))
+        //                 ->from('absensi')
+        //                 // ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
+        //                 ->groupBy('id_karyawan')
+        //                 ->orderBy('tanggal', 'DESC');
+        //             })
+        //         ->get();
+        
+        // $data = DB::table('view_absensi')
+        //         ->select(DB::raw('COUNT(masuk) AS jumlah'), 
+        //                 'users.kantor')
+        //         ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
+        //         ->groupBy('users.kantor')
+        //         ->get();
+        $data = User::select(DB::raw('COUNT(kantor) AS jumlah'), 'kantor')->groupBy('kantor')->where('id', '<>', '5')->get();//->pluck('jumlah', 'kantor')->toArray();
+        
         $grafikPerdivisi = DB::table('absensi')
-                ->select(DB::raw('COUNT(DISTINCT(absensi.id_karyawan)) AS jumlah'), 'nama_divisi')
+                ->select(DB::raw('COUNT(DISTINCT(absensi.id_karyawan)) AS jumlah'), 'kantor')
                 ->join('users', 'users.id', '=', 'absensi.id_karyawan')
-                ->join('divisi', 'divisi.id', '=', 'users.id_divisi')
-                ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
-                ->groupBy('id_divisi')
+                // ->join('divisi', 'divisi.id', '=', 'users.id_divisi')
+                // ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
+                ->groupBy('kantor')
                 ->get();
 
-        return ['data' => $data, 'data2' => $grafikPerdivisi];
+        $isac = DB::table('absen_tambahan')
+                ->select(
+                    DB::raw('COUNT(status) AS jml'),
+                    'status'
+                    )
+                ->join('users', 'users.id', '=', 'absen_tambahan.id_karyawan')
+                ->where(DB::raw('DATE(tanggal)'), '2020-09-08')
+                ->where('users.kantor', 'bandung')
+                // ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
+                ->groupBy('status')
+                ->get();
+
+        $absensi = DB::table('view_absensi')
+                    ->select(DB::raw('COUNT(tanggal) AS kehadiran'))
+                    ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
+                    ->where('tanggal', '2020-09-10')
+                    ->where('users.kantor', 'bandung')
+                    // ->where('tanggal', date('Y-m-d'))
+                    ->value('kehadiran');
+        // $jenis = [];
+        $jenis['kehadiran'] = $absensi;
+        foreach($isac AS $k => $v){
+                $jenis[$v->status] = $v->jml;
+
+                
+            }
+            
+            // $dataAll = array("kehadiran" => $absensi, $jenis);
+        // dd($jenis);
+
+
+        return ['data' => $data, 'data2' => $grafikPerdivisi, 'data3' => $isac, 'data4' => $jenis];
     }
 
     public function getAbsen(){

@@ -63,18 +63,23 @@
         </transition>
       </div>
     </div>
-    <slot name="footer" />
-    <button
+    <!-- <slot name="footer" /> -->
+    <!-- <button
       v-if="!hideToggle"
       class="vsm--toggle-btn"
       :class="{'vsm--toggle-btn_slot' : $slots['toggle-icon']}"
       @click="onToggleClick"
     >
       <slot name="toggle-icon" />
-    </button>
+    </button> -->
   </div>
 </template>
-
+<style>
+  .v-sidebar-menu{
+    max-width: 200px !important;
+    margin-top: 100px !important;
+  }
+</style>
 <script>
 import SidebarMenuItem from './SidebarMenuItem.vue'
 import { animationMixin } from '../mixin'

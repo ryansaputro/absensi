@@ -11,6 +11,7 @@
             <!-- PAGE CONTAINER-->
           <div v-if="$auth.check()">
             <div class="page-container">
+                <div class="upper-sidebar"><img class="logo" src="http://202.138.231.178:88/nuansa.com/wp-content/uploads/2019/08/nci.png"></div>
                 <Menu></Menu>
                 <div id="content" class="main-content">
                     <div v-cloak>
@@ -48,12 +49,8 @@
   export default {
     data() {
       return {
+          
         menu: [
-                    {
-                        header: true,
-                        title: 'Administrator RFID',
-                        hiddenOnCollapse: false
-                    },
                     {
                         href: '/dashboard',
                         title: 'Dashboard',
@@ -122,7 +119,7 @@
                             //     title: 'Jadwal Libur Tahunan'
                             // }
                         ]
-                    }
+                    },
                 ]
       }
     },
@@ -131,5 +128,16 @@
       SidebarMenu,
       Mobile
     },
+    created() {
+    //     localStorage.removeItem('user');
+    //   localStorage.removeItem('auth_token_default');
+        if(typeof(localStorage.getItem('user')) !== 'undefined'){
+            window.Permissions = localStorage.getItem('user');
+        }else{
+            window.Permissions = [];
+        }
+        // if(localStorage.user)
+        // window.Permissions = 
+    }
   }
 </script>

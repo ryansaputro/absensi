@@ -1,10 +1,10 @@
 import VueRouter from 'vue-router'
 // Pages
-import Home from './pages/home'
+// import Home from './pages/home'
 import About from './pages/about'
 import Register from './pages/Register'
 import Login from './pages/login'
-import Dashboard from './pages/user/Dashboard'
+// import Dashboard from './pages/user/Dashboard'
 import AdminDashboard from './pages/admin/Dashboard'
 import PenggunaRead from './pages/admin/master_user/Read'
 import PenggunaCreate from './pages/admin/master_user/Create'
@@ -23,14 +23,6 @@ import UpdateDataKehadiran from './pages/admin/data_kehadiran/Update'
 import NewDataKehadiran from './pages/admin/data_kehadiran/Create'
 // Routes
 const routes = [
-    {
-        path: '/',
-        name: 'login',
-        component: Login,
-        meta: {
-            auth: undefined
-        }
-    },
     {
         path: '/about',
         name: 'about',
@@ -192,4 +184,14 @@ const router = new VueRouter({
     routes,
     linkActiveClass: "active"
 })
+
+// router.beforeEach((to, from, next) => {
+//     // console.log(to.meta.auth)
+//     const publicPages = ['/login'];
+//     const authRequired = !publicPages.includes(to.path);
+//     // console.log(localStorage)
+//     // console.log(localStorage.getItem('auth_token_default'))
+//     if (to.name !== 'login' && to.meta.auth) next({ name: 'login' })
+//     else next()
+// })
 export default router
