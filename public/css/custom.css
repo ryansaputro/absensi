@@ -121,3 +121,144 @@ a.nav-link {
     color: #fff !important;
     padding: 5px 10px;
 }
+
+.login-style {
+    width: 300px !important;
+    position: absolute !important;
+    top: -100px !important;
+    border-radius: 15px !important;
+    min-height: 350px !important;
+}
+
+.login-content {
+    background: #e5e5e5 !important;
+    padding: 50px 30px 20px !important;
+    -webkit-border-radius: 2px !important;
+    -moz-border-radius: 2px !important;
+    border-radius: 15px !important;
+    height: 250px !important;
+    margin-top: 75px !important;
+    width: 690px !important;
+}
+
+.login-body {
+    background:green !important;
+    color:#fff !important;
+    border-radius: 15px !important;
+}
+
+.type3 {
+    width: 500px;
+    height: 500px;
+    background: aqua;
+    border: 30px solid blue;
+}
+.circleBase {
+    border-radius: 50%;
+    behavior: url(PIE.htc); /* remove if you don't care about IE8 */
+}
+
+.button-login {
+    border:1px solid #fff;
+    border-radius: 10px;
+    color:#fff;
+    padding:5px 10px;
+}
+
+.button-login:hover {
+    box-shadow: 1px 1px 2px 0px #fafafa;
+}
+
+.powered {
+    position: absolute;
+    right: 95px;
+    top: 160px;
+}
+
+.sidebar-footer {
+    z-index: 1;
+    height: 60px;
+    background: #e5e5e5;
+    left: 0px;
+    width: 28%;
+    position: absolute;
+    bottom: -65px;
+    display: block !important;
+}
+
+.footer {
+    z-index: 2 !important;
+    width: 81.4% !important;
+    left: 250px !important;
+    border-bottom-left-radius: 50px !important;
+    border-top: 1px solid #e0e0e0 !important;
+    position: absolute;
+    background: #ffffff;
+    height: 65px;
+    display: block !important;
+}
+
+.copyrights {
+    font-weight: 600;
+    padding: 26px 60px;
+    top: -10px;
+    position: absolute;
+}
+
+.version {
+    position: absolute;
+    right: 60px;
+    font-weight: 600;
+    padding: 26px 0px;
+    top: -10px;
+}
+
+.img-gedung3 {
+    width: 400px;
+    position: absolute;
+    left: 10%;
+    z-index: 10;
+}
+
+
+.img-gedung2 {
+    width: 400px;
+    position: absolute;
+    left:10%;
+    top: 162px;
+    z-index: 8;
+}
+
+
+.img-gedung1 {
+    width: 520px;
+    position: absolute;
+    left: 0%;
+    top: 310px;
+}
+/* } */
+
+
+/* .gambarGedungLt3 {
+    background-image: url('http://127.0.0.1:8000/images/lantai3.png');
+    background-repeat: no-repeat;
+    background-size: contain;
+    height: 200px;
+    background-position: center;
+}
+
+.gambarGedungLt2 {
+    background-image: url('http://127.0.0.1:8000/images/lantai2.png');
+    background-repeat: no-repeat;
+    background-size: contain;
+    height: 200px;
+    background-position: center;p
+}
+
+.gambarGedungLt1 {
+    background-image: url('http://127.0.0.1:8000/images/lantai1.png');
+    background-repeat: no-repeat;
+    background-size: contain;
+    height: 200px;
+    background-position: center;
+} */

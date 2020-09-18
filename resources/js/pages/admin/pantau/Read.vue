@@ -1,9 +1,59 @@
 <template>
     <div class="projects">
-      <div class="user-data m-b-30 p-3">
+      <div class="user-data m-b-30 p-3" style="height:700px;">
+          <div class="row">
+              <div class="col-md-6">
+                    <div class="gambarGedung">
+                        <img 
+                            :src="currentImageLt3" 
+                            @click="changeImageWhen('click')"
+                            v-bind:class="{active: isActive}"
+                            class="img-gedung3" 
+                        /> 
+                        <img 
+                            :src="currentImageLt2" 
+                            @click="changeImageWhen2('click')"
+                            v-bind:class="{active: isActive2}"
+                            class="img-gedung2" /> 
+                        <img
+                        :src="currentImageLt1" 
+                            @click="changeImageWhen1('click')"
+                            v-bind:class="{active: isActive1}"
+                        class="img-gedung1" /> 
+                    </div>
+                </div>
+          
+              <div class="col-md-6" style="height:600px;overflow-y:scroll;">
+                <div class="form-group">
+                    <label for="email"><strong>Pencarian:</strong></label>
+                    <input class="input form-control d-inline" style="width:81%;" type="text" v-model="search" placeholder="Nama, NIK"
+                   @input="resetPagination()">
+                </div>
+                  
+                <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy">
+                    <tbody>
+                        <tr v-if="paginated.length > 0" v-for="(project, index) in paginated" :key="project.id">
+                            <td>{{ project.nik_pegawai }}</td>
+                            <td>{{project.nama_lengkap}}</td>
+                            <td>{{project.jam}}</td>
+                            <td>{{project.nama_gerbang}}</td>
+                        </tr>
+                        <tr v-if="paginated.length <= 0">
+                            <td colspan="4" class="text-center">Data tidak tersedia</td>
+                        </tr>
+                    </tbody>
+                </datatable>
+                <pagination :pagination="pagination" :client="true" :filtered="filteredProjects"
+                            @prev="--pagination.currentPage"
+                            @next="++pagination.currentPage">
+                </pagination>
+              </div>
+          </div>
+      </div>
+      <!-- <div class="user-data m-b-30 p-3">
         <div class="tableFilters m-b-30">
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-6"> -->
               <!-- <input class="input form-control" type="text" v-model="search" placeholder="Search Table"
                    @input="resetPagination()"> -->
                     <!-- <date-range-picker
@@ -11,12 +61,12 @@
                             v-model="dateRange"
                     >
                     </date-range-picker> -->
-                    <date-picker :placeholder="waterMark" v-model="time1" @change="filterTanggal()" valueType="format"></date-picker>
+                    <!-- <date-picker :placeholder="waterMark" v-model="time1" @change="filterTanggal()" valueType="format"></date-picker> -->
                     <!-- <date-picker v-model="time2" type="datetime"></date-picker>
                     <date-picker v-model="time3" range></date-picker> -->
    
-            </div>
-            <div class="col-md-6">
+            <!-- </div> -->
+            <!-- <div class="col-md-6">
               <div class="control pull-right">
                 <div class="select form-control">
                     <select v-model="length" @change="resetPagination()">
@@ -26,14 +76,14 @@
                     </select>
                 </div>
             </div>
-            </div>
-          </div>
-        </div>
-        <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy">
+            </div> -->
+          <!-- </div>
+        </div> -->
+        <!-- <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy">
             <tbody>
                 <tr v-for="(project, index) in paginated" :key="project.id">
                     <td>{{ doMath(index) }}</td>
-                    <td>{{project.name}}</td>
+                    <td>{{project.nama_lengkap}}</td>
                     <td>{{project.jam}}</td>
                     <td>{{project.nama_gerbang}}</td>
                 </tr>
@@ -42,8 +92,8 @@
         <pagination :pagination="pagination" :client="true" :filtered="filteredProjects"
                     @prev="--pagination.currentPage"
                     @next="++pagination.currentPage">
-        </pagination>
-      </div>
+        </pagination> -->
+      <!-- </div> -->
     </div>
 </template>
 
@@ -66,7 +116,7 @@ export default {
     data() {
         let sortOrders = {};
         let columns = [
-            {width: '10%', label: '#', name: 'no' },
+            {width: '10%', label: 'NIK', name: 'nik_pegawai' },
             {width: '30%', label: 'Nama'},
             {width: '30%', label: 'Jam'},
             {width: '30%', label: 'Lokasi'},
@@ -75,6 +125,9 @@ export default {
            sortOrders[column.name] = -1;
         });
         return {
+            isActive: false,
+            isActive2: false,
+            isActive1: false,
             projects: [],
             columns: columns,
             sortKey: 'first_name',
@@ -94,26 +147,155 @@ export default {
             },
             time1: null,
             waterMark : new Date().toISOString().slice(0,10),
+            currentImageLt3: '/images/lantai3.png',
+            currentImageLt2: '/images/lantai2.png',
+            currentImageLt1: '/images/lantai1.png',
+
         }
     },
     methods: {
-      dateFormat (classes, date) {
-        if (!classes.disabled) {
-          classes.disabled = date.getTime() < new Date()
-        }
-        return classes
-      },
+        dateFormat (classes, date) {
+            if (!classes.disabled) {
+            classes.disabled = date.getTime() < new Date()
+            }
+            return classes
+        },
+        changeImageWhen: function (state) {
+            this.isActive = !this.isActive;
+            var newEvent = this.isActive === true ? '/images/lantai3-sorot.png' : '/images/lantai3.png';
+            this.isActive2 = false;
+            var newEvent2 = this.isActive2 === true ? '/images/lantai2-sorot.png' : '/images/lantai2.png';
+            this.isActive1 = false;
+            var newEvent1 = this.isActive1 === true ? '/images/lantai1-sorot.png' : '/images/lantai1.png';
+            console.log(this.isActive2)
+            // this.isActive2 = false;
+            this.currentImageLt1 = newEvent1
+            this.currentImageLt2 = newEvent2
+            this.currentImageLt3 = newEvent
+            if(this.isActive === true) {
+                axios.get('pantau', 
+                 {
+                    params: {
+                    lantai: "3"
+                    }
+                })
+                .then(response => {
+                    this.projects = response.data;
+                    this.pagination.total = this.projects.length;
+                })
+                .catch(errors => {
+                    console.log(errors);
+                });  
+            }else{
+                axios.get('pantau', 
+                 {
+                    params: this.tableData
+                })
+                .then(response => {
+                    this.projects = response.data;
+                    this.pagination.total = this.projects.length;
+                })
+                .catch(errors => {
+                    console.log(errors);
+                });  
+
+            }
+        },
+        changeImageWhen2: function (state) {
+            // this.isActive = false;
+            this.isActive2 = !this.isActive2;
+            // this.isActive1 = false;
+            var newEvent = this.isActive2 === true ? '/images/lantai2-sorot.png' : '/images/lantai2.png';
+            this.isActive = false;
+            var newEvent3 = this.isActive === true ? '/images/lantai3-sorot.png' : '/images/lantai3.png';
+            this.isActive1 = false;
+            var newEvent1 = this.isActive1 === true ? '/images/lantai1-sorot.png' : '/images/lantai1.png';
+            console.log(this.isActive2)
+            // this.isActive2 = false;
+            this.currentImageLt1 = newEvent1
+            this.currentImageLt3 = newEvent3
+            this.currentImageLt2 = newEvent
+            if(this.isActive2 === true) {
+                axios.get('pantau', 
+                 {
+                    params: {
+                    lantai: "2"
+                    }
+                })
+                .then(response => {
+                    this.projects = response.data;
+                    this.pagination.total = this.projects.length;
+                })
+                .catch(errors => {
+                    console.log(errors);
+                });  
+            }else{
+                axios.get('pantau', 
+                 {
+                    params: this.tableData
+                })
+                .then(response => {
+                    this.projects = response.data;
+                    this.pagination.total = this.projects.length;
+                })
+                .catch(errors => {
+                    console.log(errors);
+                });  
+
+            }
+        },
+        changeImageWhen1: function (state) {
+            this.isActive1 = !this.isActive1;
+            var newEvent = this.isActive1 === true ? '/images/lantai1-sorot.png' : '/images/lantai1.png'
+            this.isActive2 = false;
+            var newEvent2 = this.isActive2 === true ? '/images/lantai2-sorot.png' : '/images/lantai2.png';
+            this.isActive = false;
+            var newEvent3 = this.isActive === true ? '/images/lantai3-sorot.png' : '/images/lantai3.png';
+            this.currentImageLt1 = newEvent
+            this.currentImageLt2 = newEvent2
+            this.currentImageLt3 = newEvent3
+            
+            if(this.isActive1 === true) {
+                axios.get('pantau', 
+                 {
+                    params: {
+                    lantai: "1"
+                    }
+                })
+                .then(response => {
+                    this.projects = response.data;
+                    this.pagination.total = this.projects.length;
+                })
+                .catch(errors => {
+                    console.log(errors);
+                });  
+            }else{
+                axios.get('pantau', 
+                 {
+                    params: this.tableData
+                })
+                .then(response => {
+                    this.projects = response.data;
+                    this.pagination.total = this.projects.length;
+                })
+                .catch(errors => {
+                    console.log(errors);
+                });  
+
+            }
+                
+        },
+        dateFormat (classes, date) {
+            if (!classes.disabled) {
+            classes.disabled = date.getTime() < new Date()
+            }
+            return classes
+        },
       
       doMath: function (index) {
         return index+1
       },
       
-      statusMasuk: function (status){
-          if(status == 'Terlambat')
-          return "danger"
-          else
-          return "success"
-      },
         getProjects() {
             axios.get('pantau', {params: this.tableData})
                 .then(response => {

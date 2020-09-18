@@ -115,36 +115,133 @@ class HomeController extends Controller
                     'status', 'kantor'
                     )
                 ->join('users', 'users.id', '=', 'absen_tambahan.id_karyawan')
-                // ->where(DB::raw('DATE(tanggal)'), '2020-09-08')
-                ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
+                ->where(DB::raw('DATE(tanggal)'), '2020-09-08')
+                // ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
                 ->groupBy('status', 'kantor')
                 ->get();
 
         $absensi = DB::table('view_absensi')
                 ->select(DB::raw('COUNT(tanggal) AS kehadiran'), 'kantor')
                 ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
-                // ->where('tanggal', '2020-09-10')
-                ->where('tanggal', date('Y-m-d'))
+                ->where('tanggal', '2020-09-10')
+                // ->where('tanggal', date('Y-m-d'))
                 ->groupBy('kantor')
                 ->pluck('kehadiran', 'kantor')
                 ->toArray();
+
+        $telatKaryawan = DB::table('view_absensi')
+            ->select(DB::raw('COUNT(masuk) AS jumlah_telat'), 'kantor', 'tanggal')
+            ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
+            ->where('masuk', '>', '08:00')
+            ->where('tanggal', '>=', DB::raw('DATE(NOW()) - INTERVAL 7 DAY'))
+            ->groupBy('tanggal', 'kantor')
+            // ->pluck('jumlah_telat', 'tanggal')
+            // ->toArray();
+            ->get();
+        
+        $tepatKaryawan = DB::table('view_absensi')
+            ->select(DB::raw('COUNT(masuk) AS jumlah_tepat'), 'kantor', 'tanggal')
+            ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
+            ->where('masuk', '<=', '08:00')
+            ->where('tanggal', '>=', DB::raw('DATE(NOW()) - INTERVAL 7 DAY'))
+            ->groupBy('tanggal', 'kantor')
+            // ->pluck('jumlah_tepat', 'kantor')
+            ->get();
+        
+        $userArr = $data->pluck('jumlah', 'kantor')->toArray();
+        
+        $date = date('Y-m-d', strtotime('-7 days'));
+        $end_date = date('Y-m-d');
+        // End date
+        $dates = [];
+        while (strtotime($date) <= strtotime($end_date)) {
+                    $dates[] = $date;
+                    $date = date ("Y-m-d", strtotime("+1 day", strtotime($date)));
+        }
+
+        //list date
+        //$dates
+        $telat = [];
+        foreach($telatKaryawan AS $k => $v){
+            $telat[$v->tanggal][$v->kantor] = $v->jumlah_telat;
+        }
+
+        $tepat = [];
+        foreach($tepatKaryawan AS $k => $v){
+            $tepat[$v->tanggal][$v->kantor] = $v->jumlah_tepat;
+        }
+
+        //list tanggal
+        foreach($dates AS $kTgl => $vTgl){
+            //list kantor
+            foreach($kantor AS $k => $v){
+                $terlambat[$vTgl][$v]['jml_karyawan'] = $userArr[$v];
+                
+                //cek jika tgl tsb ada data telat
+                if(!empty($tepat[$vTgl])){
+                    //cek jika kantor dan tgl tsb ada telat
+                    if(!empty($tepat[$vTgl][$v])){
+                        $terlambat[$vTgl][$v]['tepat'] = $tepat[$vTgl][$v];
+                    }else{
+                        $terlambat[$vTgl][$v]['tepat'] = 0;
+                    }
+                }else{
+                    $terlambat[$vTgl][$v]['tepat'] = 0;
+                }
+
+                //cek jika tgl tsb ada data telat
+                if(!empty($telat[$vTgl])){
+                    //cek jika kantor dan tgl tsb ada telat
+                    if(!empty($telat[$vTgl][$v])){
+                        $terlambat[$vTgl][$v]['telat'] = $telat[$vTgl][$v];
+                    }else{
+                        $terlambat[$vTgl][$v]['telat'] = 0;
+                    }
+                }else{
+                    $terlambat[$vTgl][$v]['telat'] = 0;
+                }
+            }
+        }
+
         $jenis = [];
+        $jmlTelat = [];
         foreach($kantor AS $k => $v){
+
+            //untuk chart kehadiran
             if(array_key_exists($v, $absensi)){
                 $jenis[$v]['kehadiran'] = $absensi[$v];
             }else{
                 $jenis[$v]['kehadiran'] = 0;
             }
 
+            //untuk chart terlambat
+            if(array_key_exists($v, $userArr)){
+                $jmlTelat[$v]['jml_karyawan'] = $userArr[$v];
+            }else{
+                $jmlTelat[$v]['jml_karyawan'] = 0;
+            }
+
+            if(array_key_exists($v, $tepatKaryawan)){
+                $jmlTelat[$v]['tepat'] = $tepatKaryawan[$v];
+            }else{
+                $jmlTelat[$v]['tepat'] = 0;
+            }
+
+            if(array_key_exists($v, $telatKaryawan)){
+                $jmlTelat[$v]['telat'] = $telatKaryawan[$v];
+            }else{
+                $jmlTelat[$v]['telat'] = 0;
+            }
         }
-        
+
         if(count($isac) > 0){
             foreach($isac AS $k => $v){
                 $jenis[$v->kantor][$v->status] = $v->jml;
             }
         }
+
             
-        return ['data' => $data, 'data2' => $grafikPerdivisi, 'data3' => $isac, 'data4' => $jenis];
+        return ['data' => $data, 'data2' => $grafikPerdivisi, 'data3' => $isac, 'data4' => $jenis, 'data5' => $jmlTelat, 'data6' => $terlambat];
     }
 
     public function getAbsen(){
@@ -215,14 +312,14 @@ class HomeController extends Controller
     {
         if ( $request->input('tanggal') ) {
             return DB::table('absensi')
-                    ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'nama_lengkap', 'nama_gerbang')
+                    ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'nama_lengkap', 'nik_pegawai', 'nama_gerbang')
                     ->join('gate','absensi.id_gate', '=', 'gate.id')
                     ->join('users', 'users.id', '=', 'id_karyawan')
                     ->where(DB::raw('DATE(tanggal)'), $request->tanggal)->get();
     	}
         if ( $request->input('client') ) {
             return DB::table('absensi')
-                    ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'nama_lengkap', 'nama_gerbang')
+                    ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'nama_lengkap', 'nik_pegawai', 'nama_gerbang')
                     ->join('gate','absensi.id_gate', '=', 'gate.id')
                     ->join('users', 'users.id', '=', 'id_karyawan')
                     ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))->get();
@@ -235,7 +332,7 @@ class HomeController extends Controller
         $dir = $request->input('dir');
         $searchValue = $request->input('search');
 
-        $query = DB::table('absensi')->select('absensi.id', 'tanggal', 'nama_lengkap')
+        $query = DB::table('absensi')->select('absensi.id', 'tanggal', 'nik_pegawai', 'nama_lengkap')
                 ->join('users', 'users.id', '=', 'id_karyawan')
                 ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))->orderBy($columns[$column], $dir);
 
@@ -254,7 +351,7 @@ class HomeController extends Controller
     {
         if ( $request->input('tanggal') ) {
             return DB::table('absensi')
-                    ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'nama_lengkap', 'nama_gerbang')
+                    ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'nik_pegawai','nama_lengkap', 'nama_gerbang')
                     ->join('gate','absensi.id_gate', '=', 'gate.id')
                     ->join('users', 'users.id', '=', 'id_karyawan')
                     ->where(DB::raw('DATE(tanggal)'), $request->tanggal)
@@ -265,10 +362,24 @@ class HomeController extends Controller
                         ->orderBy('tanggal', 'DESC');
                     })
                     ->get();
-    	}
+        }
+        if(isset($request->lantai)){
+            return DB::table('absensi')
+                    ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'nik_pegawai','nama_lengkap', 'nama_gerbang')
+                    ->join('gate','absensi.id_gate', '=', 'gate.id')
+                    ->join('users', 'users.id', '=', 'id_karyawan')
+                    ->where('gate.id', $request->lantai)
+                    ->whereIn('absensi.id', function($query){
+                        $query->select(DB::raw('MAX(id)'))
+                        ->from('absensi')
+                        ->groupBy('id_karyawan')
+                        ->orderBy('tanggal', 'DESC');
+                    })
+                    ->get();
+        }
         if ( $request->input('client') ) {
             return DB::table('absensi')
-                    ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'nama_lengkap', 'nama_gerbang')
+                    ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'nama_lengkap', 'nik_pegawai','nama_gerbang')
                     ->join('gate','absensi.id_gate', '=', 'gate.id')
                     ->join('users', 'users.id', '=', 'id_karyawan')
                     ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
@@ -295,7 +406,7 @@ class HomeController extends Controller
         if ($searchValue) {
             $query->where(function($query) use ($searchValue) {
                 $query->where('nama_lengkap', 'like', '%' . $searchValue . '%')
-                ->orWhere('nama_lengkap', 'like', '%' . $searchValue . '%');
+                ->orWhere('nik_pegawai', 'like', '%' . $searchValue . '%');
             });
         }
 

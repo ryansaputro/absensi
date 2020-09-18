@@ -32,10 +32,13 @@
         <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy">
             <tbody>
                 <tr v-for="(project, index) in paginated" :key="project.id">
-                    <td>{{ doMath(index) }}</td>
+                    <td>{{project.nik_pegawai }}</td>
                     <td>{{project.nama_lengkap}}</td>
                     <td>{{project.jam}}</td>
                     <td>{{project.nama_gerbang}}</td>
+                </tr>
+                <tr v-if="paginated.length <= 0">
+                    <td colspan="4" class="text-center">Data tidak tersedia</td>
                 </tr>
             </tbody>
         </datatable>
@@ -66,7 +69,7 @@ export default {
     data() {
         let sortOrders = {};
         let columns = [
-            {width: '10%', label: '#', name: 'no' },
+            {width: '10%', label: 'NIK', name: 'no' },
             {width: '30%', label: 'Nama'},
             {width: '30%', label: 'Jam'},
             {width: '30%', label: 'Lokasi'},
@@ -97,23 +100,8 @@ export default {
         }
     },
     methods: {
-      dateFormat (classes, date) {
-        if (!classes.disabled) {
-          classes.disabled = date.getTime() < new Date()
-        }
-        return classes
-      },
-      
       doMath: function (index) {
         return index+1
-      },
-      
-      statusMasuk: function (status){
-          console.log(status)
-          if(status == 'Terlambat')
-          return "danger"
-          else
-          return "success"
       },
         getProjects() {
             axios.get('lacak', {params: this.tableData})
@@ -126,7 +114,6 @@ export default {
                 });
         },
         filterTanggal() {
-            console.log(this.time1)
             axios.get('lacak', 
              {
                 params: {

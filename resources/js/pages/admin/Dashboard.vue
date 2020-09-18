@@ -3,7 +3,7 @@
     <div class="container">
       <div class="user-data m-b-30 p-3">
         <div class="my-5">
-          <h3 class="text-uppercase text-center">Jumlah Karyawan</h3>
+          <h5 class="text-uppercase text-center">Total Karyawan</h5>
           <!-- <form v-on:submit.prevent="getData">
             <div class="row">
               <div class="col-md-6 offset-md-3">
@@ -29,7 +29,7 @@
     </div>
       <!-- <div class="user-data m-b-30 p-3">
         <div class="my-5">
-          <h3 class="text-uppercase text-center">mobilisasi personnel</h3> -->
+          <h5 class="text-uppercase text-center">mobilisasi personnel</h5> -->
           <!-- <form v-on:submit.prevent="getData">
             <div class="row">
               <div class="col-md-6 offset-md-3">
@@ -57,7 +57,7 @@
       <div class="col-md-6">
             <div class="user-data m-b-30 p-3">
               <div class="my-5">
-                <h3 class="text-uppercase text-center">Kehadiran Bandung</h3>
+                <h5 class="text-uppercase text-center">Kehadiran Bandung</h5>
               </div>
               <div class="my-5">
                 <!-- <div class="alert alert-info" v-show="loading">
@@ -72,7 +72,7 @@
       <div class="col-md-6">
             <div class="user-data m-b-30 p-3">
               <div class="my-5">
-                <h3 class="text-uppercase text-center">Kehadiran Surabaya</h3>
+                <h5 class="text-uppercase text-center">Kehadiran Surabaya</h5>
               </div>
               <div class="my-5">
                 <!-- <div class="alert alert-info" v-show="loading">
@@ -85,6 +85,41 @@
           </div>
       </div>
     </div>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="user-data m-b-30 p-3">
+          <div class="my-5">
+            <h5 class="text-uppercase text-center">Grafik keterlambat 7Hr Terakhir (Bandung)</h5>
+          </div>
+          <div class="my-5">
+            <div class="alert alert-info" v-show="loading">
+              Loading...
+            </div>
+            <div v-show="chart != null">
+              <canvas id="terlambat7hrBdg"></canvas>
+            </div>
+          </div>
+      </div>
+
+      </div>
+      <div class="col-md-6">
+        <div class="user-data m-b-30 p-3">
+          <div class="my-5">
+            <h5 class="text-uppercase text-center">Grafik keterlambat 7Hr Terakhir (Surabaya)</h5>
+          </div>
+          <div class="my-5">
+            <div class="alert alert-info" v-show="loading">
+              Loading...
+            </div>
+            <div v-show="chart != null">
+              <canvas id="terlambat7hrSby"></canvas>
+            </div>
+          </div>
+      </div>
+
+      </div>
+    </div>
+
   </div>
   </div>
 </template>
@@ -100,7 +135,15 @@
         jumlah_karyawan: [],
         jumlah_jenis: [],
         kehadiran: [],
+        terlambat: [],
         value:[],
+        label:[],
+        karyawan:[],
+        tepat:[],
+        telat:[],
+        karyawanSby:[],
+        tepatSby:[],
+        telatSby:[],
         loading: false,
         errored: false
       }},
@@ -136,13 +179,54 @@
           $.each(response.data.data4, function(k, v){
             nli[k] = v;
           });
+
           this.kehadiran = nli;
-          // console.log(this.kehadiran['bandung']['x']);
+
+          var terlambat7 = [];
+          $.each(response.data.data5, function(k, v){
+            terlambat7[k] = v;
+            
+          });
+
+          var terlambat7hr = [];
+          var label = [];
+          $.each(response.data.data6, function(k, v){
+            terlambat7hr[k] = v;
+            label.push(k);
+
+          });
+            this.label = label;
+          // this.terlambat = terlambat7;
+          var karyawan = [];
+          var tepat = [];
+          var telat = [];
+          var karyawanSby = [];
+          var tepatSby = [];
+          var telatSby = [];
+          $.each(label, function(k,v){
+            karyawan.push(terlambat7hr[v]['bandung']['jml_karyawan']);
+            tepat.push(terlambat7hr[v]['bandung']['tepat']);
+            telat.push(terlambat7hr[v]['bandung']['telat']);
+            
+            karyawanSby.push(terlambat7hr[v]['surabaya']['jml_karyawan']);
+            tepatSby.push(terlambat7hr[v]['surabaya']['tepat']);
+            telatSby.push(terlambat7hr[v]['surabaya']['telat']);
+          })
+
+            this.karyawan = karyawan;
+            this.tepat = tepat;
+            this.telat = telat;
+
+            this.karyawanSby = karyawanSby;
+            this.tepatSby = tepatSby;
+            this.telatSby = telatSby;
 
           var TelatDatangChart = document.getElementById('TelatDatangChart');
           var cty = document.getElementById('PulangAwalChart');
           var KehadiranBandung = document.getElementById('KehadiranBandung');
           var KehadiranSurabaya = document.getElementById('KehadiranSurabaya');
+          var terlambat7hr = document.getElementById('terlambat7hrBdg');
+          var terlambat7hrSby = document.getElementById('terlambat7hrSby');
 
          var coloR = [];
 
@@ -178,15 +262,26 @@
               ]
             },
             options: {
-                scales: {
-                    xAxes: [{
-                        stacked: true,
-                    }],
-                    yAxes: [{
-                        stacked: true,
+                // scales: {
+                //     xAxes: [{
+                //         stacked: true,
+                //     }],
+                //     yAxes: [{
+                //         stacked: true,
                         
-                    }]
-                }, 
+                //     }]
+                // }, 
+                // rotation: -Math.PI,
+                cutoutPercentage: 50,
+                // circumference: Math.PI,
+                // legend: {
+                //   position: 'center'
+                // },
+                animation: {
+                  animateRotate: true,
+                  animateScale: true
+                }
+
                 // legend: {
                 //   display: false
                 // // },
@@ -267,6 +362,149 @@
                             return tooltipItem.yLabel;
                     }
                   }
+              }
+            }
+          });
+
+
+          this.chart = new Chart(terlambat7hr,{
+            type: 'line',
+            data: {
+              labels: this.label,
+              datasets: [
+                // {
+                //   backgroundColor: ['blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue'],
+                //   borderColor: 'rgb(54, 162, 235)',
+                //   hoverBackgroundColor: 'rgb(2 171 2 / 91%)',
+                //   hoverBorderColor:"white",
+                //   fill: true,
+                //   label: 'Jumlah Karyawan',
+                //   data: this.karyawan,
+                //   // barPercentage: 1,
+                //   // barThickness: 6,
+                //   // maxBarThickness: 8,
+                //   // minBarLength: 2,
+                // },
+                // {
+                //   backgroundColor: ['green', 'green','green', 'green', 'green', 'green', 'green', 'green'],
+                //   borderColor: 'rgb(54, 162, 235)',
+                //   hoverBackgroundColor: 'rgb(2 171 2 / 91%)',
+                //   hoverBorderColor:"white",
+                //   fill: true,
+                //   label: 'Tepat Waktu',
+                //   data: this.tepat,
+                //   // barPercentage: 1,
+                //   // barThickness: 6,
+                //   // maxBarThickness: 8,
+                //   // minBarLength: 2,
+                // },
+                {
+                  backgroundColor: ['red', 'red', 'red', 'red', 'red', 'red', 'red' , 'red'],
+                  borderColor: 'red',
+                  borderWidth:3,
+                  lineTension:0.1,
+                  // hoverBackgroundColor: 'rgb(2 171 2 / 91%)',
+                  // hoverBorderColor:"white",
+                  fill: origin,
+                  label: 'Terlambat',
+                  data: this.telat,
+                  // barPercentage: 1,
+                  // barThickness: 6,
+                  // maxBarThickness: 8,
+                  // minBarLength: 2,
+                },
+
+              ]
+            },
+            options: {
+              // legend: {
+              //     display: false
+              // },
+              // tooltips: {
+              //     callbacks: {
+              //       label: function(tooltipItem) {
+              //               return tooltipItem.yLabel;
+              //       }
+              //     }
+              // },
+              scales: {
+                  yAxes: [{
+                      ticks: {
+                          min: 0,
+                          stepSize: 1
+                      }
+                  }]
+              },
+            }
+          });
+
+          this.chart = new Chart(terlambat7hrSby,{
+            type: 'line',
+            data: {
+              labels: this.label,
+              datasets: [
+                // {
+                //   backgroundColor: ['blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue'],
+                //   borderColor: 'rgb(54, 162, 235)',
+                //   hoverBackgroundColor: 'rgb(2 171 2 / 91%)',
+                //   hoverBorderColor:"white",
+                //   fill: true,
+                //   label: 'Jumlah Karyawan',
+                //   data: this.karyawanSby,
+                //   // barPercentage: 1,
+                //   // barThickness: 6,
+                //   // maxBarThickness: 8,
+                //   // minBarLength: 2,
+                // },
+                // {
+                //   backgroundColor: ['green', 'green','green', 'green', 'green', 'green', 'green', 'green'],
+                //   borderColor: 'rgb(54, 162, 235)',
+                //   hoverBackgroundColor: 'rgb(2 171 2 / 91%)',
+                //   hoverBorderColor:"white",
+                //   fill: true,
+                //   label: 'Tepat Waktu',
+                //   data: this.tepatSby,
+                //   // barPercentage: 1,
+                //   // barThickness: 6,
+                //   // maxBarThickness: 8,
+                //   // minBarLength: 2,
+                // },
+                {
+                  backgroundColor: ['red', 'red', 'red', 'red', 'red', 'red', 'red' , 'red'],
+                  borderColor: 'red',
+                  borderWidth:3,
+                  lineTension:0.1,
+                  // hoverBackgroundColor: 'rgb(2 171 2 / 91%)',
+                  // hoverBorderColor:"white",
+                  fill: 'red',
+                  label: 'Terlambat',
+                  data: this.telatSby,
+                  // barPercentage: 1,
+                  // barThickness: 6,
+                  // maxBarThickness: 8,
+                  // minBarLength: 2,
+                },
+
+              ]
+            },
+            options: {
+              // legend: {
+              //     display: false
+              // },
+              // tooltips: {
+              //     callbacks: {
+              //       label: function(tooltipItem) {
+              //               return tooltipItem.yLabel;
+              //       }
+              //     }
+              // },
+              scales: {
+                  yAxes: [{
+                      ticks: {
+                          min: 0,
+                          stepSize: 1
+                      }
+                  }]
               }
             }
           });

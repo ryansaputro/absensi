@@ -2,9 +2,11 @@
   <div class="container">
     <div class="row justify-content-md-center">
       <div class="col-12">
-        <div class="card card-default">
-          <div class="card-header">Login</div>
-          <div class="card-body">
+        <div class="card card-default login-style">
+          <!-- <div class="card-header">Login</div> -->
+          <!-- <div class="circleBase type3"></div> -->
+          <div class="card-body login-body">
+            <h5 class="text-center mb-3 mt-3" style="color:#fff;">USER LOGIN</h5>
             <div class="alert alert-danger" v-if="has_error && !success">
               <p v-if="error == 'login_error'">Validation Errors.</p>
               <p v-else>Error, unable to connect with these credentials.</p>
@@ -25,14 +27,45 @@
                 <input type="password" id="password" class="form-control" v-model="password" required>
                 <p class="error" v-if="error.password">{{ errors.password }}</p>
               </div>
-              <button type="submit" class="btn btn-primary">Signin</button>
+              <button type="submit" class="button-login pull-right">Masuk</button>
             </form>
           </div>
         </div>
+            <img v-bind:src="'/images/ncirfid.png'" class="img-vendor" /> 
+            <p class="powered">Powered by NCI</p>
       </div>
     </div>
   </div>
 </template>
+<style>
+.page-content--bge5 {
+  background: #fff !important;
+}
+
+.page-wrapper {
+  background: #fff !important;
+  padding-bottom: 0vh !important;
+}
+
+.img-vendor {
+  position: absolute;
+  right: 10px;
+  top: 47px;
+}
+
+.login-container {
+  margin-left: 20px !important;
+  padding-top: 30px !important;
+}
+
+.sidebar-footer {
+  display: none !important;
+}
+
+.footer {
+  display:none !important;
+}
+</style>
 <script>
     export default {
     data(){

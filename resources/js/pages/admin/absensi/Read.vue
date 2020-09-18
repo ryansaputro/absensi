@@ -40,6 +40,9 @@
                     <td>{{project.keluar}}</td>
                     <td>{{project.jam >= '08:00' ? 'Terlambat' : 'Tepat'}}</td>
                 </tr>
+                <tr v-if="paginated.length <= 0">
+                    <td colspan="5" class="text-center">Data tidak tersedia</td>
+                </tr>
             </tbody>
         </datatable>
         <pagination :pagination="pagination" :client="true" :filtered="filteredProjects"

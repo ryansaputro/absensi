@@ -2,7 +2,7 @@
     <div id="main">
         <div id="header">
           <div v-if="$auth.check()">
-            <Mobile></Mobile>
+            <!-- <Mobile></Mobile> -->
             <!-- <Sidebar></Sidebar> -->
             <template>
               <sidebar-menu :menu="menu" />
@@ -26,20 +26,40 @@
                 </div>
               </div>
             </div>
-              <div v-else>
-                  <div class="page-content--bge5">
-                      <div class="container">
-                          <div class="login-wrap">
-                              <div class="login-content">
-                                  <router-view></router-view>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>  
+            <div v-else>
+                <div class="page-content--bge5">
+                    <div class="container login-container">
+                        <div class="login-wrap">
+                            <div class="login-content">
+                                <router-view></router-view>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>  
+        </div>
+        <div class="sidebar-footer"></div>
+        <div class="footer">
+            <!-- <div class="row">
+                <div class="col-md-6"> -->
+                    <span class="copyrights">© RFID TOTAL SOLUTION</span>
+                <!-- </div>
+                <div class="col-md-6"> -->
+                    <span class="pull-right version">v.1.0</span>
+                <!-- </div> -->
+            </div>
         </div>
     </div>
 </template>
+<style>
+/* .sidebar-footer {
+  display: block;
+}
+
+.footer {
+  display:block;
+} */
+</style>
 <script>
   import Menu from './components/Menu.vue'
   import Sidebar from './components/Sidebar.vue'
