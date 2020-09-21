@@ -23,6 +23,7 @@ Vue.use(VueSweetalert2);
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
+
 // Set Vue globally
 window.Vue = Vue
 // Set Vue router

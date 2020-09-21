@@ -47,6 +47,7 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::post('/absen','HomeController@absen');
+    Route::get('/cek-absen','HomeController@cekAbsen');
     Route::group(['middleware' => ['auth']], function() {
         // menambahkan route untuk person
         Route::get('/dashboard','HomeController@index');
@@ -63,6 +64,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/laporan-kehadiran','ReportController@laporanKehadiran');
     Route::middleware('permission:read-absensi')->group(function () {
         Route::get('/list-absensi','HomeController@listAbsensi');
+        
     });
 
     // Route::middleware('permission:read-pengguna|create-pengguna|edit-pengguna|delete-pengguna')->group(function () {

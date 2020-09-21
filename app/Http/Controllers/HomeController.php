@@ -9,6 +9,7 @@ use App\Absensi;
 use DB;
 use Auth;
 use JWTAuth;
+use Pusher\Pusher;
 
 class HomeController extends Controller
 {
@@ -268,12 +269,13 @@ class HomeController extends Controller
 
         DB::beginTransaction();
         try {
+            
             //get id user from tag
-            $id_user = User::where('id_epc_tag', $request->tag)->value('id');
+            $id_user = User::where('id_epc_tag', $request->tag)->first();
             
             //cek jika melebihi waktu 8 detik dari data sebelumnya maka data dapat disimpan 
             $cek = Absensi::select(DB::raw('DATE_ADD(tanggal, INTERVAL 8 SECOND) AS next'))->where('id_gate', $request->id_gate)
-                    ->where('id_karyawan', $id_user)
+                    ->where('id_karyawan', $id_user->id)
                     ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
                     ->orderBy('tanggal', 'DESC')
                     ->first();
@@ -282,7 +284,7 @@ class HomeController extends Controller
                 if($request->date > $cek->next){
                     $create = Absensi::create([
                         'id_gate' => $request->id_gate,
-                        'id_karyawan' => $id_user,
+                        'id_karyawan' => $id_user->id,
                         'tanggal' => $request->date,
                     ]);
                     $message = "absen berhasil";
@@ -292,11 +294,29 @@ class HomeController extends Controller
             }else{
                 $create = Absensi::create([
                         'id_gate' => $request->id_gate,
-                        'id_karyawan' => $id_user,
+                        'id_karyawan' => $id_user->id,
                         'tanggal' => $request->date,
                     ]);
                 $message = "absen berhasil";
             }
+
+            //push to pusher (websocket)
+            $options = array(
+                'cluster' => 'ap1',
+                'useTLS' => true
+            );
+            $pusher = new Pusher(
+                "3de115e667294f63fe08",
+                "e6b3d2c8618a8560f8b3",
+                "1076418",
+                $options
+            );
+
+            $status = date("H:i", strtotime($request->date)) > '08:00' ? 'terlambat' : 'tepat';
+            
+            $data['message'] = array("foto" => "hallo", "nik" => $id_user->nik_pegawai , "nama" => $id_user->nama_lengkap , "jam" => date("H:i", strtotime($request->date)), "status" => $status);
+            $pusher->trigger('my-channel', 'my-event', $data);
+
         } catch(\Illuminate\Database\QueryException $ex){ 
             //throw $th;
             DB::rollback();
@@ -412,6 +432,21 @@ class HomeController extends Controller
 
         $projects = $query->paginate($length);
         return ['data' => $projects, 'draw' => $request->input('draw')];
+    }
+
+    public function cekAbsen(Request $request) {
+        $a = DB::table('view_absensi')
+                    ->select('view_absensi.*', 'users.nik_pegawai', 'users.nama_lengkap')
+                    ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap');
+
+        if($request->status_absen == 'keluar'){
+            $a->where('keluar', '!=', '-');
+        }
+            $a =  $a->where('tanggal', date('Y-m-d'))
+                    ->where('users.id', '<>', '5')
+                    ->orderBy('tanggal', 'DESC')
+                    ->get();
+            return $a;
     }
 
     public function listAbsensi(Request $request)
