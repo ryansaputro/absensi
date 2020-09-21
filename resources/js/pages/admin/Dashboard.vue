@@ -86,10 +86,10 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-md-6">
+      <div class="col-md-12">
         <div class="user-data m-b-30 p-3">
           <div class="my-5">
-            <h5 class="text-uppercase text-center">Grafik keterlambat 7Hr Terakhir (Bandung)</h5>
+            <h5 class="text-uppercase text-center">Grafik keterlambat 30 Hr Terakhir (Bandung)</h5>
           </div>
           <div class="my-5">
             <div class="alert alert-info" v-show="loading">
@@ -102,10 +102,10 @@
       </div>
 
       </div>
-      <div class="col-md-6">
+      <div class="col-md-12">
         <div class="user-data m-b-30 p-3">
           <div class="my-5">
-            <h5 class="text-uppercase text-center">Grafik keterlambat 7Hr Terakhir (Surabaya)</h5>
+            <h5 class="text-uppercase text-center">Grafik keterlambat 30 Hr Terakhir (Surabaya)</h5>
           </div>
           <div class="my-5">
             <div class="alert alert-info" v-show="loading">
@@ -368,7 +368,7 @@
 
 
           this.chart = new Chart(terlambat7hr,{
-            type: 'line',
+            type: 'bar',
             data: {
               labels: this.label,
               datasets: [
@@ -405,7 +405,7 @@
                   lineTension:0.1,
                   // hoverBackgroundColor: 'rgb(2 171 2 / 91%)',
                   // hoverBorderColor:"white",
-                  fill: origin,
+                  // fill: 'red',
                   label: 'Terlambat',
                   data: this.telat,
                   // barPercentage: 1,
@@ -439,7 +439,7 @@
           });
 
           this.chart = new Chart(terlambat7hrSby,{
-            type: 'line',
+            type: 'bar',
             data: {
               labels: this.label,
               datasets: [
@@ -476,7 +476,7 @@
                   lineTension:0.1,
                   // hoverBackgroundColor: 'rgb(2 171 2 / 91%)',
                   // hoverBorderColor:"white",
-                  fill: 'red',
+                  // fill: 'red',
                   label: 'Terlambat',
                   data: this.telatSby,
                   // barPercentage: 1,

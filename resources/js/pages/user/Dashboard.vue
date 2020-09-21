@@ -41,7 +41,7 @@
 </template>
 <style>
   .login-content {
-    background: #fff !important;
+    background: #fff;
   }
   .tgl {
     position: absolute;
@@ -114,6 +114,9 @@ import Echo from 'laravel-echo';
               $('table tr:last')[0].scrollIntoView();
             }else{
               $('tr#'+data.message.nik).remove();
+              $('tr#'+data.message.nik).remove();
+              $('tr#'+data.message.nik).remove();
+              console.log('tr#'+data.message.nik);
               var status = data.message.status == 'terlambat' ? 'pulang awal' : '-';
               var datas = "<tr id='"+data.message.nik+"'>";
               datas += "<td class='nik'>"+data.message.nik+"</td>"

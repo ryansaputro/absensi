@@ -47,6 +47,10 @@
   padding-bottom: 0vh !important;
 }
 
+.login-content {
+  background-color: #e5e5e5 !important;
+}
+
 .img-vendor {
   position: absolute;
   right: 10px;

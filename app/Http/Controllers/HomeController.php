@@ -144,14 +144,14 @@ class HomeController extends Controller
             ->select(DB::raw('COUNT(masuk) AS jumlah_tepat'), 'kantor', 'tanggal')
             ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
             ->where('masuk', '<=', '08:00')
-            ->where('tanggal', '>=', DB::raw('DATE(NOW()) - INTERVAL 7 DAY'))
+            ->where('tanggal', '>=', DB::raw('DATE(NOW()) - INTERVAL 30 DAY'))
             ->groupBy('tanggal', 'kantor')
             // ->pluck('jumlah_tepat', 'kantor')
             ->get();
         
         $userArr = $data->pluck('jumlah', 'kantor')->toArray();
         
-        $date = date('Y-m-d', strtotime('-7 days'));
+        $date = date('Y-m-d', strtotime('-30 days'));
         $end_date = date('Y-m-d');
         // End date
         $dates = [];
@@ -274,7 +274,7 @@ class HomeController extends Controller
             $id_user = User::where('id_epc_tag', $request->tag)->first();
             
             //cek jika melebihi waktu 8 detik dari data sebelumnya maka data dapat disimpan 
-            $cek = Absensi::select(DB::raw('DATE_ADD(tanggal, INTERVAL 8 SECOND) AS next'))->where('id_gate', $request->id_gate)
+            $cek = Absensi::select(DB::raw('DATE_ADD(tanggal, INTERVAL 100 SECOND) AS next'))->where('id_gate', $request->id_gate)
                     ->where('id_karyawan', $id_user->id)
                     ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
                     ->orderBy('tanggal', 'DESC')
@@ -287,6 +287,24 @@ class HomeController extends Controller
                         'id_karyawan' => $id_user->id,
                         'tanggal' => $request->date,
                     ]);
+
+                    //push to pusher (websocket)
+                    $options = array(
+                        'cluster' => 'ap1',
+                        'useTLS' => true
+                    );
+                    $pusher = new Pusher(
+                        "3de115e667294f63fe08",
+                        "e6b3d2c8618a8560f8b3",
+                        "1076418",
+                        $options
+                    );
+
+                    $status = date("H:i", strtotime($request->date)) > '16:00' ? 'terlambat' : 'tepat';
+                    
+                    $data['message'] = array("foto" => "hallo", "nik" => $id_user->nik_pegawai , "nama" => $id_user->nama_lengkap , "jam" => date("H:i", strtotime($request->date)), "status" => $status);
+                    $pusher->trigger('my-channel', 'my-event', $data);
+
                     $message = "absen berhasil";
                 }else{
                     $message = "data absensi anda sudah tercatat ke dalam sistem. harap berdiri agak jauh dari gerbang";
@@ -297,25 +315,27 @@ class HomeController extends Controller
                         'id_karyawan' => $id_user->id,
                         'tanggal' => $request->date,
                     ]);
+
+                //push to pusher (websocket)
+                $options = array(
+                    'cluster' => 'ap1',
+                    'useTLS' => true
+                );
+                $pusher = new Pusher(
+                    "3de115e667294f63fe08",
+                    "e6b3d2c8618a8560f8b3",
+                    "1076418",
+                    $options
+                );
+
+                $status = date("H:i", strtotime($request->date)) > '12:00' ? 'terlambat' : 'tepat';
+                
+                $data['message'] = array("foto" => "hallo", "nik" => $id_user->nik_pegawai , "nama" => $id_user->nama_lengkap , "jam" => date("H:i", strtotime($request->date)), "status" => $status);
+                $pusher->trigger('my-channel', 'my-event', $data);
+
                 $message = "absen berhasil";
             }
 
-            //push to pusher (websocket)
-            $options = array(
-                'cluster' => 'ap1',
-                'useTLS' => true
-            );
-            $pusher = new Pusher(
-                "3de115e667294f63fe08",
-                "e6b3d2c8618a8560f8b3",
-                "1076418",
-                $options
-            );
-
-            $status = date("H:i", strtotime($request->date)) > '08:00' ? 'terlambat' : 'tepat';
-            
-            $data['message'] = array("foto" => "hallo", "nik" => $id_user->nik_pegawai , "nama" => $id_user->nama_lengkap , "jam" => date("H:i", strtotime($request->date)), "status" => $status);
-            $pusher->trigger('my-channel', 'my-event', $data);
 
         } catch(\Illuminate\Database\QueryException $ex){ 
             //throw $th;

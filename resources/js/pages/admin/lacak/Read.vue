@@ -3,23 +3,17 @@
       <div class="user-data m-b-30 p-3">
         <div class="tableFilters m-b-30">
           <div class="row">
-            <div class="col-md-6">
-              <!-- <input class="input form-control" type="text" v-model="search" placeholder="Search Table"
-                   @input="resetPagination()"> -->
-                    <!-- <date-range-picker
-                            :date-format="dateFormat"
-                            v-model="dateRange"
-                    >
-                    </date-range-picker> -->
-                    <date-picker :placeholder="waterMark" v-model="time1" @change="filterTanggal()" valueType="format"></date-picker>
-                    <!-- <date-picker v-model="time2" type="datetime"></date-picker>
-                    <date-picker v-model="time3" range></date-picker> -->
-   
+            <div class="col-md-3">
+                <date-picker :placeholder="waterMark" v-model="time1" @change="filterTanggal()" valueType="format"></date-picker>
+            </div>
+            <div class="col-md-3">
+              <input class="input form-control" type="text" v-model="search" placeholder="Search Table"
+                   @input="resetPagination()">
             </div>
             <div class="col-md-6">
               <div class="control pull-right">
-                <div class="select form-control">
-                    <select v-model="length" @change="resetPagination()">
+                <div class="select">
+                    <select v-model="length" class="form-control" @change="resetPagination()">
                         <option value="10">10</option>
                         <option value="20">20</option>
                         <option value="30">30</option>
