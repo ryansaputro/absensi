@@ -75,30 +75,6 @@ class HomeController extends Controller
      *
      */
     public function telat(Request $request){
-        // $data = DB::table('absensi')
-        //         ->select('users.nama_lengkap', 'absensi.tanggal', 
-        //             DB::raw('DATE_FORMAT(tanggal, "%H.%i") AS jam'), 
-        //             DB::raw('DATE_FORMAT(TIMEDIFF(tanggal, CONCAT(CURDATE(), " 08:00:00")), "%H.%i") AS selisih_jam'),
-        //             DB::raw('CONCAT(MOD(HOUR(TIMEDIFF(tanggal,CONCAT(CURDATE(), " 08:00:00"))), 24), " Jam ",
-        //                     MINUTE(TIMEDIFF(tanggal,CONCAT(CURDATE(), " 08:00:00"))), " Menit ") AS deskripsi')
-        //             )
-        //         ->join('users', 'users.id', '=', 'absensi.id_karyawan')
-        //         ->where(DB::raw('DATE_FORMAT(tanggal, "%H:%i")'), '>', '08:00')
-        //         ->whereIn('absensi.id', function($query){
-        //                 $query->select(DB::raw('MIN(id)'))
-        //                 ->from('absensi')
-        //                 // ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
-        //                 ->groupBy('id_karyawan')
-        //                 ->orderBy('tanggal', 'DESC');
-        //             })
-        //         ->get();
-        
-        // $data = DB::table('view_absensi')
-        //         ->select(DB::raw('COUNT(masuk) AS jumlah'), 
-        //                 'users.kantor')
-        //         ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
-        //         ->groupBy('users.kantor')
-        //         ->get();
         $kantor = ['bandung', 'surabaya'];
         $data = User::select(DB::raw('COUNT(kantor) AS jumlah'), 'kantor')->groupBy('kantor')->where('id', '<>', '5')->get();//->pluck('jumlah', 'kantor')->toArray();
         
@@ -116,16 +92,16 @@ class HomeController extends Controller
                     'status', 'kantor'
                     )
                 ->join('users', 'users.id', '=', 'absen_tambahan.id_karyawan')
-                ->where(DB::raw('DATE(tanggal)'), '2020-09-08')
-                // ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
+                // ->where(DB::raw('DATE(tanggal)'), '2020-09-08')
+                ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
                 ->groupBy('status', 'kantor')
                 ->get();
 
         $absensi = DB::table('view_absensi')
                 ->select(DB::raw('COUNT(tanggal) AS kehadiran'), 'kantor')
                 ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
-                ->where('tanggal', '2020-09-10')
-                // ->where('tanggal', date('Y-m-d'))
+                // ->where('tanggal', '2020-09-10')
+                ->where('tanggal', date('Y-m-d'))
                 ->groupBy('kantor')
                 ->pluck('kehadiran', 'kantor')
                 ->toArray();
@@ -279,8 +255,11 @@ class HomeController extends Controller
                     ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
                     ->orderBy('tanggal', 'DESC')
                     ->first();
-            
+                    
+            $gate = DB::table('gate')->select('nama_gerbang')->where('id', $request->id_gate)->value('nama_gerbang');
+
             if($cek !== null){
+
                 if($request->date > $cek->next){
                     $create = Absensi::create([
                         'id_gate' => $request->id_gate,
@@ -302,7 +281,7 @@ class HomeController extends Controller
 
                     $status = date("H:i", strtotime($request->date)) > '16:00' ? 'terlambat' : 'tepat';
                     
-                    $data['message'] = array("foto" => "hallo", "nik" => $id_user->nik_pegawai , "nama" => $id_user->nama_lengkap , "jam" => date("H:i", strtotime($request->date)), "status" => $status);
+                    $data['message'] = array("foto" => "image.jpg", "nik" => $id_user->nik_pegawai , "bagian_divisi" => $id_user->bagian_divisi, "nama_lokasi" => $gate, "nama_lengkap" => $id_user->nama_lengkap , "jam" => date("H:i", strtotime($request->date)), "status" => $status);
                     $pusher->trigger('my-channel', 'my-event', $data);
 
                     $message = "absen berhasil";
@@ -330,7 +309,7 @@ class HomeController extends Controller
 
                 $status = date("H:i", strtotime($request->date)) > '12:00' ? 'terlambat' : 'tepat';
                 
-                $data['message'] = array("foto" => "hallo", "nik" => $id_user->nik_pegawai , "nama" => $id_user->nama_lengkap , "jam" => date("H:i", strtotime($request->date)), "status" => $status);
+                $data['message'] = array("foto" => "image.jpg", "nik" => $id_user->nik_pegawai , "bagian_divisi" => $id_user->bagian_divisi, "nama_lokasi" => $gate, "nama_lengkap" => $id_user->nama_lengkap , "jam" => date("H:i", strtotime($request->date)), "status" => $status);
                 $pusher->trigger('my-channel', 'my-event', $data);
 
                 $message = "absen berhasil";
@@ -456,15 +435,19 @@ class HomeController extends Controller
 
     public function cekAbsen(Request $request) {
         $a = DB::table('view_absensi')
-                    ->select('view_absensi.*', 'users.nik_pegawai', 'users.nama_lengkap')
-                    ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap');
+                    ->select('view_absensi.*', 'users.nik_pegawai', 'users.nama_lengkap', 'users.bagian_divisi', 'c.nama_gerbang AS gerbang_masuk', 'd.nama_gerbang AS gerbang_keluar', DB::raw("IF(masuk > '08:00', 'telat', 'tepat') AS status"))
+                    ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
+                    ->join('absensi AS a', 'a.id', '=', 'view_absensi.id_absen_masuk')
+                    ->join('absensi AS b', 'b.id', '=', 'view_absensi.id_absen_keluar')
+                    ->join('gate AS c', 'c.id', '=', 'a.id_gate')
+                    ->join('gate AS d', 'd.id', '=', 'b.id_gate');
 
         if($request->status_absen == 'keluar'){
             $a->where('keluar', '!=', '-');
         }
-            $a =  $a->where('tanggal', date('Y-m-d'))
+            $a =  $a->where('view_absensi.tanggal', date('Y-m-d'))
                     ->where('users.id', '<>', '5')
-                    ->orderBy('tanggal', 'DESC')
+                    ->orderBy('view_absensi.tanggal', 'DESC')
                     ->get();
             return $a;
     }

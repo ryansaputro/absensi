@@ -58,7 +58,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/laporan-terlambat','ReportController@laporanTerlambat');
         Route::get('/laporan-overtime','ReportController@laporanOvertime');
         Route::get('/laporan-semua','ReportController@laporanSemua');
+        Route::get('/rekap-keterlambatan','ReportController@rekapKeterlambatan');
         Route::get('/export-excel','ReportController@exportExcel');
+        Route::get('/rekap-export-excel','ReportController@rekapKeterlambatanExcel');
     });
 
     Route::get('/laporan-kehadiran','ReportController@laporanKehadiran');

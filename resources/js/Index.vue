@@ -27,7 +27,10 @@
               </div>
             </div>
             <div v-else>
-                <div class="page-content--bge5">
+                <div v-if="currentRouteName === 'display'" class="page-content--bge5 display">
+                    <router-view></router-view>
+                </div>
+                <div v-else class="page-content--bge5">
                     <div class="container login-container">
                         <div class="login-wrap">
                             <div class="login-content">
@@ -108,6 +111,10 @@
                                 href: '/rekap-absensi',
                                 title: 'Rekap Absensi'
                             },
+                            {
+                                href: '/rekap-keterlambatan',
+                                title: 'Rekap Keterlambatan'
+                            },
                             // {
                             //     href: '/laporan-terlambat',
                             //     title: 'Laporan Terlambat & PLA'
@@ -149,15 +156,16 @@
       Mobile
     },
     created() {
-    //     localStorage.removeItem('user');
-    //   localStorage.removeItem('auth_token_default');
         if(typeof(localStorage.getItem('user')) !== 'undefined'){
             window.Permissions = localStorage.getItem('user');
         }else{
             window.Permissions = [];
         }
-        // if(localStorage.user)
-        // window.Permissions = 
+    },
+    computed: {
+        currentRouteName() {
+            return this.$route.name;
+        }
     }
   }
 </script>

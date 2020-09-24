@@ -280,7 +280,16 @@
                 animation: {
                   animateRotate: true,
                   animateScale: true
-                }
+                },
+                
+                // scales: {
+                //   yAxes: [{
+                //       ticks: {
+                //           min: 0,
+                //           stepSize: 1
+                //       }
+                //   }]
+                // },
 
                 // legend: {
                 //   display: false
@@ -324,10 +333,22 @@
               tooltips: {
                   callbacks: {
                     label: function(tooltipItem) {
-                            return tooltipItem.yLabel;
+                            return tooltipItem.yLabel + " Orang";
                     }
                   }
-              }
+              },
+              scales: {
+                  yAxes: [{
+                      ticks: {
+                          min: 0,
+                          stepSize: 1
+                      },
+                      scaleLabel: {
+                        display: true,
+                        labelString: 'orang'
+                      }
+                  }]
+              },
             }
           });
 
@@ -359,10 +380,22 @@
               tooltips: {
                   callbacks: {
                     label: function(tooltipItem) {
-                            return tooltipItem.yLabel;
+                            return tooltipItem.yLabel + " Orang";
                     }
                   }
-              }
+              },
+              scales: {
+                  yAxes: [{
+                      ticks: {
+                          min: 0,
+                          stepSize: 1
+                      },
+                      scaleLabel: {
+                        display: true,
+                        labelString: 'orang'
+                      }
+                  }]
+              },
             }
           });
 
@@ -372,46 +405,13 @@
             data: {
               labels: this.label,
               datasets: [
-                // {
-                //   backgroundColor: ['blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue'],
-                //   borderColor: 'rgb(54, 162, 235)',
-                //   hoverBackgroundColor: 'rgb(2 171 2 / 91%)',
-                //   hoverBorderColor:"white",
-                //   fill: true,
-                //   label: 'Jumlah Karyawan',
-                //   data: this.karyawan,
-                //   // barPercentage: 1,
-                //   // barThickness: 6,
-                //   // maxBarThickness: 8,
-                //   // minBarLength: 2,
-                // },
-                // {
-                //   backgroundColor: ['green', 'green','green', 'green', 'green', 'green', 'green', 'green'],
-                //   borderColor: 'rgb(54, 162, 235)',
-                //   hoverBackgroundColor: 'rgb(2 171 2 / 91%)',
-                //   hoverBorderColor:"white",
-                //   fill: true,
-                //   label: 'Tepat Waktu',
-                //   data: this.tepat,
-                //   // barPercentage: 1,
-                //   // barThickness: 6,
-                //   // maxBarThickness: 8,
-                //   // minBarLength: 2,
-                // },
                 {
                   backgroundColor: ['red', 'red', 'red', 'red', 'red', 'red', 'red' , 'red'],
                   borderColor: 'red',
                   borderWidth:3,
                   lineTension:0.1,
-                  // hoverBackgroundColor: 'rgb(2 171 2 / 91%)',
-                  // hoverBorderColor:"white",
-                  // fill: 'red',
                   label: 'Terlambat',
                   data: this.telat,
-                  // barPercentage: 1,
-                  // barThickness: 6,
-                  // maxBarThickness: 8,
-                  // minBarLength: 2,
                 },
 
               ]
@@ -420,18 +420,22 @@
               // legend: {
               //     display: false
               // },
-              // tooltips: {
-              //     callbacks: {
-              //       label: function(tooltipItem) {
-              //               return tooltipItem.yLabel;
-              //       }
-              //     }
-              // },
+              tooltips: {
+                  callbacks: {
+                    label: function(tooltipItem) {
+                            return tooltipItem.yLabel + " Orang";
+                    }
+                  }
+              },
               scales: {
                   yAxes: [{
                       ticks: {
                           min: 0,
                           stepSize: 1
+                      },
+                      scaleLabel: {
+                        display: true,
+                        labelString: 'orang'
                       }
                   }]
               },
@@ -443,46 +447,13 @@
             data: {
               labels: this.label,
               datasets: [
-                // {
-                //   backgroundColor: ['blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue'],
-                //   borderColor: 'rgb(54, 162, 235)',
-                //   hoverBackgroundColor: 'rgb(2 171 2 / 91%)',
-                //   hoverBorderColor:"white",
-                //   fill: true,
-                //   label: 'Jumlah Karyawan',
-                //   data: this.karyawanSby,
-                //   // barPercentage: 1,
-                //   // barThickness: 6,
-                //   // maxBarThickness: 8,
-                //   // minBarLength: 2,
-                // },
-                // {
-                //   backgroundColor: ['green', 'green','green', 'green', 'green', 'green', 'green', 'green'],
-                //   borderColor: 'rgb(54, 162, 235)',
-                //   hoverBackgroundColor: 'rgb(2 171 2 / 91%)',
-                //   hoverBorderColor:"white",
-                //   fill: true,
-                //   label: 'Tepat Waktu',
-                //   data: this.tepatSby,
-                //   // barPercentage: 1,
-                //   // barThickness: 6,
-                //   // maxBarThickness: 8,
-                //   // minBarLength: 2,
-                // },
                 {
                   backgroundColor: ['red', 'red', 'red', 'red', 'red', 'red', 'red' , 'red'],
                   borderColor: 'red',
                   borderWidth:3,
                   lineTension:0.1,
-                  // hoverBackgroundColor: 'rgb(2 171 2 / 91%)',
-                  // hoverBorderColor:"white",
-                  // fill: 'red',
                   label: 'Terlambat',
                   data: this.telatSby,
-                  // barPercentage: 1,
-                  // barThickness: 6,
-                  // maxBarThickness: 8,
-                  // minBarLength: 2,
                 },
 
               ]
@@ -503,64 +474,16 @@
                       ticks: {
                           min: 0,
                           stepSize: 1
+                      }, 
+                      scaleLabel: {
+                        display: true,
+                        labelString: 'orang'
                       }
                   }]
               }
             }
           });
 
-          //mobilisasi personnel
-          // this.chart = new Chart(cty,{
-          //   type: 'pie',
-          //   data: {
-          //     labels: this.name,
-          //     datasets: [
-          //       {
-          //         label: 'Terlambat ',
-          //         // backgroundColor: 'rgba(42, 42, 46, 1)',
-          //         // borderColor: 'rgb(54, 162, 235)',
-          //         // fill: true,
-          //         data: this.dates
-          //       }
-          //     ]
-          //   },
-          //   options: {
-          //     tooltips: {
-          //       callbacks: {
-          //         label: function(tooltipItem, data) {
-          //           var label = data.datasets[tooltipItem.datasetIndex].label || '';
-                    
-          //           if (label) {
-          //             label += ': ';
-          //           }
-          //           var $tooltips = tooltipItem.yLabel;
-          //           var dt = tooltipItem.yLabel.toString().split('.');
-          //           var jam = dt[0] != 0 ? parseInt(dt[0]) +' Jam': '';
-          //           var menit = typeof dt[1] !== 'undefined' ? dt[1] != 0 ? parseInt(dt[1])+ ' Menit' : '' : '';
-          //           var labeldata = jam + menit
-          //           label +=labeldata
-                    
-          //           return label;
-          //         }
-          //       }
-          //     },
-          //     legend: {
-          //         display: true,
-          //         labels: {
-          //             fontColor: 'rgb(255, 99, 132)'
-          //         }
-          //     },
-          //       scales: {
-          //           xAxes: [{
-          //               stacked: true,
-          //           }],
-          //           yAxes: [{
-          //               stacked: true,
-                        
-          //           }]
-          //       }
-          //   }
-          // });
           
         })
         .catch(error => {

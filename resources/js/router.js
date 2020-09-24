@@ -13,11 +13,12 @@ import Absensi from './pages/admin/absensi/Read'
 import Lacak from './pages/admin/lacak/Read'
 import Pantau from './pages/admin/pantau/Read'
 import LaporanTerlambat from './pages/admin/laporan/LaporanTerlambat'
-import LaporanDigantiSore from './pages/admin/laporan/LaporanDigantiSore'
-import LaporanOvertime from './pages/admin/laporan/LaporanOvertime'
+// import LaporanDigantiSore from './pages/admin/laporan/LaporanDigantiSore'
+// import LaporanOvertime from './pages/admin/laporan/LaporanOvertime'
 import LaporanSemua from './pages/admin/laporan/LaporanSemua'
 import LaporanAbsensi from './pages/admin/laporan/LaporanAbsensi'
 import RekapAbsensi from './pages/admin/laporan/RekapAbsensi'
+import RekapKeterlambatan from './pages/admin/laporan/RekapKeterlambatan'
 import ListDataKehadiran from './pages/admin/data_kehadiran/Read'
 import UpdateDataKehadiran from './pages/admin/data_kehadiran/Update'
 import NewDataKehadiran from './pages/admin/data_kehadiran/Create'
@@ -137,21 +138,29 @@ const routes = [
         }
     },
     {
-        path: '/laporan-diganti-sore',
-        name: 'Laporan Diganti Sore',
-        component: LaporanDigantiSore,
+        path: '/rekap-keterlambatan',
+        name: 'Rekap Keterlambatan',
+        component: RekapKeterlambatan,
         meta: {
             auth: true
         }
     },
-    {
-        path: '/laporan-overtime',
-        name: 'Laporan Overtime',
-        component: LaporanOvertime,
-        meta: {
-            auth: true
-        }
-    },
+    // {
+    //     path: '/laporan-diganti-sore',
+    //     name: 'Laporan Diganti Sore',
+    //     component: LaporanDigantiSore,
+    //     meta: {
+    //         auth: true
+    //     }
+    // },
+    // {
+    //     path: '/laporan-overtime',
+    //     name: 'Laporan Overtime',
+    //     component: LaporanOvertime,
+    //     meta: {
+    //         auth: true
+    //     }
+    // },
     {
         path: '/laporan-semua',
         name: 'Laporan Absensi',
