@@ -279,7 +279,7 @@ class HomeController extends Controller
                         $options
                     );
 
-                    $status = date("H:i", strtotime($request->date)) > '16:00' ? 'terlambat' : 'tepat';
+                    $status = date("H:i", strtotime($request->date)) > '08:00' ? 'terlambat' : 'tepat';
                     
                     $data['message'] = array("foto" => "image.jpg", "nik" => $id_user->nik_pegawai , "bagian_divisi" => $id_user->bagian_divisi, "nama_lokasi" => $gate, "nama_lengkap" => $id_user->nama_lengkap , "jam" => date("H:i", strtotime($request->date)), "status" => $status);
                     $pusher->trigger('my-channel', 'my-event', $data);
@@ -307,7 +307,7 @@ class HomeController extends Controller
                     $options
                 );
 
-                $status = date("H:i", strtotime($request->date)) > '12:00' ? 'terlambat' : 'tepat';
+                $status = date("H:i", strtotime($request->date)) > '08:00' ? 'terlambat' : 'tepat';
                 
                 $data['message'] = array("foto" => "image.jpg", "nik" => $id_user->nik_pegawai , "bagian_divisi" => $id_user->bagian_divisi, "nama_lokasi" => $gate, "nama_lengkap" => $id_user->nama_lengkap , "jam" => date("H:i", strtotime($request->date)), "status" => $status);
                 $pusher->trigger('my-channel', 'my-event', $data);

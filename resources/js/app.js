@@ -13,6 +13,9 @@ import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 import VueSidebarMenu from 'vue-sidebar-menu'
 import 'vue-sidebar-menu/dist/vue-sidebar-menu.css'
 import Permissions from './mixin'
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
+
 
 Vue.mixin(Permissions)
 Vue.use(VueSidebarMenu)
@@ -20,9 +23,13 @@ Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)
 Vue.use(VueSweetalert2);
 
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
 
+/* IN MAIN FILE */
+import Moment from 'moment'
+Moment.locale('id')
+Vue.prototype.$moment = Moment
+/* INSIDE A COMPONENT */
+// console.log(this.$moment().format("LL"))
 
 // Set Vue globally
 window.Vue = Vue
@@ -37,6 +44,7 @@ Vue.use(VueAuth, auth)
 Vue.component('index', Index);
 
 const app = new Vue({
+  locale: 'id-ID',
   el: '#RyanApp',
   router
 });
