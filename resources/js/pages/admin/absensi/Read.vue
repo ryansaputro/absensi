@@ -38,7 +38,7 @@
                     <!-- <td>{{project.jam <= '12:00' ? project.jam : '-'}}</td> -->
                     <!-- <td>{{project.keluar >= '12.01' ? project.keluar : '-'}}</td> -->
                     <td>{{project.keluar}}</td>
-                    <td>{{project.jam >= '08:00' ? 'Terlambat' : 'Tepat'}}</td>
+                    <td>{{project.masuk > '08:00' ? 'Terlambat' : 'Tepat'}}</td>
                 </tr>
                 <tr v-if="paginated.length <= 0">
                     <td colspan="5" class="text-center">Data tidak tersedia</td>

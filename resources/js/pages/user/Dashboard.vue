@@ -71,8 +71,8 @@ import Echo from 'laravel-echo';
       return {
         time: '08:00',
         status_absen:'',
-        now:'',
-        jam_absen_masuk:'16:13:30',
+        now:moment(new Date()).format('kk:mm:ss'),
+        jam_absen_masuk:'16:29:30',
         date: moment(new Date()).format('ddd, DD - MMM - YYYY'),
         projects:[],
         load: false,
@@ -86,7 +86,10 @@ import Echo from 'laravel-echo';
     }, 
     methods: {
       getProjects(a) {
-        var status_absen = typeof(a) !== 'undefined' ? a : 'masuk';
+        console.log(this.now < this.jam_absen_masuk)
+        console.log(this.now)
+        console.log(this.jam_absen_masuk)
+        var status_absen = typeof(a) !== 'undefined' ? a : this.now < this.jam_absen_masuk ? 'masuk' : 'keluar';
             axios.get('cek-absen', {params: {"status_absen" : status_absen}})
                 .then(response => {
                     this.projects = response.data;
