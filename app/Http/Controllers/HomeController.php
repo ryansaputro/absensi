@@ -449,7 +449,9 @@ class HomeController extends Controller
                     ->where('users.id', '<>', '5')
                     ->orderBy('view_absensi.tanggal', 'DESC')
                     ->get();
-            return $a;
+        $karyawan = DB::table('users')->select('nama_lengkap', 'nik_pegawai', 'bagian_divisi')->where('id', '<>', 5)->get();
+        $status_absen = DB::table('absen_tambahan')->select('users.nik_pegawai', 'status')->join('users', 'users.id', '=', 'absen_tambahan.id_karyawan')->where(DB::raw('DATE(tanggal)'), '=', date('Y-m-d'))->pluck('status','nik_pegawai')->toArray();
+            return ["record" => $a, "karyawan" => $karyawan, 'status_absen' => $status_absen];
     }
 
     public function listAbsensi(Request $request)

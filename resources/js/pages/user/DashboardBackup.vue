@@ -5,8 +5,9 @@
       </div>
       <div class="mb-3">
         <h1 class="tgl">{{date}}</h1>
+        <h1 class="now">{{now}}</h1>
       </div>
-      <h3 class="text-center" style="margin-top:210px;" v-if="jam >= jam_absen_masuk">Absen Keluar</h3>
+      <h3 class="text-center" style="margin-top:210px;" v-if="now >= jam_absen_masuk">Absen Keluar</h3>
       <h3 class="text-center" style="margin-top:210px;" v-else="jam >= jam_absen_masuk">Absen Masuk</h3>
       <div style="overflow-y:scroll;height:100px;position: absolute;width: 98%;left: 20px;right: 0px;top:255px;">
         <table class="table table-stripped" id="kehadiran">
@@ -23,9 +24,9 @@
             <tr v-for="(project, index) in projects" :key="project.id" v-bind:id="project.nik_pegawai">
                 <td class="nik">{{project.nik_pegawai }}</td>
                 <td>{{project.nama_lengkap}}</td>
-                <td v-if="jam >= jam_absen_masuk">{{project.keluar}}</td>
+                <td v-if="now >= jam_absen_masuk">{{project.keluar}}</td>
                 <td v-else>{{project.masuk}}</td>
-                <td v-if="jam >= jam_absen_masuk">{{project.keluar >= '17:00' ? '-' : 'pulang awal'}}</td>
+                <td v-if="now >= jam_absen_masuk">{{project.keluar >= '17:00' ? '-' : 'pulang awal'}}</td>
                 <td v-else>{{project.masuk > '08:00' ? 'terlambat' : 'tepat'}}</td>
             </tr>
             <tr v-if="projects.length <= 0">
@@ -51,6 +52,13 @@
   .display {
     height: 60vh;
   }
+
+  .now {
+    position: absolute;
+    font-size: 16px;
+    right: 120px;
+    top: 135px;
+  }
 </style>
 <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
@@ -63,7 +71,8 @@ import Echo from 'laravel-echo';
       return {
         time: '08:00',
         status_absen:'',
-        jam_absen_masuk:'14:00',
+        now:moment(new Date()).format('kk:mm:ss'),
+        jam_absen_masuk:'16:29:30',
         date: moment(new Date()).format('ddd, DD - MMM - YYYY'),
         projects:[],
         load: false,
@@ -76,12 +85,14 @@ import Echo from 'laravel-echo';
       Clock
     }, 
     methods: {
-      getProjects() {
-        var status_absen = this.jam >= this.jam_absen_masuk ? 'keluar' : 'masuk';
-        this.status_absen = status_absen;
+      getProjects(a) {
+        console.log(this.now < this.jam_absen_masuk)
+        console.log(this.now)
+        console.log(this.jam_absen_masuk)
+        var status_absen = typeof(a) !== 'undefined' ? a : this.now < this.jam_absen_masuk ? 'masuk' : 'keluar';
             axios.get('cek-absen', {params: {"status_absen" : status_absen}})
                 .then(response => {
-                    this.projects = response.data;
+                    this.projects = response.data.absen;
                 })
                 .catch(errors => {
                     console.log(errors);
@@ -90,6 +101,7 @@ import Echo from 'laravel-echo';
 
     }, 
     created() {
+       this.getProjects();
         var channel = window.Echo.channel('my-channel');
         channel.listen('.my-event', function(data) {
           $('table tr:last td.nodata').remove();
@@ -117,8 +129,8 @@ import Echo from 'laravel-echo';
           }else{
             if(dataCek === false){
               //append into table
-              var status = data.message.status;
-            //   var status = data.message.status == 'terlambat' ? 'pulang awal' : '-';
+              // var status = data.message.status;
+              var status = data.message.status == 'terlambat' ? 'pulang awal' : '-';
               var datas = "<tr id='"+data.message.nik+"'>";
               datas += "<td class='nik'>"+data.message.nik+"</td>"
               datas += "<td>"+data.message.nama_lengkap+"</td>"
@@ -131,11 +143,8 @@ import Echo from 'laravel-echo';
 
               if(this.status_absen == 'keluar'){
                 $('tr#'+data.message.nik).remove();
-                $('tr#'+data.message.nik).remove();
-                $('tr#'+data.message.nik).remove();
-                console.log('tr#'+data.message.nik);
-                var status = data.message.status;
-              //   var status = data.message.status == 'terlambat' ? 'pulang awal' : '-';
+                // var status = data.message.status;
+                var status = data.message.status == 'terlambat' ? 'pulang awal' : '-';
                 var datas = "<tr id='"+data.message.nik+"'>";
                 datas += "<td class='nik'>"+data.message.nik+"</td>"
                 datas += "<td>"+data.message.nama_lengkap+"</td>"
@@ -152,17 +161,16 @@ import Echo from 'laravel-echo';
         });
     },
     mounted: function () {
-        this.getProjects();
-
         this.interval = setInterval(function () {
-            // console.log(new Date());
-            console.log("ada")
-            // this.getProjects();
-            // $('table tr:last')[0].scrollIntoView();
-            // $('table tr').removeAttr('style');
-            // $('table tr:last').css("background-color", "yellow"); 
-            // document.getElementById("a").scrollIntoView();
-        }.bind(this), 4000);
+            var now = moment(new Date()).format('kk:mm:ss');
+            this.now = now;
+            if(now == this.jam_absen_masuk){
+              var status = "keluar";
+              this.getProjects(status);
+            }else{
+              var status = "masuk";
+            }
+        }.bind(this), 1000);
         //36000
     },
     updated: function () {

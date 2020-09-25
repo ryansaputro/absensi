@@ -4,18 +4,8 @@
         <div class="tableFilters m-b-30">
           <div class="row">
             <div class="col-md-6">
-              <!-- <input class="input form-control" type="text" v-model="search" placeholder="Search Table"
-                   @input="resetPagination()"> -->
-                    <!-- <date-range-picker
-                            :date-format="dateFormat"
-                            v-model="dateRange"
-                    >
-                    </date-range-picker> -->
-                    <label for="periode" class="sr-only">Periode</label>
-                    <date-picker :placeholder="waterMark" id="periode"  v-model="time1" @change="filterTanggal()" range  valueType="format"></date-picker>
-                    <!-- <date-picker v-model="time2" type="datetime"></date-picker>
-                    <date-picker v-model="time3" range></date-picker> -->
-   
+                <label for="periode" class="sr-only">Periode</label>
+                <date-picker :placeholder="waterMark" id="periode"  v-model="time1" @change="filterTanggal()" range  valueType="format"></date-picker>
             </div>
             <div class="col-md-3">
                 <input class="input form-control input-sm" type="text" @input="filterTanggal()" v-model="search" placeholder="NIK, Nama">
@@ -35,6 +25,14 @@
                         </downloadexcel>
                     </b-dropdown-item>
                 </b-dropdown>
+            </div>
+            <div class="col-md-3">
+                <select v-model="filterBy" name="filterBy" class="form-control">
+                    <option value="terlambat_paling_banyak">Terlambat Paling Banyak</option>
+                    <option value="terlambat_paling_sedikit">Terlambat Paling Sedikit</option>
+                    <option value="total_terlambat_paling_banyak">Total Terlambat Paling Sedikit</option>
+                    <option value="total_terlambat_paling_sedikit">Total Terlambat Paling Sedikit</option>
+                </select>
             </div>
                 <!-- <button @click="downloadWithCSS" class="btn btn-sm btn-primary">Download PDF</button></div> -->
             <!-- <div class="col-md-2">
