@@ -1,4 +1,11 @@
 <?php
+/**
+ * @author ryan saputro
+ * @email ryansaputro52@gmail.com
+ * @create date 2020-09-28 11:01:41
+ * @modify date 2020-09-28 11:01:41
+ * @desc menghandle request dr modul data kehadiran
+ */
 
 namespace App\Http\Controllers;
 
@@ -31,26 +38,29 @@ class DataKehadiranController extends Controller
      // mengambil semua data
     public function all(Request $request)
     {
-
+        //jika request dari api dan terdapat parameter client maka proses ini dieksekusi
         if ( $request->input('client') ) {
             return DB::table('absen_tambahan')
-            ->select(DB::raw('DATE(tanggal) AS tanggal'), 'users.nik_pegawai AS no_ktp', 'absen_tambahan.id', 'id_karyawan', 'status', 'keterangan', 'nama_lengkap')
-            ->join('users', 'users.id', '=', 'absen_tambahan.id_karyawan')
-            ->get();
+                ->select(DB::raw('DATE(tanggal) AS tanggal'), 'users.nik_pegawai AS no_ktp', 'absen_tambahan.id', 'id_karyawan', 'status', 'keterangan', 'nama_lengkap')
+                ->join('users', 'users.id', '=', 'absen_tambahan.id_karyawan')
+                ->orderBy(DB::raw('DATE(tanggal)'), 'DESC')
+                ->get();
     	}
 
+        //data deklarasi variable 
         $columns = ['tanggal', 'id_karyawan', 'status'];
-
         $length = $request->input('length');
         $column = $request->input('column'); //Index
         $dir = $request->input('dir');
         $searchValue = $request->input('search');
 
+        //get data dari absensi tambahan
         $query = DB::table('absen_tambahan')
-        ->select(DB::raw('DATE(tanggal) AS tanggal'), 'users.nik_pegawai AS no_ktp', 'absen_tambahan.id', 'id_karyawan', 'status', 'keterangan')
-        ->join('users', 'users.id', '=', 'absen_tambahan.id_karyawan')
-        ->orderBy($columns[$column], $dir);
+                ->select(DB::raw('DATE(tanggal) AS tanggal'), 'users.nik_pegawai AS no_ktp', 'absen_tambahan.id', 'id_karyawan', 'status', 'keterangan')
+                ->join('users', 'users.id', '=', 'absen_tambahan.id_karyawan')
+                ->orderBy($columns[$column], $dir);
 
+        //jika user melakukan pencarian maka proses ini akan dieksekusi
         if ($searchValue) {
             $query->where(function($query) use ($searchValue) {
                 $query->where('nama_lengkap', 'like', '%' . $searchValue . '%')
@@ -58,36 +68,24 @@ class DataKehadiranController extends Controller
             });
         }
 
+        //data dari query di buat perhalaman sesuai dengan jumlah halaman yg diklik oleh user
         $projects = $query->paginate($length);
         return ['data' => $projects, 'draw' => $request->input('draw')];
-    // }
-
-        // $data = Person::all();
-        // // $data = array_push($data, Auth::user()->id);
-        // return $data;
-
-        //ORDER BY NYA BERDASARKAN PARAMETER YANG DIKIRIM DARI VUEJS
-        //SEHINGGA PENGURUTAN DATANYA SESUAI DENGAN KOLOM YG DIINGINKAN OLEH USER
-        // $posts = Person::orderBy(request()->sortby, request()->sortbydesc)
-        //     //JIKA Q ATAU PARAMETER PENCARIAN INI TIDAK KOSONG
-        //     ->when(request()->q, function($posts) {
-        //         //MAKA FUNGSI FILTER AKAN DIJALANKAN
-        //         $posts = $posts->where('first_name', 'LIKE', '%' . request()->q . '%')
-        //             ->orWhere('last_name', 'LIKE', '%' . request()->q . '%');
-        // })->paginate(request()->per_page); //KEMUDIAN LOAD PAGINATIONNYA BERDASARKAN LOAD PER_PAGE YANG DIINGINKAN OLEH USER
-        // return response()->json(['status' => 'success', 'data' => $posts]);
-
     }
 
     public function getNik()
     {
+        //get data nik semua karyawan menggunakan axios get
         $data = DB::table('users')->select('nik_pegawai AS text', 'id AS value')->get();
         return ['data' => $data];
     }
 
     public function getDataNik(Request $request)
     {
+        //cek jika inputan tanggalnya berbentu array
         $tgl = is_array($request->input('tanggal'));
+
+        //get data dari absen tambahan dan datanya dipecah sesuai dengan jenis absennya
         $data = DB::table('absen_tambahan')
             ->select(DB::raw('DATE(tanggal) AS tanggal'), 
                 DB::raw('COUNT(status) AS jml'),  
@@ -100,17 +98,21 @@ class DataKehadiranController extends Controller
                 ->groupBy('status', DB::raw('DATE(tanggal)'))
                 ->orderBy(DB::raw('DATE(tanggal)'));
             
-            if($tgl == TRUE){
-                $data->whereBetween(DB::raw('DATE(tanggal)'), $request->input('tanggal'));
-            }else{
-                $data->where(DB::raw('DATE(tanggal)'), $request->input('tanggal'));
-            }
-            // ->whereBetween(DB::raw('DATE(tanggal)'), $request->input('tanggal'))
+        //jika $tgk nya berbentuk array maka akan mengekseskusi peroses ini
+        if($tgl == TRUE){
+            $data->whereBetween(DB::raw('DATE(tanggal)'), $request->input('tanggal'));
+        }else{
+            $data->where(DB::raw('DATE(tanggal)'), $request->input('tanggal'));
+        }
 
+        //cek jika nik nya tidak boleh null
         if($request->nik != null){
             $data = $data->where('id_karyawan', $request->nik);
         }
+
+        //get data absen tambahan
         $data = $data->get();
+
         return ['data' => $data];
     }
 
@@ -124,7 +126,6 @@ class DataKehadiranController extends Controller
     public function store(Request $request)
     {
         //validate the data before processing
-        
         $rules = [
             "tanggal"=> "required|date",
             "nik" => "required|",
@@ -142,7 +143,7 @@ class DataKehadiranController extends Controller
         $this->validate($request, $rules, $customMessages);
         DB::beginTransaction();
         try {
-            //code...
+            //proses menyimpan data ke database...
             $data = DB::table('absen_tambahan')->insert([
                 'tanggal'  => $request->tanggal,
                 'id_karyawan' => $request->nik,
@@ -178,7 +179,7 @@ class DataKehadiranController extends Controller
 
         DB::beginTransaction();
         try {
-            //code...
+            //proses mengupdate data ke database...
             $data = AbsenTambahan::find($id)->update([
                 'tanggal'  => $request->tanggal,
                 'id_karyawan' => $request->nik,

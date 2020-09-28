@@ -146,7 +146,7 @@ import Echo from 'laravel-echo';
         time: '08:00',
         status_absen:'',
         now:moment(new Date()).format('kk:mm:ss'),
-        jam_absen_masuk:'16:49:25',
+        jam_absen_masuk:'12:00:00',
         date: moment(new Date()).format('ddd, DD - MMM - YYYY'),
         projects:[],
         status_absen:[],
@@ -155,14 +155,14 @@ import Echo from 'laravel-echo';
         jam: moment(new Date()).format('kk:mm'),
         
       }
-      // jam_absen_masuk:'16:49:25'
+      // jam_absen_masuk:'12:00:00'
     },
     components: {
       Clock
     }, 
     methods: {
       getProjects(a) {
-        var status_absens = typeof(a) !== 'undefined' ? a : this.now < '16:49:25' ? 'masuk' : 'keluar';
+        var status_absens = typeof(a) !== 'undefined' ? a : this.now < '12:00:00' ? 'masuk' : 'keluar';
             axios.get('cek-absen', {params: {"status_absen" : status_absens}})
                 .then(response => {
                     // $('#kehadiran tbody tr').remove();
@@ -193,7 +193,7 @@ import Echo from 'laravel-echo';
           this.jam = moment(new Date()).format('kk:mm::ss');
 
           //absen masuk
-          if(this.jam <= '16:49:25'){
+          if(this.jam <= '12:00:00'){
             //cek jika karyawan sudah diinsert
             if(dataCek === false){
                 status = data.message.status
@@ -258,7 +258,7 @@ import Echo from 'laravel-echo';
         this.interval = setInterval(function () {
             var now = moment(new Date()).format('kk:mm:ss');
             this.now = now;
-            if(now == '16:49:25'){
+            if(now == '12:00:00'){
               var status = "keluar";
               // $('div.detail').removeClass('hadir');
               // $('div.detail').addClass('belum-hadir');
@@ -276,16 +276,16 @@ import Echo from 'laravel-echo';
         // this.intervalRefresh = setInterval(function () {
         //     var now = moment(new Date()).format('kk:mm:ss');
         //     this.now = now;
-        //     if(now > '16:49:25'){
+        //     if(now > '12:00:00'){
         //       var status = "keluar";
-        //     }else if(now == '16:49:25'){
+        //     }else if(now == '12:00:00'){
         //       var status = "keluar";
         //       $('#kehadiran tbody tr').remove();
               // $('div.detail').removeClass('hadir');
               // $('div.detail').addClass('belum-hadir');
               // $('div.detail').find('.time').html('-');
         //       this.getProjects(status);
-        //     }else if(now < '16:49:25'){
+        //     }else if(now < '12:00:00'){
         //       var status = "masuk";
         //       // $('#kehadiran tbody tr').remove();
         //       // this.getProjects(status);
@@ -298,14 +298,14 @@ import Echo from 'laravel-echo';
     //give color to karyawan after rendering
     $.each(this.projects, function(k,v){
       var now = moment(new Date()).format('kk:mm:ss');
-      if(now == '16:49:25'){
+      if(now == '12:00:00'){
         var status = jam > '17:00' ? 'pulang' : 'pulang awal';
         var jam = v.keluar;
         $('div.detail').removeClass('hadir');
         $('div.detail').addClass('belum-hadir');
         $('div.detail').find('.time').html('-');
         $('#kehadiran tbody').remove();
-      }else if(now > '16:49:25'){
+      }else if(now > '12:00:00'){
         var jam = v.keluar;
         var status = jam > '17:00' ? 'pulang' : 'pulang awal';
         $('#'+v.nik_pegawai+'.detail').removeClass('belum-hadir');
