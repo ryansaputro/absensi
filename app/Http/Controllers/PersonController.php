@@ -75,7 +75,8 @@ class PersonController extends Controller
     public function divisi()
     {
         $data = DB::table('divisi')->where('status', '1')->get();
-        return ['data' => $data];
+        $jabatan = DB::table('jabatan')->where('status', '1')->get();
+        return ['data' => $data, 'jabatan' => $jabatan];
     }
 
     public function provinsi()

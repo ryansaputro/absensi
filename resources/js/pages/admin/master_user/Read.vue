@@ -1,5 +1,39 @@
 <template>
     <div class="projects">
+        <div class="user-data m-b-30 p-3">
+          <div class="row">
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <label for="filterBy">Pencarian</label>
+                    </div>
+                    <div class="col-md-6">
+                        <input class="input form-control input-sm" type="text" @input="filterTanggal()" v-model="search" placeholder="NIK, Nama">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="filterBy">Data/Halaman</label>
+                    </div>
+                    <div class="col-md-6">
+                        <select class="select form-control" v-model="length" @change="resetPagination()">
+                            <option value="10">10</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                    </div>
+                    <div class="col-md-6">
+                        <router-link v-if="$can('read-pengguna')" class="btn btn-primary w-100" to="pengguna/create">+ Tambah</router-link>
+                    </div>
+                </div>
+            </div>
+          </div>
+      </div>
+
       <div class="user-data m-b-30 p-3">
         <div class="tableFilters m-b-30">
           <div class="row">
