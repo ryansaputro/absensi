@@ -1,4 +1,11 @@
 <?php
+/**
+ * @author ryan saputro
+ * @email ryansaputro52@gmail.com
+ * @create date 2020-09-28 10:08:44
+ * @modify date 2020-09-28 10:08:44
+ * @desc menghandle request di dashboard
+ */
 
 namespace App\Http\Controllers;
 
@@ -20,10 +27,10 @@ class HomeController extends Controller
      */
     function __construct()
     {
-        $this->middleware('permission:product-list|product-create|product-edit|product-delete', ['only' => ['index','show']]);
-        $this->middleware('permission:product-create', ['only' => ['create','store']]);
-        $this->middleware('permission:product-edit', ['only' => ['edit','update']]);
-        $this->middleware('permission:product-delete', ['only' => ['destroy']]);
+        $this->middleware('permission:absensi-list|absensi-create|absensi-edit|absensi-delete', ['only' => ['index','show']]);
+        $this->middleware('permission:absensi-create', ['only' => ['create','store']]);
+        $this->middleware('permission:absensi-edit', ['only' => ['edit','update']]);
+        $this->middleware('permission:absensi-delete', ['only' => ['destroy']]);
     }
 
     /**
@@ -31,123 +38,98 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    /**
-     * Get authenticated user
-     */
-    public function checkUser(Request $request)
-    {
-        dd(JWTAuth::user());
-        $user = User::find(Auth::user()->id);
-        return response()->json([
-            'status' => 'success',
-            'data' => $user
-        ]);
-    }
-    public function index(Request $request)
-    {
-        if ( $request->input('client') ) {
-    	    return Person::select('id', 'first_name', 'last_name', 'created_at', 'dt_txt', 'temp')->get();
-    	}
-
-        $columns = ['first_name', 'last_name', 'created_at', 'dt_txt', 'temp'];
-
-        $length = $request->input('length');
-        $column = $request->input('column'); //Index
-        $dir = $request->input('dir');
-        $searchValue = $request->input('search');
-
-        // $query = Person::select('id', 'first_name', 'last_name', 'created_at')->orderBy($columns[$column], $dir);
-        $query = Person::select('id', 'first_name', 'last_name', 'created_at', 'dt_txt', 'temp');
-
-        if ($searchValue) {
-            $query->where(function($query) use ($searchValue) {
-                $query->where('last_name', 'like', '%' . $searchValue . '%')
-                ->orWhere('first_name', 'like', '%' . $searchValue . '%');
-            });
-        }
-
-        $projects = $query->get();//->paginate($length);
-        return ['data' => $projects, 'draw' => $request->input('draw')];
-    }
-
      /**
      * Dashboard telat
      *
      */
     public function telat(Request $request){
-        $kantor = ['bandung', 'surabaya'];
-        $data = User::select(DB::raw('COUNT(kantor) AS jumlah'), 'kantor')->groupBy('kantor')->where('id', '<>', '5')->get();//->pluck('jumlah', 'kantor')->toArray();
+        // $kantor = ['bandung', 'surabaya'];
+        // $data = User::select(DB::raw('COUNT(kantor) AS jumlah'), 'kantor')->groupBy('kantor')->where('id', '<>', '5')->get();//->pluck('jumlah', 'kantor')->toArray();
         
-        $grafikPerdivisi = DB::table('absensi')
-                ->select(DB::raw('COUNT(DISTINCT(absensi.id_karyawan)) AS jumlah'), 'kantor')
-                ->join('users', 'users.id', '=', 'absensi.id_karyawan')
-                // ->join('divisi', 'divisi.id', '=', 'users.id_divisi')
-                // ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
-                ->groupBy('kantor')
+        //ambil data kantor yg aktif di tabel cabang
+        $kantor = DB::table('cabang')->select('nama_cabang')->where('status', '=', '1')->pluck('nama_cabang')->toArray();
+        
+        //ambil jumlah karyawan di semua kantor group by cabang 
+        $data = DB::table('users')
+                ->select(DB::raw('COUNT(users_status_pegawai.id_cabang) AS jumlah'), 'nama_cabang AS kantor')
+                ->join('users_status_pegawai', 'users_status_pegawai.id_karyawan', '=', 'users.id')
+                ->join('cabang', 'users_status_pegawai.id_cabang', '=', 'cabang.id')
+                ->groupBy('users_status_pegawai.id_cabang')
                 ->get();
-
+        
+        // $grafikPerdivisi = DB::table('absensi')
+        //         ->select(DB::raw('COUNT(DISTINCT(absensi.id_karyawan)) AS jumlah'), 'nama_cabang AS kantor')
+        //         ->join('users_status_pegawai', 'users_status_pegawai.id_karyawan', '=', 'absensi.id_karyawan')
+        //         ->join('cabang', 'users_status_pegawai.id_cabang', '=', 'cabang.id')
+        //         ->groupBy('kantor')
+        //         ->get();
+        
+        //ambil data Ijin Sakit Alpa Cuti dr tabel absen_tambahan
         $isac = DB::table('absen_tambahan')
-                ->select(
-                    DB::raw('COUNT(status) AS jml'),
-                    'status', 'kantor'
-                    )
-                ->join('users', 'users.id', '=', 'absen_tambahan.id_karyawan')
+                ->select(DB::raw('COUNT(absen_tambahan.status) AS jml'), 'absen_tambahan.status', 'nama_cabang AS kantor')
+                ->join('users_status_pegawai', 'users_status_pegawai.id_karyawan', '=', 'absen_tambahan.id_karyawan')
+                ->join('cabang', 'users_status_pegawai.id_cabang', '=', 'cabang.id')
                 // ->where(DB::raw('DATE(tanggal)'), '2020-09-08')
                 ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
                 ->groupBy('status', 'kantor')
                 ->get();
-
+        
+        //ambil data karyawan hadir di kantor group by per kantor dr table view_absensi
         $absensi = DB::table('view_absensi')
-                ->select(DB::raw('COUNT(tanggal) AS kehadiran'), 'kantor')
-                ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
-                // ->where('tanggal', '2020-09-10')
+                ->select(DB::raw('COUNT(tanggal) AS kehadiran'), 'nama_cabang AS kantor')
+                ->join('users_status_pegawai', 'users_status_pegawai.id_karyawan', '=', 'view_absensi.id_karyawan')
+                ->join('cabang', 'users_status_pegawai.id_cabang', '=', 'cabang.id')
+                // ->where('tanggal', '2020-09-21')
                 ->where('tanggal', date('Y-m-d'))
-                ->groupBy('kantor')
+                ->groupBy('users_status_pegawai.id_cabang')
                 ->pluck('kehadiran', 'kantor')
                 ->toArray();
-
+        
+        //ambil data karyawan yg terlambat datang ke kantor selama 30 hari terakhir
         $telatKaryawan = DB::table('view_absensi')
-            ->select(DB::raw('COUNT(masuk) AS jumlah_telat'), 'kantor', 'tanggal')
-            ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
-            ->where('masuk', '>', '08:00')
-            ->where('tanggal', '>=', DB::raw('DATE(NOW()) - INTERVAL 7 DAY'))
-            ->groupBy('tanggal', 'kantor')
-            // ->pluck('jumlah_telat', 'tanggal')
-            // ->toArray();
-            ->get();
-        
+                ->select(DB::raw('COUNT(masuk) AS jumlah_telat'), 'nama_cabang AS kantor', 'tanggal')
+                ->join('users_status_pegawai', 'users_status_pegawai.id_karyawan', '=', 'view_absensi.id_karyawan')
+                ->join('cabang', 'users_status_pegawai.id_cabang', '=', 'cabang.id')
+                ->where('masuk', '>', '08:00')
+                ->where('tanggal', '>=', DB::raw('DATE(NOW()) - INTERVAL 30 DAY'))
+                ->groupBy('tanggal', 'users_status_pegawai.id_cabang')
+                ->get();
+    
+        //ambil data karyawan yg tepat waktu datang ke kantor
         $tepatKaryawan = DB::table('view_absensi')
-            ->select(DB::raw('COUNT(masuk) AS jumlah_tepat'), 'kantor', 'tanggal')
-            ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
-            ->where('masuk', '<=', '08:00')
-            ->where('tanggal', '>=', DB::raw('DATE(NOW()) - INTERVAL 30 DAY'))
-            ->groupBy('tanggal', 'kantor')
-            // ->pluck('jumlah_tepat', 'kantor')
-            ->get();
+                ->select(DB::raw('COUNT(masuk) AS jumlah_tepat'), 'nama_cabang AS kantor', 'tanggal')
+                ->join('users_status_pegawai', 'users_status_pegawai.id_karyawan', '=', 'view_absensi.id_karyawan')
+                ->join('cabang', 'users_status_pegawai.id_cabang', '=', 'cabang.id')
+                ->where('masuk', '<=', '08:00')
+                ->where('tanggal', '>=', DB::raw('DATE(NOW()) - INTERVAL 30 DAY'))
+                ->groupBy('tanggal', 'kantor')
+                ->get();
         
+        //data kantor di generate ke array yg didefinisikan
         $userArr = $data->pluck('jumlah', 'kantor')->toArray();
         
+        //membuat daftar tanggal ke dlm array dr data 30 hr
         $date = date('Y-m-d', strtotime('-30 days'));
         $end_date = date('Y-m-d');
-        // End date
         $dates = [];
         while (strtotime($date) <= strtotime($end_date)) {
                     $dates[] = $date;
                     $date = date ("Y-m-d", strtotime("+1 day", strtotime($date)));
         }
 
-        //list date
-        //$dates
+        //membuat array jumlah karyawan yg terlambat berdasarkan tanggal dan kantor 
         $telat = [];
         foreach($telatKaryawan AS $k => $v){
             $telat[$v->tanggal][$v->kantor] = $v->jumlah_telat;
         }
 
+        //membuat array jumlah karyawan yg tepat berdasarkan tanggal dan kantor 
         $tepat = [];
         foreach($tepatKaryawan AS $k => $v){
             $tepat[$v->tanggal][$v->kantor] = $v->jumlah_tepat;
         }
 
+        //membuat list tanggal dan isi dr jumlah karyawan yg terlambat dan tepat
         //list tanggal
         foreach($dates AS $kTgl => $vTgl){
             //list kantor
@@ -180,6 +162,7 @@ class HomeController extends Controller
             }
         }
 
+        //membuat list array berdasarkan kantor dengan jumlah kehadiran karyawan 
         $jenis = [];
         $jmlTelat = [];
         foreach($kantor AS $k => $v){
@@ -211,14 +194,14 @@ class HomeController extends Controller
             }
         }
 
+        //membuat array jumlah ijin sakit alpa dan cuti berdasarkan kantor dan jenisnya
         if(count($isac) > 0){
             foreach($isac AS $k => $v){
                 $jenis[$v->kantor][$v->status] = $v->jml;
             }
         }
 
-            
-        return ['data' => $data, 'data2' => $grafikPerdivisi, 'data3' => $isac, 'data4' => $jenis, 'data5' => $jmlTelat, 'data6' => $terlambat];
+        return ['data' => $data, 'data3' => $isac, 'data4' => $jenis, 'data5' => $jmlTelat, 'data6' => $terlambat];
     }
 
     public function getAbsen(){
@@ -230,7 +213,16 @@ class HomeController extends Controller
         return response()->json(['data' => $absen]);
     }
 
-    public function absen(Request $request){
+    /**
+     * Create the application absen.
+     *
+     */
+     /**
+     * Proses input karyawan ketika absen
+     *
+     */
+    public function absen(Request $request)
+    {
         //validate the data before processing
         $rules = [
             'tag' => 'required|string',
@@ -249,25 +241,31 @@ class HomeController extends Controller
             //get id user from tag
             $id_user = User::where('id_epc_tag', $request->tag)->first();
             
-            //cek jika melebihi waktu 8 detik dari data sebelumnya maka data dapat disimpan 
+            //cek jika melebihi waktu 100 detik dari data sebelumnya maka data dapat disimpan 
             $cek = Absensi::select(DB::raw('DATE_ADD(tanggal, INTERVAL 100 SECOND) AS next'))->where('id_gate', $request->id_gate)
                     ->where('id_karyawan', $id_user->id)
                     ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
                     ->orderBy('tanggal', 'DESC')
                     ->first();
-                    
+
+            //get nama gerbang dari data yg diinput
             $gate = DB::table('gate')->select('nama_gerbang')->where('id', $request->id_gate)->value('nama_gerbang');
 
+            //jika data ada maka proses ini dijalankan
             if($cek !== null){
 
+                //jika data yg terbaru waktunya lebih dari yg diinsert sebelumnya maka proses ini dijalankan
                 if($request->date > $cek->next){
+
+                    //proses simpan data di table absensi
                     $create = Absensi::create([
                         'id_gate' => $request->id_gate,
                         'id_karyawan' => $id_user->id,
                         'tanggal' => $request->date,
                     ]);
 
-                    //push to pusher (websocket)
+                    //push to pusher (websocket) 
+                    // realtime notifikasi
                     $options = array(
                         'cluster' => 'ap1',
                         'useTLS' => true
@@ -279,16 +277,21 @@ class HomeController extends Controller
                         $options
                     );
 
+                    //memberikan logika utk jam masuk dengan status
                     $status = date("H:i", strtotime($request->date)) > '08:00' ? 'terlambat' : 'tepat';
-                    
+
+                    //data yg akan dipush di realtime notifikasi
                     $data['message'] = array("foto" => "image.jpg", "nik" => $id_user->nik_pegawai , "bagian_divisi" => $id_user->bagian_divisi, "nama_lokasi" => $gate, "nama_lengkap" => $id_user->nama_lengkap , "jam" => date("H:i", strtotime($request->date)), "status" => $status);
                     $pusher->trigger('my-channel', 'my-event', $data);
 
+                    //message jika berhasil menambahkan record ke database
                     $message = "absen berhasil";
                 }else{
+                    // logika jika data yg diinsert kan ke database dengan waktu yg sama maka akan meng-eksekusi message ini
                     $message = "data absensi anda sudah tercatat ke dalam sistem. harap berdiri agak jauh dari gerbang";
                 }
             }else{
+                //jika data karyawan belum ada di table absensi maka menjalankan proses ini
                 $create = Absensi::create([
                         'id_gate' => $request->id_gate,
                         'id_karyawan' => $id_user->id,
@@ -296,6 +299,7 @@ class HomeController extends Controller
                     ]);
 
                 //push to pusher (websocket)
+                // realtime notifikasi
                 $options = array(
                     'cluster' => 'ap1',
                     'useTLS' => true
@@ -307,11 +311,14 @@ class HomeController extends Controller
                     $options
                 );
 
+                //memberikan logika utk jam masuk dengan status
                 $status = date("H:i", strtotime($request->date)) > '08:00' ? 'terlambat' : 'tepat';
-                
+
+                //data yg akan dipush di realtime notifikasi
                 $data['message'] = array("foto" => "image.jpg", "nik" => $id_user->nik_pegawai , "bagian_divisi" => $id_user->bagian_divisi, "nama_lokasi" => $gate, "nama_lengkap" => $id_user->nama_lengkap , "jam" => date("H:i", strtotime($request->date)), "status" => $status);
                 $pusher->trigger('my-channel', 'my-event', $data);
 
+                //message jika berhasil menambahkan record ke database
                 $message = "absen berhasil";
             }
 
@@ -325,7 +332,6 @@ class HomeController extends Controller
         return response()->json(['status' => 'success', 'message' => $message], 200);
 
     }
-
 
     public function lacak(Request $request)
     {
@@ -433,25 +439,46 @@ class HomeController extends Controller
         return ['data' => $projects, 'draw' => $request->input('draw')];
     }
 
-    public function cekAbsen(Request $request) {
+    //fungsi untuk menampilkan list karyawan di display absensi dengan url ..../display 
+    public function cekAbsen(Request $request)
+    {
+        //get data absensi dari table absensi 
         $a = DB::table('view_absensi')
-                    ->select('view_absensi.*', 'users.nik_pegawai', 'users.nama_lengkap', 'users.bagian_divisi', 'c.nama_gerbang AS gerbang_masuk', 'd.nama_gerbang AS gerbang_keluar', DB::raw("IF(masuk > '08:00', 'telat', 'tepat') AS status"))
-                    ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
-                    ->join('absensi AS a', 'a.id', '=', 'view_absensi.id_absen_masuk')
-                    ->join('absensi AS b', 'b.id', '=', 'view_absensi.id_absen_keluar')
-                    ->join('gate AS c', 'c.id', '=', 'a.id_gate')
-                    ->join('gate AS d', 'd.id', '=', 'b.id_gate');
+                ->select('view_absensi.*', 'users.nik_pegawai', 'users.nama_lengkap', 'nama_divisi AS bagian_divisi', 'c.nama_gerbang AS gerbang_masuk', 'd.nama_gerbang AS gerbang_keluar', DB::raw("IF(masuk > '08:00', 'telat', 'tepat') AS status"))
+                ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
+                ->join('divisi', 'users.id_divisi', '=', 'divisi.id')
+                ->join('absensi AS a', 'a.id', '=', 'view_absensi.id_absen_masuk')
+                ->join('absensi AS b', 'b.id', '=', 'view_absensi.id_absen_keluar')
+                ->join('gate AS c', 'c.id', '=', 'a.id_gate')
+                ->join('gate AS d', 'd.id', '=', 'b.id_gate');
 
+        //logika jika request dari api dengan parameter keluar(jam keluar) maka perintah ini di eksekusi
         if($request->status_absen == 'keluar'){
             $a->where('keluar', '!=', '-');
         }
-            $a =  $a->where('view_absensi.tanggal', date('Y-m-d'))
-                    ->where('users.id', '<>', '5')
-                    ->orderBy('view_absensi.tanggal', 'DESC')
-                    ->get();
-        $karyawan = DB::table('users')->select('nama_lengkap', 'nik_pegawai', 'bagian_divisi')->where('id', '<>', 5)->get();
-        $status_absen = DB::table('absen_tambahan')->select('users.nik_pegawai', 'status')->join('users', 'users.id', '=', 'absen_tambahan.id_karyawan')->where(DB::raw('DATE(tanggal)'), '=', date('Y-m-d'))->pluck('status','nik_pegawai')->toArray();
-            return ["record" => $a, "karyawan" => $karyawan, 'status_absen' => $status_absen];
+
+        //data absensi 
+        $a =  $a->where('view_absensi.tanggal', date('Y-m-d'))
+                ->where('users.id', '<>', '5')
+                ->orderBy('view_absensi.tanggal', 'DESC')
+                ->get();
+
+        //get data karyawan
+        $karyawan = DB::table('users')
+                ->select('nama_lengkap', 'nik_pegawai', 'nama_divisi AS bagian_divisi')
+                ->join('divisi', 'users.id_divisi', '=', 'divisi.id')
+                ->where('users.id', '<>', 5)
+                ->get();
+        
+        //get list absen tambahan seperti ijin sakit alpa dan cuti utk ditampilkan di display absensi
+        $status_absen = DB::table('absen_tambahan')
+                ->select('users.nik_pegawai', 'status')
+                ->join('users', 'users.id', '=', 'absen_tambahan.id_karyawan')
+                ->where(DB::raw('DATE(tanggal)'), '=', date('Y-m-d'))
+                ->pluck('status','nik_pegawai')
+                ->toArray();
+
+        return ["record" => $a, "karyawan" => $karyawan, 'status_absen' => $status_absen];
     }
 
     public function listAbsensi(Request $request)
