@@ -1,34 +1,37 @@
 <template>
     <div class="projects">
-      <div class="user-data m-b-30 p-3">
-        <div class="tableFilters m-b-30">
+        <div class="user-data m-b-30 p-3">
           <div class="row">
             <div class="col-md-6">
-              <!-- <input class="input form-control" type="text" v-model="search" placeholder="Search Table"
-                   @input="resetPagination()"> -->
-                    <!-- <date-range-picker
-                            :date-format="dateFormat"
-                            v-model="dateRange"
-                    >
-                    </date-range-picker> -->
-                    <date-picker :placeholder="waterMark" v-model="time1" @change="filterTanggal()" valueType="format"></date-picker>
-                    <!-- <date-picker v-model="time2" type="datetime"></date-picker>
-                    <date-picker v-model="time3" range></date-picker> -->
-   
-            </div>
-            <div class="col-md-6">
-              <div class="control pull-right">
-                <div class="select form-control">
-                    <select v-model="length" @change="resetPagination()">
-                        <option value="10">10</option>
-                        <option value="20">20</option>
-                        <option value="30">30</option>
-                    </select>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <label for="periode">Tanggal</label>
+                    </div>
+                    <div class="col-md-6">
+                        <date-picker :placeholder="waterMark" style="width:100%;" v-model="time1" @change="filterTanggal()" valueType="format"></date-picker>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label for="filterBy">Pencarian</label>
+                    </div>
+                    <div class="col-md-6">
+                        <input class="input form-control input-sm" type="text" @input="filterTanggal()" v-model="search" placeholder="NIK, Nama">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="filterBy">Data/Halaman</label>
+                    </div>
+                    <div class="col-md-6">
+                        <select class="select form-control" v-model="length" @change="resetPagination()">
+                            <option value="10">10</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-            </div>
           </div>
-        </div>
+      </div>
+
+      <div class="user-data m-b-30 p-3">
         <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy">
             <tbody>
                 <tr v-for="(project, index) in paginated" :key="project.id">

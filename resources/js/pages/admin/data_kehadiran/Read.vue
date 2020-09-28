@@ -1,28 +1,41 @@
 <template>
     <div class="projects">
-      <div class="user-data m-b-30 p-3">
-        <div class="tableFilters m-b-30">
+        <div class="user-data m-b-30 p-3">
           <div class="row">
-            <div class="col-md-2">
-              <router-link v-if="$can('read-absensi')" class="btn btn-primary w-100" to="data-kehadiran/create">+ Tambah</router-link>
-            </div>
-            <div class="col-md-4">
-              <input class="input form-control" type="text" v-model="search" placeholder="Search Table"
-                   @input="resetPagination()">
-            </div>
             <div class="col-md-6">
-              <div class="control pull-right">
-                <div class="select form-control">
-                    <select v-model="length" @change="resetPagination()">
-                        <option value="10">10</option>
-                        <option value="20">20</option>
-                        <option value="30">30</option>
-                    </select>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <label for="filterBy">Pencarian</label>
+                    </div>
+                    <div class="col-md-6">
+                        <input class="input form-control input-sm" type="text" @input="filterTanggal()" v-model="search" placeholder="NIK, Nama">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="filterBy">Data/Halaman</label>
+                    </div>
+                    <div class="col-md-6">
+                        <select class="select form-control" v-model="length" @change="resetPagination()">
+                            <option value="10">10</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
                 </div>
             </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                    </div>
+                    <div class="col-md-6">
+                        <router-link v-if="$can('read-absensi')" class="btn btn-primary w-100" to="data-kehadiran/create">+ Tambah</router-link>
+                        <!-- <date-picker :placeholder="waterMark" style="width:100%;" v-model="time1" @change="filterTanggal()" valueType="format"></date-picker> -->
+                    </div>
+                </div>
             </div>
           </div>
-        </div>
+      </div>
+
+      <div class="user-data m-b-30 p-3">
         <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy">
             <tbody>
                 <tr v-for="(project, index) in paginated" :key="project.id">
@@ -51,8 +64,10 @@
 <script>
 import Datatable from '../../../components/Datatables.vue';
 import Pagination from '../../../components/Pagination.vue';
+import DatePicker from 'vue2-datepicker';
+import 'vue2-datepicker/index.css';
 export default {
-    components: { datatable: Datatable, pagination: Pagination },
+    components: { datatable: Datatable, pagination: Pagination , DatePicker},
     created() {
         this.getProjects();
     },

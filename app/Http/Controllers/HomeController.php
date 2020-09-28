@@ -335,23 +335,34 @@ class HomeController extends Controller
 
     public function lacak(Request $request)
     {
+        //jika parameter tanggal diset maka akan menjalankan proses ini
         if ( $request->input('tanggal') ) {
+
+            //proses akan me-return data absensi
             return DB::table('absensi')
                     ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'nama_lengkap', 'nik_pegawai', 'nama_gerbang')
                     ->join('gate','absensi.id_gate', '=', 'gate.id')
                     ->join('users', 'users.id', '=', 'id_karyawan')
-                    ->where(DB::raw('DATE(tanggal)'), $request->tanggal)->get();
-    	}
+                    ->where(DB::raw('DATE(tanggal)'), $request->tanggal)
+                    ->orderBy('tanggal', 'DESC')
+                    ->get();
+        }
+        
+        //jika parameter client sama dengan true maka proses ini akan dijalankan
         if ( $request->input('client') ) {
+
+            //proses ini akan menjalankan data absensi
             return DB::table('absensi')
                     ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'nama_lengkap', 'nik_pegawai', 'nama_gerbang')
                     ->join('gate','absensi.id_gate', '=', 'gate.id')
                     ->join('users', 'users.id', '=', 'id_karyawan')
-                    ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))->get();
+                    ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
+                    ->orderBy('tanggal', 'DESC')
+                    ->get();
     	}
 
+        //deklarasi variable
         $columns = ['absensi.id', 'tanggal', 'nama_lengkap'];
-
         $length = $request->input('length');
         $column = $request->input('column'); //Index
         $dir = $request->input('dir');
@@ -359,22 +370,27 @@ class HomeController extends Controller
 
         $query = DB::table('absensi')->select('absensi.id', 'tanggal', 'nik_pegawai', 'nama_lengkap')
                 ->join('users', 'users.id', '=', 'id_karyawan')
-                ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))->orderBy($columns[$column], $dir);
+                ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))->orderBy('tanggal', 'DESC');
 
+        //jika user melakukan pencarian maka perintah ini akan dieksekusi 
         if ($searchValue) {
             $query->where(function($query) use ($searchValue) {
                 $query->where('nama_lengkap', 'like', '%' . $searchValue . '%')
-                ->orWhere('nama_lengkap', 'like', '%' . $searchValue . '%');
+                ->orWhere('nik', 'like', '%' . $searchValue . '%');
             });
         }
 
+        //data akan di bagi per halaman sesuai request user 
         $projects = $query->paginate($length);
         return ['data' => $projects, 'draw' => $request->input('draw')];
     }
 
     public function pantau(Request $request)
     {
+        //jika tanggal diset maka proses ini akan dijalankan 
         if ( $request->input('tanggal') ) {
+
+            //proses akan me-return data absensi 
             return DB::table('absensi')
                     ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'nik_pegawai','nama_lengkap', 'nama_gerbang')
                     ->join('gate','absensi.id_gate', '=', 'gate.id')
@@ -388,7 +404,11 @@ class HomeController extends Controller
                     })
                     ->get();
         }
+
+        //jika parameter lantai di set maka akan memproses fungsi ini 
         if(isset($request->lantai)){
+
+            //proses ini akan mengambil data dari absensi
             return DB::table('absensi')
                     ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'nik_pegawai','nama_lengkap', 'nama_gerbang')
                     ->join('gate','absensi.id_gate', '=', 'gate.id')
@@ -402,7 +422,11 @@ class HomeController extends Controller
                     })
                     ->get();
         }
+
+        //jika parameter client di set maka akan menjalankan proses ini 
         if ( $request->input('client') ) {
+
+            //proses ini akan meng ekseskusi data absensi 
             return DB::table('absensi')
                     ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'nama_lengkap', 'nik_pegawai','nama_gerbang')
                     ->join('gate','absensi.id_gate', '=', 'gate.id')
@@ -417,17 +441,19 @@ class HomeController extends Controller
                     ->get();
     	}
 
+        //pendeklarasian variable 
         $columns = ['absensi.id', 'tanggal', 'nama_lengkap'];
-
         $length = $request->input('length');
         $column = $request->input('column'); //Index
         $dir = $request->input('dir');
         $searchValue = $request->input('search');
 
+        //melakukan get data dari absensi 
         $query = DB::table('absensi')->select('absensi.id', 'tanggal', 'nama_lengkap')
                 ->join('users', 'users.id', '=', 'id_karyawan')
                 ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))->orderBy($columns[$column], $dir);
 
+        //jika user melakukan search maka fungsi ini akan dijalankan
         if ($searchValue) {
             $query->where(function($query) use ($searchValue) {
                 $query->where('nama_lengkap', 'like', '%' . $searchValue . '%')
@@ -435,6 +461,7 @@ class HomeController extends Controller
             });
         }
 
+        //data absensi akan di buat page menggunakan perintah pagination 
         $projects = $query->paginate($length);
         return ['data' => $projects, 'draw' => $request->input('draw')];
     }

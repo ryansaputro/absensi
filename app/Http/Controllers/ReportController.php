@@ -1,4 +1,11 @@
 <?php
+/**
+ * @author ryan saputro
+ * @email ryansaputro52@gmail.com
+ * @create date 2020-09-28 11:34:55
+ * @modify date 2020-09-28 11:34:55
+ * @desc menghandle request semua laporan
+ */
 
 namespace App\Http\Controllers;
 
@@ -267,29 +274,52 @@ class ReportController extends Controller
 
     public function rekapKeterlambatan(Request $request)
     {
-        
+        //deklarasi variable
         $dataAbsen = [];
         $dataKeluar = [];
         $searchValue = $request->input('search');
+
+        //cek jika tanggal adalah array maka jika benar bernilai true 
         $tgl = is_array($request->input('tanggal'));
-
-        if ( $request->input('tanggal')[0] != null && $request->input('tanggal')[1] != null ) {
+        //jika tanggal array tidak sama dengan null maka akan men eksekusi proses ini 
+        if ( $request->input('tanggal') ) {
+            
+            //get data kehadiran dari table view_kehadiran
             $absen = DB::table('view_absensi')
-            ->select(DB::raw('COUNT(masuk) AS kehadiran'), 'users.nik_pegawai AS no_ktp', 'users.id AS id_user','view_absensi.nama_lengkap', 'masuk', 'keluar', 'tanggal', DB::raw('DATE_FORMAT(tanggal, "%Y-%c-%e") as tgl'))
-            ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
-            ->where('users.id', '<>', '5')
-            ->groupBy('users.id');
+                ->select(DB::raw('COUNT(masuk) AS kehadiran'), 'users.nik_pegawai AS no_ktp', 'users.id AS id_user','view_absensi.nama_lengkap', 'masuk', 'keluar', 'tanggal', DB::raw('DATE_FORMAT(tanggal, "%Y-%c-%e") as tgl'))
+                ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
+                ->where('users.id', '<>', '5')
+                ->groupBy('users.id');
 
+            //get data jumlah menit telat per kryawan dan jumlah telat
             $status = DB::table('view_absensi')
-            ->select(
-                DB::raw('IF(telat != "00:00", COUNT(id_karyawan), 0) AS jml_telat'),
-                DB::raw('SEC_TO_TIME( SUM( TIME_TO_SEC( `telat` ) ) ) AS menit_telat'), 
-                'id_karyawan', 'nama_lengkap'
-            )
-            ->where('telat', '!=', '00:00')
-            ->groupBy('id_karyawan')
-            ->orderBy('jml_telat', 'DESC');
-
+                ->select(
+                    DB::raw('IF(telat != "00:00", COUNT(id_karyawan), 0) AS jml_telat'),
+                    DB::raw('SEC_TO_TIME( SUM( TIME_TO_SEC( `telat` ) ) ) AS menit_telat'), 
+                    DB::raw("SUM(EXTRACT(HOUR FROM (SEC_TO_TIME(TIME_TO_SEC(telat) % 86400)))) hours"), 
+                    DB::raw("SUM(EXTRACT(MINUTE FROM (SEC_TO_TIME(TIME_TO_SEC(telat) % 86400)))) minutes"), 
+                    'id_karyawan', 'view_absensi.nama_lengkap', 'nik_pegawai'
+                )
+                ->join('users', 'users.id', 'view_absensi.id_karyawan')
+                ->where('telat', '!=', '00:00')
+                ->groupBy('id_karyawan');
+                
+                //filter user 
+                if($request->input('filterby')){
+                    if($request->filterby == 'terlambat_paling_banyak'){
+                        $status->orderBy('jml_telat', 'DESC');
+                    }elseif($request->filterby == 'terlambat_paling_sedikit'){
+                        $status->orderBy('jml_telat', 'ASC');
+                    }elseif($request->filterby == 'total_terlambat_paling_banyak'){
+                        $status->orderBy('menit_telat', 'DESC');
+                    }elseif($request->filterby == 'total_terlambat_paling_sedikit'){
+                        $status->orderBy('menit_telat', 'ASC');
+                    }
+                }else{
+                    $status->orderBy('jml_telat', 'DESC');
+                }
+            
+            //jika $tgl nya berupa array maka akan dieksekusi perintah ini
             if($tgl == TRUE){
                 $absen->whereBetween('tanggal', $request->input('tanggal'));
                 $status->whereBetween('tanggal', $request->input('tanggal'));
@@ -298,40 +328,63 @@ class ReportController extends Controller
                 $status->where('tanggal', $request->input('tanggal'));
             }
             
-            // $karyawan = User::where('users.id', '<>', '5')->get();
-            
+            //jika user melakukan pencarian maka akan di eksekusi perintah ini
             if ($searchValue) {
                 $absen->where(function($absen) use ($searchValue) {
                     $absen->where('view_absensi.nama_lengkap', 'like', '%' . $searchValue . '%')
                     ->orWhere('users.nik_pegawai', 'like', '%' . $searchValue . '%');
                 });
+            }
 
-                // $karyawan = User::where('nama_lengkap', 'like', '%' . $searchValue . '%')
-                //     ->orWhere('nik_pegawai', 'like', '%' . $searchValue . '%')->get();
+            //data di get dengan bentuk array
+            $absen = $absen->get();
+            $status = $status->get();
+
+            //mendeklarsikan variable menjadi array 
+            $jml = [];
+            $id_karyawan = [];
+            $dataKehadiranTerlambat = [];
+            $jml = [];
+
+
+            //looping utk absen dan membuat variable baru utk di passing ke view
+            foreach($absen AS $k => $v){
+                
+                //membuat data jml absen pertanggal dan per karyawan
+                $dataAbsen[$v->tgl][$v->id_user] = $v->masuk; 
+
+                //membuat data jml yg sudah melakukan absen yg keluar
+                $dataKeluar[$v->tgl][$v->id_user] = $v->keluar; 
+
+                //membuat jumlah data kehadiran
+                $jml[$v->id_user] = $v->kehadiran;
+                
 
             }
 
-            $absen = $absen->get();
-            $status = $status->get();
-            $jml = [];
-            $id_karyawan = [];
-
+            //jika variable $status jumlahnya lebih dari 0 maka akan di eksekusi perintah ini 
             if(count($status) > 0){
                 foreach($status AS $k => $v){
                     $jmlTelat[$v->id_karyawan] = $v->jml_telat;  
-                    $jmlMenit[$v->id_karyawan] = substr($v->menit_telat,0,8);  
+                    $jmlMenit[$v->id_karyawan] = $v->hours. " jam ". $v->minutes. " menit";//substr($v->menit_telat,0,8);  
                     $id_karyawan[] = $v->id_karyawan;
+                    $dataKehadiranTerlambat[] = array("nama_lengkap" => $v->nama_lengkap, "nik_pegawai" => $v->nik_pegawai, "kehadiran" => $jml[$v->id_karyawan],  "terlambat" => $v->jml_telat, "menit_terlambat" => $v->hours. " jam ". $v->minutes. " menit");
 
                 }
             }else{
                     $jmlTelat[][] = '';
                     $jmlMenit[][] = '';
                     $id_karyawan[] = '';
+                    $dataKehadiranTerlambat = [];
             }
 
-            $karyawanNotAbsen = User::where('users.id', '<>', '5')->whereNotIn('id', $id_karyawan);//->get();
-            $karyawanAbsen = User::where('users.id', '<>', '5')->whereIn('id', $id_karyawan);//->get();
+            //get data karyawan yg tidak absen 
+            $karyawanNotAbsen = User::where('users.id', '<>', '5')->whereNotIn('id', $id_karyawan);
             
+            //get data karyawan yg melakukan absen 
+            $karyawanAbsen = User::where('users.id', '<>', '5')->whereIn('id', $id_karyawan);
+            
+            //jika user melakukan pencarian maka akan dieksekusi proses ini 
             if($searchValue){
                 $karyawanNotAbsen = $karyawanNotAbsen->where('nama_lengkap', 'like', '%' . $searchValue . '%')
                     ->orWhere('nik_pegawai', 'like', '%' . $searchValue . '%');//->get();
@@ -340,41 +393,38 @@ class ReportController extends Controller
 
             }
 
+            //data karyawan dibentuk menjadi array 
             $karyawanNotAbsen = $karyawanNotAbsen->get();
             $karyawanAbsen = $karyawanAbsen->get();
 
-
-            $jml = [];
-            foreach($absen AS $k => $v){
-                $dataAbsen[$v->tgl][$v->id_user] = $v->masuk; 
-                $dataKeluar[$v->tgl][$v->id_user] = $v->keluar; 
-                $jml[$v->id_user] = $v->kehadiran;
-            }
-
-
-            return ['status' => $status, 'karyawanNotAbsen' => $karyawanNotAbsen, 'karyawanAbsen' => $karyawanAbsen, 'jmlTelat' =>  $jmlTelat, 'jmlMenit' => $jmlMenit,'absen'=> $dataAbsen, 'keluar'=> $dataKeluar, 'kehadiran' => $jml];
+            return ['dataKehadiranTerlambat' => $dataKehadiranTerlambat, 'status' => $status, 'karyawanNotAbsen' => $karyawanNotAbsen, 'karyawanAbsen' => $karyawanAbsen, 'jmlTelat' =>  $jmlTelat, 'jmlMenit' => $jmlMenit,'absen'=> $dataAbsen, 'keluar'=> $dataKeluar, 'kehadiran' => $jml];
         }
         
+        //jika api request mempunyai parameter client ataupun user melakukan serach maka akn meng eksekusi perintah ini 
+        if ( $request->input('client') || ($request->input('search')) || $request->tanggal[0] === "null") {
 
-        if ( $request->input('client') || ($request->input('search'))) {
-
+            //get data absen dari table view absensi
             $absen = DB::table('view_absensi')->select(DB::raw('COUNT(masuk) AS kehadiran'), 'users.nik_pegawai AS no_ktp', 'users.id AS id_user','view_absensi.nama_lengkap', 'masuk', 'keluar', 'tanggal', DB::raw('DATE_FORMAT(tanggal, "%Y-%c-%e") as tgl'))
-            ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
-            ->where('tanggal', date('Y-m-d'))
-            // ->where('users.id', '<>', '5')
-            ->groupBy('users.id');
+                ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
+                ->where('tanggal', date('Y-m-d'))
+                // ->where('users.id', '<>', '5')
+                ->groupBy('users.id');
             
+            //get data status jumlah telat dan telat dalam menit 
             $status = DB::table('view_absensi')
-            ->select(
-                DB::raw('IF(telat != "00:00", COUNT(id_karyawan), 0) AS jml_telat'),
-                DB::raw('SEC_TO_TIME( SUM( TIME_TO_SEC( `telat` ) ) ) AS menit_telat'), 
-                'id_karyawan', 'nama_lengkap'
-            )
-            ->where('telat', '!=', '00:00')
-            ->where('tanggal', date('Y-m-d'))
-            ->groupBy('id_karyawan')
-            ->orderBy('jml_telat', 'DESC');
-
+                ->select(
+                    DB::raw('IF(telat != "00:00", COUNT(id_karyawan), 0) AS jml_telat'),
+                    DB::raw('SEC_TO_TIME( SUM( TIME_TO_SEC( `telat` ) ) ) AS menit_telat'), 
+                    DB::raw("SUM(EXTRACT(HOUR FROM (SEC_TO_TIME(TIME_TO_SEC(telat) % 86400)))) hours"), 
+                    DB::raw("SUM(EXTRACT(MINUTE FROM (SEC_TO_TIME(TIME_TO_SEC(telat) % 86400)))) minutes"), 
+                    'id_karyawan', 'view_absensi.nama_lengkap', 'nik_pegawai'
+                )
+                ->join('users', 'users.id', 'view_absensi.id_karyawan')
+                ->where('telat', '!=', '00:00')
+                ->where('tanggal', date('Y-m-d'))
+                ->groupBy('id_karyawan')
+                ->orderBy('jml_telat', 'DESC');
+                    
             // if($tgl == TRUE){
             //     // $absen->whereBetween('tanggal', $request->input('tanggal'));
             //     $status->whereBetween('tanggal', $request->input('tanggal'));
@@ -383,7 +433,7 @@ class ReportController extends Controller
             //     $status->where('tanggal', $request->input('tanggal'));
             // }
 
-
+            //jika user malakukan serach atapun pencarian maka akan mengeksekusi perintah ini 
             if ($searchValue) {
                 $absen->where(function($absen) use ($searchValue) {
                     $absen->where('view_absensi.nama_lengkap', 'like', '%' . $searchValue . '%')
@@ -392,27 +442,53 @@ class ReportController extends Controller
 
             }
 
+           //data di get dengan bentuk array
             $absen = $absen->get();
             $status = $status->get();
+
+            //mendeklarsikan variable menjadi array 
             $jml = [];
             $id_karyawan = [];
 
+            //get data absen karyawan yg hadir            
+            foreach($absen AS $k => $v){
+                $dataAbsen[$v->tgl][$v->id_user] = $v->masuk; 
+                $dataKeluar[$v->tgl][$v->id_user] = $v->keluar; 
+                $jml[$v->id_user] = $v->kehadiran;
+            }
+
+            //jika jml status lebih dari 0 maka akan meng eksekusi perintah ini 
             if(count($status) > 0){
+
+                //looping status
                 foreach($status AS $k => $v){
+                    //membuat variable  utk jumlah telat  berdasarkan karyawan
                     $jmlTelat[$v->id_karyawan] = $v->jml_telat;  
-                    $jmlMenit[$v->id_karyawan] = substr($v->menit_telat,0,8);  
+
+                    //membuat variable utk jumlah menit telat berdasarkan karyawan 
+                    $jmlMenit[$v->id_karyawan] = $v->hours. " jam ". $v->minutes. " menit";//substr($v->menit_telat,0,8); 
+
+                    //membuat variable id karyawan ke dalam array utk digunakan sebagai filter karyawan yg hadir terlambat paling banyak 
                     $id_karyawan[] = $v->id_karyawan;
+
+                    //data karyawan terlambat order by jumlah terlambat
+                    $dataKehadiranTerlambat[] = array("nama_lengkap" => $v->nama_lengkap, "nik_pegawai" => $v->nik_pegawai, "kehadiran" => $jml[$v->id_karyawan],  "terlambat" => $v->jml_telat, "menit_terlambat" => $v->hours. " jam ". $v->minutes. " menit");
 
                 }
             }else{
-                    $jmlTelat[][] = '';
-                    $jmlMenit[][] = '';
+                    $jmlTelat[] = '';
+                    $jmlMenit[] = '';
                     $id_karyawan[] = '';
+                    $dataKehadiranTerlambat = [];
             }
 
-            $karyawanNotAbsen = User::where('users.id', '<>', '5')->whereNotIn('id', $id_karyawan);//->get();
-            $karyawanAbsen = User::where('users.id', '<>', '5')->whereIn('id', $id_karyawan);//->get();
+            //get karyawan yg tidak absen
+            $karyawanNotAbsen = User::where('users.id', '<>', '5')->whereNotIn('id', $id_karyawan);
+
+            //get karyawan yg absen
+            $karyawanAbsen = User::where('users.id', '<>', '5')->whereIn('id', $id_karyawan);
             
+            //jika user melakukan pencarian maka fungsi ini akan diproses 
             if($searchValue){
                 $karyawanNotAbsen = $karyawanNotAbsen->where('nama_lengkap', 'like', '%' . $searchValue . '%')
                     ->orWhere('nik_pegawai', 'like', '%' . $searchValue . '%');//->get();
@@ -424,13 +500,7 @@ class ReportController extends Controller
             $karyawanNotAbsen = $karyawanNotAbsen->get();
             $karyawanAbsen = $karyawanAbsen->get();
 
-            foreach($absen AS $k => $v){
-                $dataAbsen[$v->tgl][$v->id_user] = $v->masuk; 
-                $dataKeluar[$v->tgl][$v->id_user] = $v->keluar; 
-                $jml[$v->id_user] = $v->kehadiran;
-            }
-
-            return ['karyawanNotAbsen' => $karyawanNotAbsen, 'karyawanAbsen' => $karyawanAbsen, 'jmlTelat' =>  $jmlTelat, 'jmlMenit' => $jmlMenit, 'absen'=> $dataAbsen, 'keluar'=> $dataKeluar, 'kehadiran' => $jml];
+            return ['dataKehadiranTerlambat' => $dataKehadiranTerlambat,'karyawanNotAbsen' => $karyawanNotAbsen, 'karyawanAbsen' => $karyawanAbsen, 'jmlTelat' =>  $jmlTelat, 'jmlMenit' => $jmlMenit, 'absen'=> $dataAbsen, 'keluar'=> $dataKeluar, 'kehadiran' => $jml];
     	}
 
         $columns = ['absensi.id', 'tanggal', 'name'];

@@ -1,21 +1,25 @@
 <template>
     <div class="projects">
-      <div class="user-data m-b-30 p-3">
-        <div class="tableFilters m-b-30">
+        <div class="user-data m-b-30 p-3">
           <div class="row">
             <div class="col-md-6">
-                <date-picker :placeholder="waterMark" v-model="time1" @change="filterTanggal()" range valueType="format"></date-picker>
-            </div>
-            <div class="col-md-2">
-                
-                
-            <!-- </div>
-            <div class="col-md-2"> -->
-                <!-- <button type="button" class="btn btn-sm btn-success">Export CSV</button> -->
-                    <!-- :data="json_data" -->
-                    
-                <div class="pull-left control">
-                    <div>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <label for="periode">Periode</label>
+                    </div>
+                    <div class="col-md-6">
+                        <date-picker :placeholder="waterMark" style="width:100%;" id="periode"  v-model="time1" @change="filterTanggal()" range  valueType="format"></date-picker>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label for="filterBy">Pencarian</label>
+                    </div>
+                    <div class="col-md-6">
+                        <input class="input form-control input-sm" type="text" @input="filterTanggal()" v-model="search" placeholder="NIK, Nama">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="filterBy">Data/Halaman</label>
+                    </div>
+                    <div class="col-md-6">
                         <select class="select form-control" v-model="length" @change="resetPagination()">
                             <option value="10">10</option>
                             <option value="50">50</option>
@@ -24,24 +28,31 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                 <b-dropdown text="Export" variant="primary" class="pull-right">
-                    <b-dropdown-item href="#"><button type="button" class="btn" @click="downloadWithCSS">PDF</button></b-dropdown-item>
-                    <b-dropdown-item href="#">
-                        <downloadexcel
-                            class = "btn"
-                            :fetch   = "fetchData"
-                            :fields = "json_fields"
-                            :before-generate = "startDownload"
-                            :before-finish = "finishDownload"
-                            type    = "xls">
-                            Excel
-                        </downloadexcel>
-                    </b-dropdown-item>
-                </b-dropdown>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-6">
+                    </div>
+                    <div class="col-md-6">
+                        <b-dropdown text="Export" variant="primary" class="pull-right">
+                            <b-dropdown-item href="#"><button type="button" class="btn" @click="downloadWithCSS">PDF</button></b-dropdown-item>
+                            <b-dropdown-item href="#">
+                                <downloadexcel
+                                    class = "btn"
+                                    :fetch   = "fetchData"
+                                    :fields = "json_fields"
+                                    :before-generate = "startDownload"
+                                    :before-finish = "finishDownload"
+                                    type    = "xls">
+                                    Excel
+                                </downloadexcel>
+                            </b-dropdown-item>
+                        </b-dropdown>
+                    </div>
+                </div>
             </div>
           </div>
-        </div>
+      </div>
+      <div class="user-data m-b-30 p-3">
         <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy" id="my-table">
             <tbody>
                 <tr v-for="(project, index) in paginated" :key="project.id">

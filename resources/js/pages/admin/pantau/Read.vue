@@ -1,5 +1,19 @@
 <template>
     <div class="projects">
+        <div class="user-data m-b-30 p-3">
+          <div class="row">
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <label for="filterBy">Pencarian</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input class="input form-control input-sm" type="text" @input="filterTanggal()" v-model="search" placeholder="NIK, Nama">
+                    </div>
+                </div>
+            </div>
+          </div>
+      </div>
       <div class="user-data m-b-30 p-3" style="height:700px;">
           <div class="row">
               <div class="col-md-6">
@@ -24,11 +38,11 @@
                 </div>
           
               <div class="col-md-6" style="height:600px;overflow-y:scroll;">
-                <div class="form-group">
+                <!-- <div class="form-group">
                     <label for="email"><strong>Pencarian:</strong></label>
                     <input class="input form-control d-inline" style="width:81%;" type="text" v-model="search" placeholder="Nama, NIK"
                    @input="resetPagination()">
-                </div>
+                </div> -->
                   
                 <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy">
                     <tbody>

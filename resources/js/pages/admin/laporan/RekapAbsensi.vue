@@ -1,55 +1,48 @@
 <template>
     <div class="projects">
-      <div class="user-data m-b-30 p-3">
-        <div class="tableFilters m-b-30">
+        <div class="user-data m-b-30 p-3">
           <div class="row">
             <div class="col-md-6">
-              <!-- <input class="input form-control" type="text" v-model="search" placeholder="Search Table"
-                   @input="resetPagination()"> -->
-                    <!-- <date-range-picker
-                            :date-format="dateFormat"
-                            v-model="dateRange"
-                    >
-                    </date-range-picker> -->
-                    <label for="periode" class="sr-only">Periode</label>
-                    <date-picker :placeholder="waterMark" id="periode"  v-model="time1" @change="filterTanggal()" range  valueType="format"></date-picker>
-                    <!-- <date-picker v-model="time2" type="datetime"></date-picker>
-                    <date-picker v-model="time3" range></date-picker> -->
-   
-            </div>
-            <!-- <div class="col-md-3">
-                <input class="input form-control input-sm" type="text" @input="filterTanggal()" v-model="search" placeholder="Cari Karyawan">
-            </div> -->
-            <div class="col-md-6">
-                <b-dropdown text="Export" variant="primary" class="pull-right">
-                    <b-dropdown-item href="#"><button type="button" class="btn" @click="downloadWithCSS">PDF</button></b-dropdown-item>
-                    <b-dropdown-item href="#">
-                        <downloadexcel
-                            class = "btn"
-                            :fetch   = "fetchData"
-                            :fields = "json_fields"
-                            :before-generate = "startDownload"
-                            :before-finish = "finishDownload"
-                            type    = "xls">
-                            Excel
-                        </downloadexcel>
-                    </b-dropdown-item>
-                </b-dropdown>
-            </div>
-                <!-- <button @click="downloadWithCSS" class="btn btn-sm btn-primary">Download PDF</button></div> -->
-            <!-- <div class="col-md-2">
-              <div class="control pull-right">
-                <div>
-                    <select  class="select form-control" v-model="length" @change="resetPagination()">
-                        <option value="10">10</option>
-                        <option value="20">20</option>
-                        <option value="30">30</option>
-                    </select>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <label for="periode">Periode</label>
+                    </div>
+                    <div class="col-md-6">
+                        <date-picker :placeholder="waterMark" style="width:100%;" id="periode"  v-model="time1" @change="filterTanggal()" range  valueType="format"></date-picker>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="filterBy">Pencarian</label>
+                    </div>
+                    <div class="col-md-6">
+                        <input class="input form-control input-sm" type="text" @input="filterTanggal()" v-model="search" placeholder="NIK, Nama">
+                    </div>
                 </div>
             </div>
-            </div> -->
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-6">
+                    </div>
+                    <div class="col-md-6">
+                        <b-dropdown text="Export" variant="primary" class="pull-right">
+                            <b-dropdown-item href="#"><button type="button" class="btn" @click="downloadWithCSS">PDF</button></b-dropdown-item>
+                            <b-dropdown-item href="#">
+                                <downloadexcel
+                                    class = "btn"
+                                    :fetch   = "fetchData"
+                                    :fields = "json_fields"
+                                    :before-generate = "startDownload"
+                                    :before-finish = "finishDownload"
+                                    type    = "xls">
+                                    Excel
+                                </downloadexcel>
+                            </b-dropdown-item>
+                        </b-dropdown>
+                    </div>
+                </div>
+            </div>
           </div>
-        </div>
+      </div>
+      <div class="user-data m-b-30 p-3">
         <div style="overflow-x:auto;">
         <span>Filter : {{jmlKerja+" Hari"}}</span>
         <table class="table table-bordered table-hover" id="my-table">

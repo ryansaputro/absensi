@@ -1,53 +1,59 @@
 <template>
     <div class="projects">
       <div class="user-data m-b-30 p-3">
-        <div class="tableFilters m-b-30">
           <div class="row">
             <div class="col-md-6">
-                <label for="periode" class="sr-only">Periode</label>
-                <date-picker :placeholder="waterMark" id="periode"  v-model="time1" @change="filterTanggal()" range  valueType="format"></date-picker>
-            </div>
-            <div class="col-md-3">
-                <input class="input form-control input-sm" type="text" @input="filterTanggal()" v-model="search" placeholder="NIK, Nama">
-            </div>
-            <div class="col-md-3">
-                <b-dropdown text="Export" variant="primary" class="pull-right">
-                    <b-dropdown-item href="#"><button type="button" class="btn" @click="downloadWithCSS">PDF</button></b-dropdown-item>
-                    <b-dropdown-item href="#">
-                        <downloadexcel
-                            class = "btn"
-                            :fetch   = "fetchData"
-                            :fields = "json_fields"
-                            :before-generate = "startDownload"
-                            :before-finish = "finishDownload"
-                            type    = "xls">
-                            Excel
-                        </downloadexcel>
-                    </b-dropdown-item>
-                </b-dropdown>
-            </div>
-            <div class="col-md-3">
-                <select v-model="filterBy" name="filterBy" class="form-control">
-                    <option value="terlambat_paling_banyak">Terlambat Paling Banyak</option>
-                    <option value="terlambat_paling_sedikit">Terlambat Paling Sedikit</option>
-                    <option value="total_terlambat_paling_banyak">Total Terlambat Paling Sedikit</option>
-                    <option value="total_terlambat_paling_sedikit">Total Terlambat Paling Sedikit</option>
-                </select>
-            </div>
-                <!-- <button @click="downloadWithCSS" class="btn btn-sm btn-primary">Download PDF</button></div> -->
-            <!-- <div class="col-md-2">
-              <div class="control pull-right">
-                <div>
-                    <select  class="select form-control" v-model="length" @change="resetPagination()">
-                        <option value="10">10</option>
-                        <option value="20">20</option>
-                        <option value="30">30</option>
-                    </select>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <label for="periode">Periode</label>
+                    </div>
+                    <div class="col-md-6">
+                        <date-picker :placeholder="waterMark" style="width:100%;" id="periode"  v-model="time1" @change="filterTanggal()" range  valueType="format"></date-picker>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="filterBy">Filter</label>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <select v-model="filterBy" @change="filterWith()" id="filterBy" name="filterBy" class="form-control">
+                            <option value="terlambat_paling_banyak" selected>Terlambat Paling Banyak</option>
+                            <option value="terlambat_paling_sedikit">Terlambat Paling Sedikit</option>
+                            <option value="total_terlambat_paling_banyak">Total Terlambat Paling Banyak</option>
+                            <option value="total_terlambat_paling_sedikit">Total Terlambat Paling Sedikit</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="filterBy">Pencarian</label>
+                    </div>
+                    <div class="col-md-6">
+                        <input class="input form-control input-sm" type="text" @input="filterTanggal()" v-model="search" placeholder="NIK, Nama">
+                    </div>
                 </div>
             </div>
-            </div> -->
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-6">
+                    </div>
+                    <div class="col-md-6">
+                        <b-dropdown text="Export" variant="primary" class="pull-right">
+                        <b-dropdown-item href="#"><button type="button" class="btn" @click="downloadWithCSS">PDF</button></b-dropdown-item>
+                        <b-dropdown-item href="#">
+                            <downloadexcel
+                                class = "btn"
+                                :fetch   = "fetchData"
+                                :fields = "json_fields"
+                                :before-generate = "startDownload"
+                                :before-finish = "finishDownload"
+                                type    = "xls">
+                                Excel
+                            </downloadexcel>
+                        </b-dropdown-item>
+                    </b-dropdown>
+                    </div>
+                </div>
+            </div>
           </div>
-        </div>
+      </div>
+      <div class="user-data m-b-30 p-3">
         <div style="overflow-x:auto;">
         <span>Filter : {{jmlKerja+" Hari"}}</span>
         <table class="table table-bordered table-hover" id="my-table">
@@ -57,31 +63,30 @@
                     <th>Nama</th>
                     <th>Kehadiran</th>
                     <th>Terlambat</th>
-                    <th>Total Terlambat</th>
+                    <th>Total Durasi Terlambat</th>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(project, index) in karyawanAbsen" :key="project.id">
-                    <td>
-                        {{project.nik_pegawai}}
-                    </td>
-                    <td>
-                        {{project.nama_lengkap}}
-                    </td>
+                <tr v-for="(project, index) in karyawanAbsen" :key="project.id" v-if="filterBy === 'terlambat_paling_banyak' || filterBy === 'total_terlambat_paling_banyak' ">
+                    <td>{{project.nik_pegawai}}</td>
+                    <td>{{project.nama_lengkap}}</td>
+                    <td>{{project.kehadiran}}</td>
+                    <td>{{project.terlambat}} kali</td>
+                    <td>{{project.menit_terlambat}}</td>
+                </tr>
+                <tr v-for="(project, index) in karyawanNotAbsen" :key="project.id">
+                    <td>{{project.nik_pegawai}}</td>
+                    <td>{{project.nama_lengkap}}</td>
                     <td>{{typeof(kehadiran[project.id]) === 'undefined' ? '0' : kehadiran[project.id] }}</td>
                     <td>{{typeof(jmlTelat[project.id]) !== 'undefined' ?   jmlTelat[project.id] : '0'}} kali</td>
                     <td>{{typeof(jmlMenit[project.id]) !== 'undefined' ?   jmlMenit[project.id] : '0'}}</td>
                 </tr>
-                <tr v-for="(project, index) in karyawanNotAbsen" :key="project.id">
-                    <td>
-                        {{project.nik_pegawai}}
-                    </td>
-                    <td>
-                        {{project.nama_lengkap}}
-                    </td>
-                    <td>{{typeof(kehadiran[project.id]) === 'undefined' ? '0' : kehadiran[project.id] }}</td>
-                    <td>{{typeof(jmlTelat[project.id]) !== 'undefined' ?   jmlTelat[project.id] : '0'}} kali</td>
-                    <td>{{typeof(jmlMenit[project.id]) !== 'undefined' ?   jmlMenit[project.id] : '0'}}</td>
+                <tr v-for="(project, index) in karyawanAbsen" :key="project.id" v-if="filterBy === 'terlambat_paling_sedikit' || filterBy === 'total_terlambat_paling_sedikit' ">
+                    <td>{{project.nik_pegawai}}</td>
+                    <td>{{project.nama_lengkap}}</td>
+                    <td>{{project.kehadiran}}</td>
+                    <td>{{project.terlambat}} kali</td>
+                    <td>{{project.menit_terlambat}}</td>
                 </tr>
             </tbody>
         </table>
@@ -126,6 +131,7 @@ export default {
         });
         return {
             jmlKerja: '1',
+            filterBy:'terlambat_paling_banyak',
             statusMasuk: [],
             jmlMenit: [],
             jmlTelat: [],
@@ -200,25 +206,13 @@ export default {
             console.log('hide loading');
         },
       
-      doMath: function (jml_kerja) {
-        var m1  = jml_kerja.toString();
-        var waktu1 = m1.split(":");
-        var jam = parseInt(waktu1[0]) > 0 ? parseInt(waktu1[0]) + ' jam ' : '';
-        var menit = parseInt(waktu1[1]) > 0 ? parseInt(waktu1[1]) + ' menit' : '';
-        var tot = jam + menit;
-        // jam = menit >= 60 ? parseInt(jam)+1 +' jam' : jam+ ' jam';
-        // menit = menit >= 60 ? parseInt(menit)-60 == 0 ? '' : parseInt(menit)-60 + ' menit' : menit + ' menit' ;
-        // var tot = '- '+jam+' '+menit;
-        return tot;
-      },
-      
         getProjects() {
             axios.get('rekap-keterlambatan', {params: this.tableData})
                 .then(response => {
                     var waktu = this.time1;
                     var cekArr = Array.isArray(waktu);
 
-                    this.karyawanAbsen = response.data.karyawanAbsen;
+                    this.karyawanAbsen = response.data.dataKehadiranTerlambat;
                     this.karyawanNotAbsen = response.data.karyawanNotAbsen;
                     this.jmlMenit = response.data.jmlMenit;
                     this.jmlTelat = response.data.jmlTelat;
@@ -269,36 +263,23 @@ export default {
              {
                 params: {
                 tanggal: this.time1,
-                search: this.search
+                search: this.search,
+                filterby: this.filterBy
                 }
             })
                 .then(response => {
                     var waktu = this.time1;
                     var cekArr = Array.isArray(waktu);
 
-                    this.karyawanAbsen = response.data.karyawanAbsen;
+                    this.karyawanAbsen = response.data.dataKehadiranTerlambat;
                     this.karyawanNotAbsen = response.data.karyawanNotAbsen;
                     this.jmlMenit = response.data.jmlMenit;
                     this.jmlTelat = response.data.jmlTelat;
                     this.absen = response.data.absen;
 
-                    // var now = new Date();
                     var start = cekArr == true ? new Date(waktu[0]) : new Date();
                     var end = cekArr == true ? new Date(waktu[1]) : new Date();
                    
-                    // var dateArray = [];
-                    // var currentDate = moment(start);
-                    // var stopDate = moment(end);
-                    // while (currentDate <= stopDate) {
-                    //     dateArray.push( moment(currentDate).format('YYYY-M-D') )
-                    //     currentDate = moment(currentDate).add(1, 'days');
-                    // }
-
-                    // var absenMasuk = [];
-                    // var absenKeluar = [];
-                    // var idx = [];
-                    // var idy = [];
-
                     var jmlKehadiran= [];
                     $.each(response.data.kehadiran, function(k,v){
                             jmlKehadiran[k] = v;
@@ -326,27 +307,62 @@ export default {
                     
                     // To calculate the no. of days between two dates 
                     var Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24); 
-                    // console.log(Difference_In_Days)
                     this.jmlKerja = parseInt(Difference_In_Days)+1;
+                })
+                .catch(errors => {
+                    console.log(errors);
+                });
+        },
+        filterWith() {
+            axios.get('rekap-keterlambatan', 
+             {
+                params: {
+                tanggal: this.time1,
+                search: this.search,
+                filterby: this.filterBy
+                }
+            })
+                .then(response => {
+                    var waktu = this.time1;
+                    var cekArr = Array.isArray(waktu);
 
-                    // $.each(response.data.absen, function(k,v){
-                    //     $.each(v, function(x,y){
-                    //         idx[x] = y;
-                    //         absenMasuk[k] = new Array(2);
-                    //         absenMasuk[k] = idx;
-                    //     })
-                    // })
+                    this.karyawanAbsen = response.data.dataKehadiranTerlambat;
+                    this.karyawanNotAbsen = response.data.karyawanNotAbsen;
+                    this.jmlMenit = response.data.jmlMenit;
+                    this.jmlTelat = response.data.jmlTelat;
+                    this.absen = response.data.absen;
 
-                    // $.each(response.data.keluar, function(k,v){
-                    //     $.each(v, function(x,y){
-                    //         idy[x] = y;
-                    //         absenKeluar[k] = new Array(2);
-                    //         absenKeluar[k] = idy;
-                    //     })
-                    // })
-                    //     this.jamMasuk = absenMasuk;
-                    //     this.jamKeluar = absenKeluar;
-                    //     this.tanggal = dateArray;
+                    var start = cekArr == true ? new Date(waktu[0]) : new Date();
+                    var end = cekArr == true ? new Date(waktu[1]) : new Date();
+                   
+                    var jmlKehadiran= [];
+                    $.each(response.data.kehadiran, function(k,v){
+                            jmlKehadiran[k] = v;
+                    })
+                    this.kehadiran = jmlKehadiran;
+
+                    var StatusKehadiran= [];
+                    $.each(response.data.statusMasuk, function(k,v){
+                        StatusKehadiran[k] = new Array(2);
+                        $.each(v, function(x,y){
+                            
+                            StatusKehadiran[k][x] = new Array(2);
+                            StatusKehadiran[k][x] = y;
+                        })
+
+                    })
+                    
+                    this.statusMasuk = StatusKehadiran;
+                     // To set two dates to two variables 
+                    var date1 = start; 
+                    var date2 = end; 
+                    
+                    // To calculate the time difference of two dates 
+                    var Difference_In_Time = date2.getTime() - date1.getTime(); 
+                    
+                    // To calculate the no. of days between two dates 
+                    var Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24); 
+                    this.jmlKerja = parseInt(Difference_In_Days)+1;
                 })
                 .catch(errors => {
                     console.log(errors);
