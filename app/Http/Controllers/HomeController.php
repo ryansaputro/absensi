@@ -492,7 +492,7 @@ class HomeController extends Controller
 
         //get data karyawan
         $karyawan = DB::table('users')
-                ->select('nama_lengkap', 'nik_pegawai', 'nama_divisi AS bagian_divisi')
+                ->select('nama_lengkap', 'nik_pegawai', 'nama_divisi AS bagian_divisi', 'foto')
                 ->join('divisi', 'users.id_divisi', '=', 'divisi.id')
                 ->where('users.id', '<>', 5)
                 ->get();

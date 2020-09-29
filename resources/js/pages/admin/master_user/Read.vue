@@ -35,28 +35,6 @@
       </div>
 
       <div class="user-data m-b-30 p-3">
-        <div class="tableFilters m-b-30">
-          <div class="row">
-            <div class="col-md-2">
-              <router-link v-if="$can('read-pengguna')" class="btn btn-primary w-100" to="pengguna/create">+ Tambah</router-link>
-            </div>
-            <div class="col-md-4">
-              <input class="input form-control" type="text" v-model="search" placeholder="Search Table"
-                   @input="resetPagination()">
-            </div>
-            <div class="col-md-6">
-              <div class="control pull-right">
-                <div class="select form-control">
-                    <select v-model="length" @change="resetPagination()">
-                        <option value="10">10</option>
-                        <option value="20">20</option>
-                        <option value="30">30</option>
-                    </select>
-                </div>
-            </div>
-            </div>
-          </div>
-        </div>
         <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy">
             <tbody>
                 <tr v-for="(project, index) in paginated" :key="project.id">
@@ -65,7 +43,7 @@
                     <td>{{project.jabatan}}</td>
                     <td>{{project.bagian_divisi}}</td>
                     <td>{{project.tgl_masuk}}</td>
-                    <td>{{project.masa_kerja}}</td>
+                    <td>{{project.tgl_habis_kontrak == '0000-00-00' ? '-' : project.tgl_habis_kontrak}}</td>
                     <td>
                       <router-link v-if="$can('edit-pengguna')" class="btn btn-primary btn-xs" :to="'/pengguna/'+project.id">Edit</router-link>
                       <button v-if="$can('delete-pengguna')" class="btn btn-danger btn-xs" v-on:click="deleteData(project.id)">Delete</button>
@@ -145,7 +123,7 @@ export default {
           axios.delete("pengguna/" + id).then(response => {
             this.getProjects();
             // $swal function calls SweetAlert into the application with the specified configuration.
-            this.$swal('Deleted', 'You successfully deleted this file', 'success');
+            this.$swal('Hapus', 'Data Karyawan Berhasil dihapus.', 'success');
           });
         },
         paginate(array, length, pageNumber) {
@@ -183,7 +161,7 @@ export default {
             let order = this.sortOrders[sortKey] || 1;
             if (sortKey) {
                 projects = projects.slice().sort((a, b) => {
-                    let index = this.getIndex(this.columns, 'name', sortKey);
+                    let index = this.getIndex(this.columns, 'nama_lengkap', sortKey);
                     a = String(a[sortKey]).toLowerCase();
                     b = String(b[sortKey]).toLowerCase();
                     // if (this.columns[index].type && this.columns[index].type === 'date') {

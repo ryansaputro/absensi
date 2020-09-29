@@ -44,7 +44,7 @@
       <div class="col-md-8 mt-2">
         <h3 class="text-center" style="margin-top:10px;">Daftar Karyawan</h3>
           <div class="row mr-3"  style="overflow-y:scroll;height:500px;">
-            <div v-for="(karyawan, index) in karyawans" :key="karyawan.id" class="col-md-2" style="background-image:url(http://placehold.it/150x150&text=);">
+            <div v-for="(karyawan, index) in karyawans" :key="karyawan.id" class="col-md-2" v-bind:style="{ 'background-image': 'url(/images/karyawan/' + karyawan.foto + '), url(http://placehold.it/150x150&text=)' }" style="background-size:cover;">
               <div class="detail belum-hadir" v-bind:id="karyawan.nik_pegawai">
                 <span class="name">{{karyawan.nama_lengkap.substr(0, 15)}}</span>
                 <span class="division">{{karyawan.bagian_divisi.substr(0, 20)}}</span>
@@ -206,14 +206,14 @@ import Echo from 'laravel-echo';
                 datas += "</tr>";
                 $('#kehadiran').append(datas);
                 $('table tr:last')[0].scrollIntoView();
-                console.log(status)
-                console.log("baca masuk");
+                // console.log(status)
+                // console.log("baca masuk");
               }
 
           }else{
             if(jQuery.inArray(data.message.nik, nik) !== -1){
               // if(this.status_absen == 'keluar'){
-                console.log("ada")
+                // console.log("ada")
                 $('tr#'+data.message.nik).remove();
                 // var status = data.message.status;
                 var status = data.message.jam < '17:00' ? 'pulang awal' : 'pulang';
@@ -229,7 +229,7 @@ import Echo from 'laravel-echo';
               // }
 
             }else{
-              console.log("tidak ada")
+              // console.log("tidak ada")
               //append into table
               // var status = data.message.status;
               var status = data.message.jam < '17:00' ? 'pulang awal' : 'pulang';
@@ -246,7 +246,7 @@ import Echo from 'laravel-echo';
             
           }
 
-          console.log(jQuery.inArray(data.message.nik, nik) !== -1);
+          // console.log(jQuery.inArray(data.message.nik, nik) !== -1);
           //give sign in grid model
           $('#'+data.message.nik+'.detail').removeClass('belum-hadir');
           $('#'+data.message.nik+'.detail').addClass('hadir');

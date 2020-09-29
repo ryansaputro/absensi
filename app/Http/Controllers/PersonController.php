@@ -7,9 +7,12 @@ use Illuminate\Http\Request;
 // import file model Person
 use App\Person;
 use App\User;
+use App\UserStatusPegawai;
+use App\UserAlamat;
 use Illuminate\Support\Facades\Auth;
 use Ixudra\Curl\Facades\Curl;
 use DB;
+use File;
 
 class PersonController extends Controller
 {
@@ -25,6 +28,8 @@ class PersonController extends Controller
         $this->middleware('permission:create-pengguna', ['only' => ['create','store']]);
         $this->middleware('permission:edit-pengguna', ['only' => ['edit','update']]);
         $this->middleware('permission:delete-pengguna', ['only' => ['destroy']]);
+        $this->path = public_path('images/karyawan');;
+        $this->dimensions = ['245', '300', '500'];
     }
 
      // mengambil semua data
@@ -32,22 +37,38 @@ class PersonController extends Controller
     {
 
         if ( $request->input('client') ) {
-    	    return User::select('id', 'nama_lengkap', 'nik_pegawai AS no_ktp', 'created_at', 'jabatan', 'bagian_divisi', 'tgl_masuk', 'masa_kerja')->where('id', '<>', '5')->get();
+    	    return DB::table('users')
+                ->select('users.id','nama_lengkap', 'nik_pegawai AS no_ktp', 'nama_jabatan AS jabatan', 'nama_divisi AS bagian_divisi',
+                DB::raw('DATE(tgl_masuk) AS tgl_masuk'), DB::raw('DATE(tgl_habis_kontrak) AS tgl_habis_kontrak'))
+                ->join('users_status_pegawai', 'users.id', '=', 'users_status_pegawai.id_karyawan')
+                ->join('jabatan', 'users.id_jabatan', '=', 'jabatan.id')
+                ->join('divisi', 'users.id_divisi', '=', 'divisi.id')
+                ->where('users.id', '<>', '5')
+                ->orderBy('nik_pegawai')
+                ->get();
     	}
 
-        $columns = ['nama_lengkap', 'nik_pegawai', 'created_at', 'jabatan', 'bagian_divisi', 'tgl_masuk', 'masa_kerja'];
+        // $columns = ['nama_lengkap', 'nik_pegawai', 'created_at', 'jabatan', 'bagian_divisi', 'tgl_masuk', 'masa_kerja'];
 
         $length = $request->input('length');
         $column = $request->input('column'); //Index
         $dir = $request->input('dir');
         $searchValue = $request->input('search');
 
-        $query = User::select('id', 'nama_lengkap', 'nik_pegawai AS no_ktp', 'created_at', 'jabatan', 'bagian_divisi', 'tgl_masuk', 'masa_kerja')->where('id', '<>', '5')->orderBy($columns[$column], $dir);
+        $query = DB::table('users')
+                ->select('users.id','nama_lengkap', 'nik_pegawai AS no_ktp', 'nama_jabatan AS jabatan', 'nama_divisi AS bagian_divisi', 
+                        DB::raw('DATE(tgl_masuk) AS tgl_masuk'), DB::raw('DATE(tgl_habis_kontrak) AS tgl_habis_kontrak'))
+                ->join('users_status_pegawai', 'users.id', '=', 'users_status_pegawai.id_karyawan')
+                ->join('jabatan', 'users.id_jabatan', '=', 'jabatan.id')
+                ->join('divisi', 'users.id_divisi', '=', 'divisi.id')
+                ->where('users.id', '<>', '5')
+                ->orderBy('nik_pegawai');
 
         if ($searchValue) {
             $query->where(function($query) use ($searchValue) {
                 $query->where('nama_lengkap', 'like', '%' . $searchValue . '%')
-                ->orWhere('no_ktp', 'like', '%' . $searchValue . '%');
+                ->orWhere('no_ktp', 'like', '%' . $searchValue . '%')
+                ->orWhere('nik_pegawai', 'like', '%' . $searchValue . '%');
             });
         }
 
@@ -76,7 +97,8 @@ class PersonController extends Controller
     {
         $data = DB::table('divisi')->where('status', '1')->get();
         $jabatan = DB::table('jabatan')->where('status', '1')->get();
-        return ['data' => $data, 'jabatan' => $jabatan];
+        $kantor = DB::table('cabang')->where('status', '1')->get();
+        return ['data' => $data, 'jabatan' => $jabatan, 'kantor' => $kantor];
     }
 
     public function provinsi()
@@ -110,14 +132,24 @@ class PersonController extends Controller
     // mengambil data by id
     public function show($id)
     {
-        return User::find($id);
+        $data = DB::table('users')
+                ->select('nik_pegawai', 'nik_ktp', 'id_divisi', 'id_jabatan', 'nama_lengkap', 'gol_darah', 'no_telp', 'email', 'id_epc_tag', 'foto', 'tgl_masuk', 'tgl_habis_kontrak', 'status_pegawai', 'masa_kerja', 'id_cabang', 'rt', 'rw', 'kelurahan', 'kecamatan', 'kota', 'provinsi', 'kode_pos', 'alamat')
+                ->join('users_status_pegawai', 'users_status_pegawai.id_karyawan', '=', 'users.id')
+                ->join('users_alamat', 'users_alamat.id_karyawan', '=', 'users.id')
+                ->where('users.id', $id)
+                ->first();
+
+        return [$data];
     }
 
     // menambah data
     public function store(Request $request)
     {
+        $path = $this->path; //. '/' . date('Y') . '/' . date('m');
+        if (!File::isDirectory($path)) {$folder = File::makeDirectory($path, 0777, true);}
+        if (!File::isDirectory($this->path)) {File::makeDirectory($this->path, 0777, true);}
+
         //validate the data before processing
-        
         $rules = [
             "no_ktp" => "required|numeric|digits:16",
             "nama_lengkap" => "required|string",
@@ -140,34 +172,62 @@ class PersonController extends Controller
             'required' => 'Isian :attribute tidak boleh kosong.',
             'numeric' => 'Isian :attribute harus berupa angka.',
             'digits_between' => 'Isian :attribute harus berupa angka dengan minimal 10 karakter dan maksimal 15.',
-            'digits' => 'Isian :attribute harus berupa angka dengan 5 karakter.',
+            'kode_pos.digits' => 'Isian :attribute harus berupa angka dengan 5 karakter.',
+            'no_ktp.digits' => 'Isian :attribute harus berupa angka dengan 16 karakter.',
             'size' => 'Isian :attribute harus 3 karakter.'
         ];
 
         $this->validate($request, $rules, $customMessages);
         DB::beginTransaction();
         try {
-            //code...
-            $data = User::create([
-                'id_epc_tag'  => $request->tag,
-                'no_ktp' => $request->no_ktp,
-                'nama_lengkap' => $request->nama_lengkap,
-                'name' => $request->nama_lengkap,
-                'no_telp' => $request->no_telp,
-                'email' => $request->email,
-                'id_epc_tag' => $request->id_epc_tag,
-                'provinsi' => $request->provinsi,
-                'kota' => $request->kota,
-                'kecamatan' => $request->kecamatan,
-                'kelurahan' => $request->kelurahan,
-                'kode_pos' => $request->kode_pos,
-                'rt' => $request->rt,
-                'rw' => $request->rw,
-                'alamat' => $request->alamat,
-                'gol_darah' => $request->gol_darah,
-                'id_divisi' => $request->divisi,
-                'password' =>  bcrypt('12345678')
-            ]);
+            //proses simpan foto
+            $img = $request->foto;  // your base64 encoded
+            $imageName = strtoupper(str_replace(' ', '_',$request->nama_lengkap));
+            $image_parts = explode(";base64,", $img);
+            $image_type_aux = explode("image/", $image_parts[0]);
+            $image_type = $image_type_aux[1];
+            $image_base64 = base64_decode($image_parts[1]);
+            $file = $path.'/' . $imageName . '.'.$image_type;
+
+            if(file_put_contents($file, $image_base64)){
+                //proses simpan data
+                $data = User::create([
+                    'nik_pegawai'  => $request->nik_pegawai,
+                    'nik_ktp' => $request->no_ktp,
+                    'id_divisi' => $request->divisi,
+                    'id_jabatan' => $request->jabatan,
+                    'nama_lengkap' => $request->nama_lengkap,
+                    'gol_darah' => $request->gol_darah,
+                    'no_telp' => $request->no_telp,
+                    'email' => $request->email,
+                    'id_epc_tag' => $request->id_epc_tag,
+                    'foto' => $imageName.'.'.$image_type
+                ]);
+
+                $data2 = UserStatusPegawai::create([
+                    'id_karyawan'  => $data->id,
+                    'tgl_masuk' => $request->tgl_masuk,
+                    'tgl_habis_kontrak' => $request->tgl_akhir_kontrak,
+                    'status_pegawai' => $request->status_karyawan,
+                    'masa_kerja' => '-',
+                    'id_cabang' => $request->kantor
+                ]);
+
+                $data3 = UserAlamat::create([
+                    'id_karyawan'  => $data->id,
+                    'rt' => $request->rt,
+                    'rw' => $request->rw,
+                    'kelurahan' => $request->kelurahan,
+                    'kecamatan' => $request->kecamatan,
+                    'kota' => $request->kota,
+                    'provinsi' => $request->provinsi,
+                    'kode_pos' => $request->kode_pos,
+                    'alamat' => $request->alamat
+                ]);
+            }
+
+
+            
         } catch (\Illuminate\Database\QueryException $ex) {
             //throw $th;
             DB::rollback();
@@ -180,8 +240,24 @@ class PersonController extends Controller
     // mengubah data
     public function update($id, Request $request)
     {
+        //definiskan path sesuai dengan global variable
+        $path = $this->path;
+
+        //cek jika folder belum ada maka akan menjalankan fungsi ini untuk membuat folder
+        if (!File::isDirectory($path)) {$folder = File::makeDirectory($path, 0777, true);}
+        if (!File::isDirectory($this->path)) {File::makeDirectory($this->path, 0777, true);}
+
+        //get data dari ID yg di passing
+        $data = DB::table('users')
+            ->select('nik_pegawai', 'nik_ktp', 'id_divisi', 'id_jabatan', 'nama_lengkap', 'gol_darah', 'no_telp', 'email', 'id_epc_tag', 'foto', 'tgl_masuk', 'tgl_habis_kontrak', 'status_pegawai', 'masa_kerja', 'id_cabang', 'rt', 'rw', 'kelurahan', 'kecamatan', 'kota', 'provinsi', 'kode_pos', 'alamat')
+            ->join('users_status_pegawai', 'users_status_pegawai.id_karyawan', '=', 'users.id')
+            ->join('users_alamat', 'users_alamat.id_karyawan', '=', 'users.id')
+            ->where('users.id', $id)
+            ->first(); 
+
         $rules = [
-            "no_ktp" => "required|numeric|digits:16",
+            "nik_pegawai" => "required|string|unique:users,nik_pegawai,".$data->nik_pegawai.',nik_pegawai',
+            "nik_ktp" => "required|numeric|digits:16|unique:users,nik_ktp,".$data->nik_ktp.',nik_ktp',
             "nama_lengkap" => "required|string",
             "no_telp" => "required|numeric|digits_between:10,15",
             "email" => "required|email:rfc,dns",
@@ -203,34 +279,69 @@ class PersonController extends Controller
             'numeric' => 'Isian :attribute harus berupa angka.',
             'digits_between' => 'Isian :attribute harus berupa angka dengan minimal 10 karakter dan maksimal 15.',
             'digits' => 'Isian :attribute harus berupa angka dengan 5 karakter.',
-            'size' => 'Isian :attribute harus 3 karakter.'
+            'size' => 'Isian :attribute harus 3 karakter.',
+            'unique' => ':attribute tidak unik atau sudah dipakai.'
         ];
 
         $this->validate($request, $rules, $customMessages);
         // dd($request->all());
         DB::beginTransaction();
         try {
-            //code...
-            $data = User::find($id)->update([
-                'id_epc_tag'  => $request->tag,
-                'no_ktp' => $request->no_ktp,
-                'nama_lengkap' => $request->nama_lengkap,
-                'name' => $request->nama_lengkap,
-                'no_telp' => $request->no_telp,
-                'email' => $request->email,
-                'id_epc_tag' => $request->id_epc_tag,
-                'provinsi' => $request->provinsi,
-                'kota' => $request->kota,
-                'kecamatan' => $request->kecamatan,
-                'kelurahan' => $request->kelurahan,
-                'kode_pos' => $request->kode_pos,
-                'rt' => $request->rt,
-                'rw' => $request->rw,
-                'alamat' => $request->alamat,
-                'gol_darah' => $request->gol_darah,
-                'id_divisi' => $request->divisi,
-                'password' =>  bcrypt('12345678')
-            ]);
+
+            //cek jika gambar ada di folder images/karyawan maka akan di lakukan proses penghapusan
+            if(file_exists($path . '/' . $data->foto)){
+                
+                //delete file exist
+                unlink($path . '/' . $data->foto);
+            }
+
+                //jika foto diset maka proses ini akan dijalankan
+                if($request->foto !== '/images/karyawan/'.$data->foto){
+
+                    //proses simpan foto
+                    $img = $request->foto;  // your base64 encoded
+                    $imageName = strtoupper(str_replace(' ', '_',$request->nama_lengkap));
+                    $image_parts = explode(";base64,", $img);
+                    $image_type_aux = explode("image/", $image_parts[0]);
+                    $image_type = $image_type_aux[1];
+                    $image_base64 = base64_decode($image_parts[1]);
+                    $file = $path.'/' . $imageName . '.'.$image_type;
+                    file_put_contents($file, $image_base64);
+                }
+
+                //proses simpan data
+                $data = User::where('id', $id)->update([
+                    'nik_pegawai'  => $request->nik_pegawai,
+                    'nik_ktp' => $request->nik_ktp,
+                    'id_divisi' => $request->divisi,
+                    'id_jabatan' => $request->jabatan,
+                    'nama_lengkap' => $request->nama_lengkap,
+                    'gol_darah' => $request->gol_darah,
+                    'no_telp' => $request->no_telp,
+                    'email' => $request->email,
+                    'id_epc_tag' => $request->id_epc_tag,
+                ]);
+
+                $data2 = UserStatusPegawai::where('id_karyawan', $id)->update([
+                    'tgl_masuk' => $request->tgl_masuk,
+                    'tgl_habis_kontrak' => $request->tgl_akhir_kontrak,
+                    'status_pegawai' => $request->status_karyawan,
+                    'masa_kerja' => '-',
+                    'id_cabang' => $request->kantor
+                ]);
+
+                $data3 = UserAlamat::where('id_karyawan', $id)->update([
+                    'rt' => $request->rt,
+                    'rw' => $request->rw,
+                    'kelurahan' => $request->kelurahan,
+                    'kecamatan' => $request->kecamatan,
+                    'kota' => $request->kota,
+                    'provinsi' => $request->provinsi,
+                    'kode_pos' => $request->kode_pos,
+                    'alamat' => $request->alamat
+                ]);
+            
+
         } catch (\Illuminate\Database\QueryException $ex) {
             //throw $th;
             DB::rollback();
@@ -243,8 +354,38 @@ class PersonController extends Controller
     // menghapus data
     public function delete($id)
     {
-        $person = User::find($id);
-        $person->delete();
-        return response()->json(['status' => 'success']);
+        //path utk foto karyawan
+        $path = $this->path;
+
+        DB::beginTransaction();
+        try {
+
+            //get data karyawan 
+            $person = User::where('id', $id);
+
+            //hapus data karyawan di table users status pegawai
+            $person1 = UserStatusPegawai::where('id_karyawan', $id)->delete();
+
+            //hapus data karyawan di table users alamat
+            $person2 = UserAlamat::where('id_karyawan', $id)->delete();
+            
+            $data = $person->first();
+
+            //cek jika gambar ada di folder images/karyawan maka akan di lakukan proses penghapusan
+            if(file_exists($path . '/' . $data->foto)){
+                //delete file exist
+                unlink($path . '/' . $data->foto);
+            }
+
+            //delete karyawan dari table user
+            $person->delete(); 
+
+        } catch (\Illuminate\Database\QueryException $ex) {
+            //throw $th;
+            DB::rollback();
+            return response()->json(['status' => 'failed', 'message' => $ex->getMessage()], 500);
+        }
+        DB::commit();
+        return response()->json(['status' => 'success'], 200);
     }
 }

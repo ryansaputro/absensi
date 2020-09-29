@@ -12,7 +12,7 @@
                     type="textfield"
                     class="form-control"
                     placeholder="Masukkan NIK Pegawai"
-                    v-model="form.no_ktp"
+                    v-model="form.nik_pegawai"
                     required
                   >
                 </div>
@@ -36,19 +36,6 @@
                     required
                   >
                 </div>
-
-              </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Golongan Darah</label>
-                  <select class="form-control" v-model="form.gol_darah" required>
-                    <option value="" disabled>Pilih Golongan Darah</option>
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="O">O</option>
-                    <option value="AB">AB</option>
-                  </select>
-                </div>
                 <div class="form-group">
                   <label>No Telp</label>
                   <input
@@ -69,6 +56,29 @@
                     required
                   >
                 </div>
+
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Foto</label>
+                    <div v-if="!form.foto">
+                      <input type="file" @change="onFileChange">
+                    </div>
+                    <div v-else>
+                      <img :src="form.foto" />
+                      <button class="btn btn-danger btn-sm" @click="removeImage">Hapus Foto</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                  <label>Golongan Darah</label>
+                  <select class="form-control" v-model="form.gol_darah" required>
+                    <option value="" disabled>Pilih Golongan Darah</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="O">O</option>
+                    <option value="AB">AB</option>
+                  </select>
+                </div>
                 <div class="form-group">
                   <label>No Tag RFID</label>
                   <input
@@ -84,116 +94,144 @@
             </div>
           </b-tab>
           <b-tab title="Status">
-            <div class="form-group">
-              <label>Divisi</label>
-              <select class="form-control" v-model="form.divisi" required>
-                <option value="" disabled>Pilih Divisi</option>
-                <option v-for="item in divisi" :value="item.id">
-                  {{ item.nama_divisi }}
-                </option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Jabatan</label>
-              <select class="form-control" v-model="form.jabatan" required>
-                <option value="" disabled>Pilih Jabatan</option>
-                <option v-for="item in jabatan" :value="item.id">
-                  {{ item.nama_jabatan }}
-                </option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Status Karyawan</label>
-              <select class="form-control" @change="getKota()" v-model="form.status_karyawan" required>
-                <option value="" disabled>Pilih Status Karyawan</option>
-                <option value="kontrak">Kontrak</option>
-                <option value="tetap">Tetap</option>
-              </select>
-            </div>
-            <div class="form-group" v-if="form.status_karyawan === 'kontrak'">
-              <label>Tanggal Akhir Kontrak</label>
-              <date-picker :placeholder="waterMark" style="width:100%;" id="periode"  v-model="form.tgl_akhir_kontrak" @change="filterTanggal()" valueType="format"></date-picker>
-            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Divisi</label>
+                  <select class="form-control" v-model="form.divisi" required>
+                    <option value="" disabled>Pilih Divisi</option>
+                    <option v-for="item in divisi" :value="item.id">
+                      {{ item.nama_divisi }}
+                    </option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Jabatan</label>
+                  <select class="form-control" v-model="form.jabatan" required>
+                    <option value="" disabled>Pilih Jabatan</option>
+                    <option v-for="item in jabatan" :value="item.id">
+                      {{ item.nama_jabatan }}
+                    </option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Status Karyawan</label>
+                  <select class="form-control" v-model="form.status_karyawan" required>
+                    <option value="" disabled>Pilih Status Karyawan</option>
+                    <option value="kontrak">Kontrak</option>
+                    <option value="tetap">Tetap</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group" v-if="form.status_karyawan === 'kontrak'">
+                  <label>Tanggal Akhir Kontrak</label>
+                  <date-picker :placeholder="waterMark" style="width:100%;" id="periode"  v-model="form.tgl_akhir_kontrak"  valueType="format"></date-picker>
+                </div>
 
-            <div class="form-group">
-              <label>Tanggal Masuk</label>
-              <date-picker :placeholder="waterMark" style="width:100%;" id="periode"  v-model="form.tgl_masuk" @change="filterTanggal()" valueType="format"></date-picker>
+                <div class="form-group">
+                  <label>Tanggal Masuk</label>
+                  <date-picker :placeholder="waterMark" style="width:100%;" id="periode"  v-model="form.tgl_masuk"  valueType="format"></date-picker>
+                </div>
+
+                <div class="form-group">
+                  <label>Kantor</label>
+                  <select class="form-control" v-model="form.kantor" required>
+                    <option value="" disabled>Pilih Kantor</option>
+                    <option v-for="item in kantor" :value="item.id">
+                      {{ item.nama_cabang }}
+                    </option>
+                  </select>
+                </div>
+              </div>
             </div>
 
           </b-tab>
           <b-tab title="Alamat">
-            <div class="form-group">
-              <label>Provinsi</label>
-              <select class="form-control" @change="getKota()" v-model="form.provinsi" required>
-                <option value="" disabled selected>Pilih Provinsi</option>
-                <option v-for="item in projects" :value="item.id">
-                  {{ item.nama }}
-                </option>
-              </select>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Provinsi</label>
+                  <select class="form-control" @change="getKota()" v-model="form.provinsi" required>
+                    <option value="" disabled selected>Pilih Provinsi</option>
+                    <option v-for="item in projects" :value="item.id">
+                      {{ item.nama }}
+                    </option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Kota</label>
+                  <select class="form-control" @change="getKecamatan()" v-model="form.kota" required>
+                    <option value="" disabled selected>Pilih Kota</option>
+                    <option v-for="item in kota" :value="item.id">
+                      {{ item.nama }}
+                    </option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Kecamatan</label>
+                  <select class="form-control" @change="getKelurahan()" v-model="form.kecamatan" required>
+                    <option value="" disabled selected>Pilih Kecamatan</option>
+                    <option v-for="item in kecamatan" :value="item.id">
+                      {{ item.nama }}
+                    </option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Kelurahan</label>
+                  <select class="form-control" v-model="form.kelurahan" required>
+                    <option value="" disabled selected>Pilih Kelurahan</option>
+                    <option v-for="item in kelurahan" :value="item.id">
+                      {{ item.nama }}
+                    </option>
+                  </select>
+                </div>
+
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Kode Pos</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Masukkan Kode pos"
+                    v-model="form.kode_pos"
+                    required
+                  >
+                </div>
+                <div class="form-group">
+                  <label>RT</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Masukkan RT"
+                    v-model="form.rt"
+                    required
+                  >
+                </div>
+                <div class="form-group">
+                  <label>RW</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Masukkan RW"
+                    v-model="form.rw"
+                    required
+                  >
+                </div>
+                <div class="form-group">
+                  <label>Alamat</label>
+                  <textarea 
+                    v-model="form.alamat" 
+                    class="form-control" 
+                    placeholder="Masukkan Alamat"></textarea>
+                </div>
+
+              </div>
             </div>
             <div class="form-group">
-              <label>Kota</label>
-              <select class="form-control" @change="getKecamatan()" v-model="form.kota" required>
-                <option value="" disabled selected>Pilih Kota</option>
-                <option v-for="item in kota" :value="item.id">
-                  {{ item.nama }}
-                </option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Kecamatan</label>
-              <select class="form-control" @change="getKelurahan()" v-model="form.kecamatan" required>
-                <option value="" disabled selected>Pilih Kecamatan</option>
-                <option v-for="item in kecamatan" :value="item.id">
-                  {{ item.nama }}
-                </option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Kelurahan</label>
-              <select class="form-control" v-model="form.kelurahan" required>
-                <option value="" disabled selected>Pilih Kelurahan</option>
-                <option v-for="item in kelurahan" :value="item.id">
-                  {{ item.nama }}
-                </option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Kode Pos</label>
-              <input
-                type="text"
-                class="form-control"
-                placeholder="Masukkan Kode pos"
-                v-model="form.kode_pos"
-                required
-              >
-            </div>
-            <div class="form-group">
-              <label>RT</label>
-              <input
-                type="text"
-                class="form-control"
-                placeholder="Masukkan RT"
-                v-model="form.rt"
-                required
-              >
-            </div>
-            <div class="form-group">
-              <label>RW</label>
-              <input
-                type="text"
-                class="form-control"
-                placeholder="Masukkan RW"
-                v-model="form.rw"
-                required
-              >
-            </div>
-            <div class="form-group">
-              <label>Alamat</label>
-              <textarea 
-                v-model="form.alamat" 
-                class="form-control" 
-                placeholder="Masukkan Alamat"></textarea>
+              <router-link class="btn btn-danger" to="/pengguna">Kembali</router-link>
+              <button class="btn btn-primary">Simpan</button>
             </div>
 
           </b-tab>
@@ -202,7 +240,14 @@
     </form>
   </div>
 </template>
-
+<style>
+img {
+  width: 50%;
+  margin: auto;
+  display: block;
+  margin-bottom: 10px;
+}
+</style>
 <script>
 import DatePicker from 'vue2-datepicker';
 import 'vue2-datepicker/index.css';
@@ -210,25 +255,28 @@ export default {
   data(){
     return{
       form:{
+        nik_pegawai: '',
         no_ktp: '',
         nama_lengkap: '',
         no_telp: '',
         email: '',
-        id_epc_tag: '',
+        foto: '',
+        gol_darah:'',
+        id_epc_tag:'',
+        divisi: '',
+        jabatan: '',
+        status_karyawan: '',
+        tgl_akhir_kontrak:moment(new Date()).format('YYYY-M-D'),
+        tgl_masuk:moment(new Date()).format('YYYY-M-D'),
+        kantor:'',
         provinsi: '',
         kota: '',
         kecamatan: '',
-        kelurahan: '',
-        kode_pos: '',
-        rt: '',
-        rw: '',
-        alamat: '',
-        gol_darah:'',
-        divisi:'',
-        jabatan:'',
-        status_karyawan:'',
-        tgl_akhir_kontrak:moment(new Date()).format('YYYY-M-D'),
-        tgl_masuk: moment(new Date()).format('YYYY-M-D'),
+        kelurahan:'',
+        kode_pos:'',
+        rt:'',
+        rw:'',
+        alamat:'',
       },
       waterMark : new Date().toISOString().slice(0,10),
       projects:[],
@@ -246,15 +294,44 @@ export default {
         this.getDivisi();
   },
   methods: {
+    onFileChange(e) {
+          var files = e.target.files || e.dataTransfer.files;
+          if (!files.length)
+            return;
+          this.createImage(files[0]);
+    },
+    createImage(file) {
+          var image = new Image();
+          var reader = new FileReader();
+          var vm = this;
+
+          reader.onload = (e) => {
+            vm.form.foto = e.target.result;
+            console.log(vm.foto)
+          };
+          reader.readAsDataURL(file);
+    },
+    removeImage: function (e) {
+          this.form.foto = '';
+    },
     addData() {
       // post data ke api menggunakan axios
       axios
         .post("pengguna/create", {
+          nik_pegawai: this.form.nik_pegawai,
           no_ktp: this.form.no_ktp,
           nama_lengkap: this.form.nama_lengkap,
           no_telp: this.form.no_telp,
           email: this.form.email,
+          foto: this.form.foto,
+          gol_darah: this.form.gol_darah,
           id_epc_tag: this.form.id_epc_tag,
+          divisi: this.form.divisi,
+          jabatan: this.form.jabatan,
+          status_karyawan: this.form.status_karyawan,
+          tgl_akhir_kontrak: this.form.tgl_akhir_kontrak,
+          tgl_masuk: this.form.tgl_masuk,
+          kantor: this.form.kantor,
           provinsi: this.form.provinsi,
           kota: this.form.kota,
           kecamatan: this.form.kecamatan,
@@ -262,25 +339,37 @@ export default {
           kode_pos: this.form.kode_pos,
           rt: this.form.rt,
           rw: this.form.rw,
-          alamat: this.form.alamat,
-          gol_darah: this.form.gol_darah,
-          divisi: this.form.divisi,
-          jabatan: this.form.jabatan
+          alamat: this.form.alamat
         })
         .then(response => {
           // push router ke read data
           this.$router.push("/pengguna");
-          this.$swal('Created', 'You successfully Created this file', 'success');
+          this.$swal('Berhasil', 'Karyawan Baru sukses di input.', 'success');
         })
         .catch(errors => {
-            console.log(errors);
+            if (errors.response) {
+                var data = '';
+                $.each(errors.response.data.errors, function(k,v){
+                  data += v[0]+"\n";
+                });
+                console.log(data);
+                this.$swal('Gagal', data, 'error');
+              // client received an error response (5xx, 4xx)
+            } else if (errors.request) {
+                console.log(errors.request);
+                console.log("request never left")
+              // client never received a response, or request never left
+            } else {
+              console.log("lainnya")
+            }
         });
     },
       getDivisi() {
             axios.get('divisi')
                 .then(response => {
                     this.divisi = response.data.data;
-                    this.jabatan = response.data.jabatan
+                    this.jabatan = response.data.jabatan;
+                    this.kantor = response.data.kantor;
                 })
                 .catch(errors => {
                     console.log(errors);
