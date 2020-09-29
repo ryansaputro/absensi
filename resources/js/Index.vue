@@ -72,7 +72,7 @@
   export default {
     data() {
       return {
-          
+        // menu:JSON.parse(localStorage.getItem('role'))
         menu: [
                     {
                         href: '/dashboard',
@@ -158,14 +158,57 @@
     created() {
         if(typeof(localStorage.getItem('user')) !== 'undefined'){
             window.Permissions = localStorage.getItem('user');
+            console.log(localStorage.getItem('user'))
+            console.log(localStorage.getItem('role'))            
         }else{
             window.Permissions = [];
         }
+
+        // this.menu = [{"href":"\/dashboard","title":"Dashboard","icon":"fa fa-area-chart"},{"href":"\/absensi","title":"Absensi","icon":"fa fa-user"},{"href":"\/lacak","title":"Lacak Personnel","icon":"fa fa-blind"},{"href":"\/pantau","title":"Pantau Personnel","icon":"fa fa-eye"},{"href":"\/data-kehadiran","title":"Data Kehadiran","icon":"fa fa-calendar"},{"title":"Laporan","icon":"fa fa-book","child":[{"href":"\/laporan-absensi","title":"Laporan Kehadiran"},{"href":"\/rekap-absensi","title":"Rekap Absensi"},{"href":"\/rekap-keterlambatan","title":"Rekap Keterlambatan"}]},{"title":"Master Data","icon":"fa fa-database","child":[{"href":"\/pengguna","title":"Karyawan"}]}];
+        this.getProjects();
+        // console.log("a")
+        // this.menus = JSON.parse(localStorage.getItem('role'));
+
+        
     },
+    // beforeRouteUpdate (to, from, next) {
+        // this.menus = JSON.parse(localStorage.getItem('role'))
+    // },
+    //  beforeRouteEnter (to, from, next) {
+    //     getPost(to.params.id, (err, menu) => {
+    //     next(vm => vm.setData(err, menu))
+    //     })
+    // },
+    // when route changes and this component is already rendered,
+    // the logic will be slightly different.
+    // beforeRouteUpdate (to, from, next) {
+    //     this.menu = null
+    //     getPost(to.params.id, (err, menu) => {
+    //     this.setData(err, menu)
+    //     next()
+    //     })
+    // },
+    // updated: {
+    // },
     computed: {
         currentRouteName() {
+            // console.log(this.menu)
+            // console.log(localStorage.getItem('role'))
             return this.$route.name;
+        },
+        
+    },
+    methods: {
+        // setData (err, menu) {
+        //     if (err) {
+        //         this.error = err.toString()
+        //     } else {
+        //         this.menu = localStorage.getItem('role')
+        //     }
+        // },
+        getProjects() {
+            console.log("user" +localStorage.getItem('role'))
         }
-    }
+    } 
   }
 </script>

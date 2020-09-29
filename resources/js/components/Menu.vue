@@ -57,6 +57,7 @@
         if(this.$auth.logout()){
           console.log("sukses")
           localStorage.removeItem('user');
+          localStorage.removeItem('role');
         }
         //   axios.post('/auth/logout')
         // .then(res => {

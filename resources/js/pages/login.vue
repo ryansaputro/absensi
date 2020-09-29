@@ -122,11 +122,12 @@
           rememberMe: true,
           fetchUser: true
         }).then(res => {
-          // console.info(res.data.data);
+          localStorage.setItem('role', res.data.role);
           if(localStorage.setItem('user', res.data.data)){
             location.reload(true);
+            console.log(localStorage.getItem('role'))
           }
-          
+          console.log(localStorage.getItem('role'))
 
           // console.log(localStorage)
         })

@@ -84,22 +84,26 @@ class AuthController extends Controller
      */
     public function user(Request $request)
     {
-        $user = User::find(Auth::user()->id);
+        $user = User::where('id',Auth::user()->id)->first();
         $permission = DB::table('role_has_permissions')
                 ->select('permissions.name')
                 ->join('permissions', 'permissions.id', '=', 'role_has_permissions.permission_id')
                 ->join('roles', 'roles.id', '=', 'role_has_permissions.role_id')
                 ->join('model_has_roles', 'model_has_roles.role_id', '=', 'roles.id')
-                // ->where('model_id', $user)
+                ->where('model_id', $user->id)
                 ->pluck('name')->toArray();
 
-
+        $role = DB::table('model_has_roles')->select('role_id')->where('model_id', $user->id)->value('role_id');
+        $data = DB::table('role_has_menus')->where('id_role', $role)->value('menus');
+        $data = json_decode($data);
         // $setSession = Session::put($user);
         return response()->json([
             'status' => 'success',
-            'data' => json_encode($permission, true)
+            'data' => json_encode($permission, true),
+            'role' => json_encode($data, true)
         ]);
     }
+
 
     public function getAuthenticatedUser()
     {
