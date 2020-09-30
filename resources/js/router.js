@@ -25,6 +25,8 @@ import NewDataKehadiran from './pages/admin/data_kehadiran/Create'
 import NotFound from './components/404'
 import gantiPassword from './components/gantiPassword'
 import AdminAppPenggunaApp from './pages/admin/pengguna_aplikasi/Read'
+import AdminAppRole from './pages/admin/role/Read'
+import AdminAppPermission from './pages/admin/permission/Read'
 // Routes
 const routes = [
     {
@@ -206,6 +208,24 @@ const routes = [
         path: '/user-login',
         name: 'Pengguna Aplikasi',
         component: AdminAppPenggunaApp,
+        meta: {
+            auth: true,
+            menus: 'read-pengguna'
+        }
+    },
+    {
+        path: '/role',
+        name: 'Role',
+        component: AdminAppRole,
+        meta: {
+            auth: true,
+            menus: 'read-pengguna'
+        }
+    },
+    {
+        path: '/permission',
+        name: 'Permission',
+        component: AdminAppPermission,
         meta: {
             auth: true,
             menus: 'read-pengguna'

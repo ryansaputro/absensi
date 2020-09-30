@@ -87,6 +87,8 @@ Route::prefix('v1')->group(function () {
     // });
             
     Route::get('/user-login','AdministratorAplikasiController@userLogin');
+    Route::get('/role','AdministratorAplikasiController@role');
+    Route::get('/permission','AdministratorAplikasiController@permission');
 
     Route::get('data-kehadiran/get-data-nik','DataKehadiranController@getDataNik');
     // middleware('permission:read-user|create-user|edit-user|delete-user')->
