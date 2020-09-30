@@ -161,7 +161,7 @@ export default {
             let order = this.sortOrders[sortKey] || 1;
             if (sortKey) {
                 projects = projects.slice().sort((a, b) => {
-                    let index = this.getIndex(this.columns, 'nama_lengkap', sortKey);
+                    let index = this.getIndex(this.columns, 'nik_pegawai', sortKey);
                     a = String(a[sortKey]).toLowerCase();
                     b = String(b[sortKey]).toLowerCase();
                     // if (this.columns[index].type && this.columns[index].type === 'date') {

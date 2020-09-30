@@ -151,7 +151,7 @@ class PersonController extends Controller
 
         //validate the data before processing
         $rules = [
-            "no_ktp" => "required|numeric|digits:16",
+            "no_ktp" => "required|numeric|digits_between:15,17",
             "nama_lengkap" => "required|string",
             "no_telp" => "required|numeric|digits_between:10,15",
             "email" => "required|email:rfc,dns",
@@ -166,6 +166,7 @@ class PersonController extends Controller
             "alamat" => "required|string",
             "gol_darah" => "required|string",
             "divisi" => "required|numeric",
+            "foto" => "required|",
         ];
 
         $customMessages = [
@@ -257,7 +258,7 @@ class PersonController extends Controller
 
         $rules = [
             "nik_pegawai" => "required|string|unique:users,nik_pegawai,".$data->nik_pegawai.',nik_pegawai',
-            "nik_ktp" => "required|numeric|digits:16|unique:users,nik_ktp,".$data->nik_ktp.',nik_ktp',
+            "nik_ktp" => "required|numeric|digits_between:15,17|unique:users,nik_ktp,".$data->nik_ktp.',nik_ktp',
             "nama_lengkap" => "required|string",
             "no_telp" => "required|numeric|digits_between:10,15",
             "email" => "required|email:rfc,dns",
@@ -272,6 +273,7 @@ class PersonController extends Controller
             "alamat" => "required|string",
             "gol_darah" => "required|string",
             "divisi" => "required|",
+            "foto" => "required|",
         ];
 
         $customMessages = [

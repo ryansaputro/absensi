@@ -44,7 +44,7 @@
       <div class="col-md-8 mt-2">
         <h3 class="text-center" style="margin-top:10px;">Daftar Karyawan</h3>
           <div class="row mr-3"  style="overflow-y:scroll;height:500px;">
-            <div v-for="(karyawan, index) in karyawans" :key="karyawan.id" class="col-md-2" v-bind:style="{ 'background-image': 'url(/images/karyawan/' + karyawan.foto + '), url(http://placehold.it/150x150&text=)' }" style="background-size:cover;">
+            <div v-for="(karyawan, index) in karyawans" :key="karyawan.id" class="col-md-2" v-bind:style="{ 'background-image': 'url(/images/karyawan/' + karyawan.foto + '), url(http://placehold.it/150x150&text=)' }" style="background-size:contain;">
               <div class="detail belum-hadir" v-bind:id="karyawan.nik_pegawai">
                 <span class="name">{{karyawan.nama_lengkap.substr(0, 15)}}</span>
                 <span class="division">{{karyawan.bagian_divisi.substr(0, 20)}}</span>

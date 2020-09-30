@@ -35,13 +35,35 @@ class AuthController extends Controller
         $user->save();
         return response()->json(['status' => 'success'], 200);
     }
+
+    /**
+     * Register a new user
+     */
+    public function updatePassword(Request $request)
+    {
+        $v = Validator::make($request->all(), [
+            'password'  => 'required|min:3|confirmed',
+        ]);
+        if ($v->fails())
+        {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $v->errors()
+            ], 422);
+        }
+        $id = Auth::user()->id;
+        $user = User::find($id)->update([
+            'password' => bcrypt($request->password)
+        ]);
+        return response()->json(['status' => 'success'], 200);
+    }
     /**
      * Login user and return a token
      */
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
-        // dd($credentials);
+        // dd($this->guard()->attempt($credentials));
         // try{    
         // // your code here.   
         //     $token = $this->guard()->attempt($credentials);

@@ -46,6 +46,7 @@ Route::prefix('v1')->group(function () {
 
     });
 
+    Route::post('/update-password','AuthController@updatePassword');
     Route::post('/absen','HomeController@absen');
     Route::get('/cek-absen','HomeController@cekAbsen');
     Route::group(['middleware' => ['auth']], function() {
@@ -82,8 +83,10 @@ Route::prefix('v1')->group(function () {
             Route::get('/kota','PersonController@kota');
             Route::get('/kecamatan','PersonController@kecamatan');
             Route::get('/kelurahan','PersonController@kelurahan');
-
+            
     // });
+            
+    Route::get('/user-login','AdministratorAplikasiController@userLogin');
 
     Route::get('data-kehadiran/get-data-nik','DataKehadiranController@getDataNik');
     // middleware('permission:read-user|create-user|edit-user|delete-user')->

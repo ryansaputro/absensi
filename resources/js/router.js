@@ -22,8 +22,29 @@ import RekapKeterlambatan from './pages/admin/laporan/RekapKeterlambatan'
 import ListDataKehadiran from './pages/admin/data_kehadiran/Read'
 import UpdateDataKehadiran from './pages/admin/data_kehadiran/Update'
 import NewDataKehadiran from './pages/admin/data_kehadiran/Create'
+import NotFound from './components/404'
+import gantiPassword from './components/gantiPassword'
+import AdminAppPenggunaApp from './pages/admin/pengguna_aplikasi/Read'
 // Routes
 const routes = [
+    {
+        path: '/ganti-password',
+        name: 'gantiPassword',
+        component: gantiPassword,
+        meta: {
+            auth: true,
+            menus:'read-404'
+        }
+    },
+    {
+        path: '/404',
+        name: 'NotFound',
+        component: NotFound,
+        meta: {
+            auth: true,
+            menus:'read-404'
+        }
+    },
     {
         path: '/display',
         name: 'display',
@@ -62,7 +83,8 @@ const routes = [
         name: 'dashboard',
         component: AdminDashboard,
         meta: {
-            auth: true
+            auth: true,
+            menus: 'read-absensi'
         }
     },
     {
@@ -70,7 +92,8 @@ const routes = [
         name: 'Absensi',
         component: Absensi,
         meta: {
-            auth: true
+            auth: true,
+            menus: 'read-absensi'
         }
     },
     {
@@ -78,7 +101,8 @@ const routes = [
         name: 'Lacak Personnel',
         component: Lacak,
         meta: {
-            auth: true
+            auth: true,
+            menus: 'read-absensi'
         }
     },
     {
@@ -86,7 +110,8 @@ const routes = [
         name: 'Pantau Personnel',
         component: Pantau,
         meta: {
-            auth: true
+            auth: true,
+            menus: 'read-absensi'
         }
     },
     {
@@ -94,7 +119,8 @@ const routes = [
         name: 'Data Kehadiran',
         component: ListDataKehadiran,
         meta: {
-            auth: true
+            auth: true,
+            menus: 'read-data-kehadiran'
         }
     },
     {
@@ -102,7 +128,8 @@ const routes = [
         name: 'Data Kehadiran Baru',
         component: NewDataKehadiran,
         meta: {
-            auth: true
+            auth: true,
+            menus: 'create-data-kehadiran'
         }
     },
     {
@@ -110,7 +137,8 @@ const routes = [
         name: 'Update Data Kehadiran',
         component: UpdateDataKehadiran,
         meta: {
-            auth: true
+            auth: true,
+            menus: 'edit-data-kehadiran'
         }
     },
     {
@@ -118,7 +146,8 @@ const routes = [
         name: 'Laporan Terlambat & PLA',
         component: LaporanTerlambat,
         meta: {
-            auth: true
+            auth: true,
+            menus: 'read-absensi'
         }
     },
     {
@@ -126,7 +155,8 @@ const routes = [
         name: 'Laporan Absensi',
         component: LaporanAbsensi,
         meta: {
-            auth: true
+            auth: true,
+            menus: 'read-absensi'
         }
     },
     {
@@ -134,7 +164,8 @@ const routes = [
         name: 'Rekap Absensi',
         component: RekapAbsensi,
         meta: {
-            auth: true
+            auth: true,
+            menus: 'read-absensi'
         }
     },
     {
@@ -142,7 +173,8 @@ const routes = [
         name: 'Rekap Keterlambatan',
         component: RekapKeterlambatan,
         meta: {
-            auth: true
+            auth: true,
+            menus: 'read-absensi'
         }
     },
     // {
@@ -166,7 +198,17 @@ const routes = [
         name: 'Laporan Absensi',
         component: LaporanSemua,
         meta: {
-            auth: true
+            auth: true,
+            menus: 'read-absensi'
+        }
+    },
+    {
+        path: '/user-login',
+        name: 'Pengguna Aplikasi',
+        component: AdminAppPenggunaApp,
+        meta: {
+            auth: true,
+            menus: 'read-pengguna'
         }
     },
     {
@@ -174,7 +216,8 @@ const routes = [
         name: 'karyawan',
         component: PenggunaRead,
         meta: {
-            auth: true
+            auth: true,
+            menus: 'read-pengguna'
         }
     },
     {
@@ -182,7 +225,8 @@ const routes = [
         name: 'karyawan baru',
         component: PenggunaCreate,
         meta: {
-            auth: true
+            auth: true,
+            menus: 'create-pengguna'
         }
     },
     {
@@ -190,7 +234,8 @@ const routes = [
         name: 'perbarui karyawan',
         component: PenggunaUpdate,
         meta: {
-            auth: true
+            auth: true,
+            menus: 'edit-pengguna'
         }
     },
     
@@ -203,13 +248,9 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-    // console.log(to.meta.auth)
-    const publicPages = ['/login'];
-    const authRequired = !publicPages.includes(to.path);
-    // console.log(localStorage.getItem('auth_token_default'))
     if (to.name !== 'login' && to.meta.auth == null){
         if (to.name == 'display'){
-            next()
+            next();
 
         }else{
             next({ name: 'login' })
@@ -217,9 +258,37 @@ router.beforeEach((to, from, next) => {
         }
     } 
     else{
-        next()
+
+        if (to.fullPath == '/dashboard' && from.fullPath == '/login'){
+            next();
+            if (!localStorage.getItem('firstLoad')){
+                localStorage['firstLoad'] = true;
+                window.location.reload()
+            }else{
+                localStorage.removeItem('firstLoad');
+            }
+        }else{
+            console.log(to.meta.auth)
+            if (to.meta.auth === true){
+                console.log(to.meta)
+                console.log(JSON.parse(localStorage.user))
+                var menusRole = to.meta.menus;
+                if (jQuery.inArray(menusRole, JSON.parse(localStorage.user)) !== -1){
+                    console.log("ada")
+                    next();
+                }else{
+                    next({ name:'NotFound'});
+                }
+
+            }else{
+                next();
+            }
+            
+        }
+        
     } 
 })
+
 
 
 export default router

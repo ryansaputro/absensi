@@ -34,8 +34,8 @@
                     </div>
                     <div class="col-md-6">
                         <b-dropdown text="Export" variant="primary" class="pull-right">
-                            <b-dropdown-item href="#"><button type="button" class="btn" @click="downloadWithCSS">PDF</button></b-dropdown-item>
-                            <b-dropdown-item href="#">
+                            <b-dropdown-item href="#" v-if="$can('export-pdf-laporan-absensi')"><button type="button" class="btn" @click="downloadWithCSS">PDF</button></b-dropdown-item>
+                            <b-dropdown-item href="#" v-if="$can('export-xls-laporan-absensi')">
                                 <downloadexcel
                                     class = "btn"
                                     :fetch   = "fetchData"

@@ -53,7 +53,7 @@
 
 .img-vendor {
   position: absolute;
-  right: 10px;
+  right: -10px;
   top: 47px;
 }
 
@@ -110,8 +110,8 @@
           success: function() {
             // handle redirection
             app.success = true
-            const redirectTo = 'dashboard'
-            this.$router.push({name: redirectTo})
+            // const redirectTo = 'dashboard'
+            // this.$router.push({name: redirectTo})
             
           },
           error: function() {
@@ -124,10 +124,11 @@
         }).then(res => {
           localStorage.setItem('role', res.data.role);
           if(localStorage.setItem('user', res.data.data)){
-            location.reload(true);
-            console.log(localStorage.getItem('role'))
+            // location.reload(true);
+            location.href="/dashboard";
+            // console.log(localStorage.getItem('role'))
           }
-          console.log(localStorage.getItem('role'))
+          // console.log(localStorage.getItem('role'))
 
           // console.log(localStorage)
         })
@@ -152,10 +153,10 @@
       }
     },
     created() {
-      localStorage.removeItem('user');
-      localStorage.removeItem('auth_token_default');
-      console.log(localStorage)
-    }
+      // localStorage.removeItem('user');
+      // localStorage.removeItem('auth_token_default');
+      // console.log(localStorage)
+    },
     
   } 
 </script>

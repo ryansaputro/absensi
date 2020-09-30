@@ -1,7 +1,7 @@
 export default {
   methods: {
     $can(permissionName) {
-      // console.log(localStorage.getItem('role'))
+      console.log(localStorage)
       if (typeof (localStorage.getItem('user')) !== 'undefined') {
         window.Permissions = localStorage.getItem('user');
       } else {

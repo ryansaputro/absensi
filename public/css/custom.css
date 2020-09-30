@@ -87,7 +87,7 @@ a.nav-link {
     border-radius: 13px;
     color: rgb(0, 0, 0) !important;
     padding: 7px 10px;
-    width: 115px;
+    width: 150px;
     margin-right: 50px;
     text-align: center;
 }
@@ -235,6 +235,11 @@ a.nav-link {
     position: absolute;
     left: 0%;
     top: 310px;
+}
+
+.page-container {
+    padding-left: 250px;
+    background: #e5e5e5;
 }
 /* } */
 

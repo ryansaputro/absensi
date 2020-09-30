@@ -22,7 +22,11 @@
       </ul>
       <ul class="navbar-nav ml-auto" v-if="$auth.check()">
         <li class="nav-item">
-          <a class="nav-link" href="#" @click="logout()"> <i class="fa fa-user" aria-hidden="true"></i> Keluar </a>
+          <router-link to="/ganti-password" class="nav-link"><i class="fa fa-key" aria-hidden="true"></i> ganti password </router-link>
+            
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" style="margin-right:0px;" href="#" @click="logout()"> <i class="fa fa-user" aria-hidden="true"></i> Keluar </a>
         </li>
       </ul>
     </div>
@@ -55,9 +59,10 @@
     methods: {
       logout(){
         if(this.$auth.logout()){
-          console.log("sukses")
+          // console.log("sukses")
           localStorage.removeItem('user');
           localStorage.removeItem('role');
+          localStorage.removeItem('firstLoad');
         }
         //   axios.post('/auth/logout')
         // .then(res => {

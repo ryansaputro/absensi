@@ -1,7 +1,7 @@
 <template>
   <div class="content">
     <div class="container">
-      <div class="user-data m-b-30 p-3">
+      <div class="user-data m-b-30 p-3" v-if="$can('dashboard-total-karyawan')">
         <div class="my-5">
           <h5 class="text-uppercase text-center">Total Karyawan</h5>
           <!-- <form v-on:submit.prevent="getData">
@@ -27,33 +27,7 @@
           </div>
         </div>
     </div>
-      <!-- <div class="user-data m-b-30 p-3">
-        <div class="my-5">
-          <h5 class="text-uppercase text-center">mobilisasi personnel</h5> -->
-          <!-- <form v-on:submit.prevent="getData">
-            <div class="row">
-              <div class="col-md-6 offset-md-3">
-                <h5>Enter A City:</h5>
-                <div class="input-group">
-                  <input type="text" class="form-control" v-model="city" />
-                  <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="submit">Submit</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </form> -->
-        <!-- </div>
-        <div class="my-5">
-          <div class="alert alert-info" v-show="loading">
-            Loading...
-          </div>
-          <div v-show="chart != null">
-            <canvas id="PulangAwalChart"></canvas>
-          </div>
-        </div>
-    </div> -->
-    <div class="row">
+    <div class="row" v-if="$can('dashboard-kehadiran')">
       <div class="col-md-6">
             <div class="user-data m-b-30 p-3">
               <div class="my-5">
@@ -85,7 +59,7 @@
           </div>
       </div>
     </div>
-    <div class="row">
+    <div class="row" v-if="$can('dashboard-keterlambatan')">
       <div class="col-md-12">
         <div class="user-data m-b-30 p-3">
           <div class="my-5">

@@ -54,6 +54,7 @@ class HomeController extends Controller
                 ->select(DB::raw('COUNT(users_status_pegawai.id_cabang) AS jumlah'), 'nama_cabang AS kantor')
                 ->join('users_status_pegawai', 'users_status_pegawai.id_karyawan', '=', 'users.id')
                 ->join('cabang', 'users_status_pegawai.id_cabang', '=', 'cabang.id')
+                ->where('users.id', '<>', '5')
                 ->groupBy('users_status_pegawai.id_cabang')
                 ->get();
         

@@ -27,7 +27,7 @@
                     <div class="col-md-6 mb-2">
                     </div>
                     <div class="col-md-6">
-                        <router-link v-if="$can('read-absensi')" class="btn btn-primary w-100" to="data-kehadiran/create">+ Tambah</router-link>
+                        <router-link v-if="$can('create-data-kehadiran')" class="btn btn-primary w-100" to="data-kehadiran/create">+ Tambah</router-link>
                         <!-- <date-picker :placeholder="waterMark" style="width:100%;" v-model="time1" @change="filterTanggal()" valueType="format"></date-picker> -->
                     </div>
                 </div>
@@ -47,8 +47,8 @@
                     <td v-else-if="project.status === 'A' ">Alpa</td>
                     <td v-else>Cuti</td>
                     <td>
-                      <router-link class="btn btn-primary btn-xs" :to="'/data-kehadiran/'+project.id">Edit</router-link>
-                      <button class="btn btn-danger btn-xs" v-on:click="deleteData(project.id)">Delete</button>
+                      <router-link v-if="$can('edit-data-kehadiran')" class="btn btn-primary btn-xs" :to="'/data-kehadiran/'+project.id">Edit</router-link>
+                      <button v-if="$can('delete-data-kehadiran')" class="btn btn-danger btn-xs" v-on:click="deleteData(project.id)">Delete</button>
                     </td>
                 </tr>
             </tbody>
