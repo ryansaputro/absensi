@@ -1,4 +1,11 @@
 <?php
+/**
+ * @author ryan saputro
+ * @email ryansaputro52@gmail.com
+ * @create date 2020-10-01 13:24:39
+ * @modify date 2020-10-01 13:24:39
+ * @desc handle url to request
+ */
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -46,62 +53,112 @@ Route::prefix('v1')->group(function () {
 
     });
 
+    //utk update password pengguna aplikasi
     Route::post('/update-password','AuthController@updatePassword');
+
+    //url utk display
     Route::post('/absen','HomeController@absen');
     Route::get('/cek-absen','HomeController@cekAbsen');
+
     Route::group(['middleware' => ['auth']], function() {
-        // menambahkan route untuk person
+
+        //menu absensi, lacak, pantau
         Route::get('/dashboard','HomeController@index');
-        Route::post('/get-absen','HomeController@getAbsen');
         Route::get('/lacak','HomeController@lacak');
         Route::get('/pantau','HomeController@pantau');
         Route::get('/telat','HomeController@telat');
+        
+        //post data dari alat (RFID READER/ANTENA)
+        Route::post('/get-absen','HomeController@getAbsen');
+
+        //utk report
         Route::get('/laporan-terlambat','ReportController@laporanTerlambat');
         Route::get('/laporan-overtime','ReportController@laporanOvertime');
         Route::get('/laporan-semua','ReportController@laporanSemua');
+        Route::get('/laporan-kehadiran','ReportController@laporanKehadiran');
         Route::get('/rekap-keterlambatan','ReportController@rekapKeterlambatan');
         Route::get('/export-excel','ReportController@exportExcel');
         Route::get('/rekap-export-excel','ReportController@rekapKeterlambatanExcel');
     });
 
-    Route::get('/laporan-kehadiran','ReportController@laporanKehadiran');
     Route::middleware('permission:read-absensi')->group(function () {
         Route::get('/list-absensi','HomeController@listAbsensi');
         
     });
 
-    // Route::middleware('permission:read-pengguna|create-pengguna|edit-pengguna|delete-pengguna')->group(function () {
-        Route::prefix('pengguna')->group(function() {
-            Route::get('/','PersonController@all');
-            Route::get('/{id}','PersonController@show');
-            Route::post('/create','PersonController@store');
-            Route::put('/{id}','PersonController@update');
-            Route::delete('/{id}','PersonController@delete');
-        });
-            Route::get('/provinsi','PersonController@provinsi');
-            Route::get('/divisi','PersonController@divisi');
-            Route::get('/kota','PersonController@kota');
-            Route::get('/kecamatan','PersonController@kecamatan');
-            Route::get('/kelurahan','PersonController@kelurahan');
-            
-    // });
-            
-    Route::get('/user-login','AdministratorAplikasiController@userLogin');
-    Route::get('/role','AdministratorAplikasiController@role');
-    Route::get('/permission','AdministratorAplikasiController@permission');
+    //master data > karyawan 
+    Route::prefix('karyawan')->group(function() {
+        Route::get('/','PersonController@all');
+        Route::get('/{id}','PersonController@show');
+        Route::post('/create','PersonController@store');
+        Route::put('/{id}','PersonController@update');
+        Route::delete('/{id}','PersonController@delete');
+    });
 
-    Route::get('data-kehadiran/get-data-nik','DataKehadiranController@getDataNik');
-    // middleware('permission:read-user|create-user|edit-user|delete-user')->
-    // Route::group(function () {
-        Route::prefix('data-kehadiran')->group(function() {
-            Route::get('/','DataKehadiranController@all');
-            Route::get('/get-nik','DataKehadiranController@getNik');
-            Route::get('/{id}','DataKehadiranController@show');
-            Route::post('/create','DataKehadiranController@store');
-            Route::put('/{id}','DataKehadiranController@update');
-            Route::delete('/{id}','DataKehadiranController@delete');
-        });
+        //data utk karyawan
+        Route::get('/provinsi','PersonController@provinsi');
+        Route::get('/get-divisi','PersonController@divisi');
+        Route::get('/kota','PersonController@kota');
+        Route::get('/kecamatan','PersonController@kecamatan');
+        Route::get('/kelurahan','PersonController@kelurahan');
+            
+    
+    //admin aplikasi > pengguna aplikasi 
+    Route::prefix('user-login')->group(function() {
+        Route::get('/','AdministratorAplikasiController@userLogin');
+        Route::post('/create','AdministratorAplikasiController@userLoginCreate');
+        Route::get('/{id}','AdministratorAplikasiController@userLoginShow');
+        Route::put('/{id}','AdministratorAplikasiController@userLoginUpdate');
+        Route::delete('/{id}','AdministratorAplikasiController@userLoginDelete');
+    });
 
-    // });
+    //admin aplikasi > role 
+    Route::prefix('role')->group(function() {
+        Route::get('/','AdministratorAplikasiController@role');
+        Route::get('/get-permissions','AdministratorAplikasiController@permission');
+        Route::post('/create','AdministratorAplikasiController@roleCreate');
+        Route::get('/{id}','AdministratorAplikasiController@roleShow');
+        Route::put('/{id}','AdministratorAplikasiController@roleUpdate');
+        Route::delete('/{id}','AdministratorAplikasiController@roleDelete');
+    });
+
+    //data kehadiran 
+    Route::prefix('data-kehadiran')->group(function() {
+        Route::get('/get-data-nik','DataKehadiranController@getDataNik');
+        Route::get('/','DataKehadiranController@all');
+        Route::get('/get-nik','DataKehadiranController@getNik');
+        Route::get('/{id}','DataKehadiranController@show');
+        Route::post('/create','DataKehadiranController@store');
+        Route::put('/{id}','DataKehadiranController@update');
+        Route::delete('/{id}','DataKehadiranController@delete');
+    });
+
+    //master data > lokasi
+    Route::prefix('lokasi')->group(function() {
+        Route::get('/','LokasiController@index');
+        Route::post('/create','LokasiController@store');
+        Route::get('/{id}','LokasiController@show');
+        Route::put('/{id}','LokasiController@update');
+        Route::delete('/{id}','LokasiController@delete');
+    });
+
+    //master data > divisi
+    Route::prefix('divisi')->group(function() {
+        Route::get('/','DivisiController@index');
+        Route::post('/create','DivisiController@store');
+        Route::get('/{id}','DivisiController@show');
+        Route::put('/{id}','DivisiController@update');
+        Route::delete('/{id}','DivisiController@delete');
+    });
+
+    //master data > jabatan
+    Route::prefix('jabatan')->group(function() {
+        Route::get('/','JabatanController@index');
+        Route::post('/create','JabatanController@store');
+        Route::get('/{id}','JabatanController@show');
+        Route::put('/{id}','JabatanController@update');
+        Route::delete('/{id}','JabatanController@delete');
+    });
+
 });
 

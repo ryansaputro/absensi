@@ -27,7 +27,7 @@
                     <div class="col-md-6 mb-2">
                     </div>
                     <div class="col-md-6">
-                        <router-link v-if="$can('read-pengguna')" class="btn btn-primary w-100" to="pengguna/create">+ Tambah</router-link>
+                        <router-link v-if="$can('read-karyawan')" class="btn btn-primary w-100" to="karyawan/create">+ Tambah</router-link>
                     </div>
                 </div>
             </div>
@@ -45,8 +45,8 @@
                     <td>{{project.tgl_masuk}}</td>
                     <td>{{project.tgl_habis_kontrak == '0000-00-00' ? '-' : project.tgl_habis_kontrak}}</td>
                     <td>
-                      <router-link v-if="$can('edit-pengguna')" class="btn btn-primary btn-xs" :to="'/pengguna/'+project.id">Edit</router-link>
-                      <button v-if="$can('delete-pengguna')" class="btn btn-danger btn-xs" v-on:click="deleteData(project.id)">Delete</button>
+                      <router-link v-if="$can('edit-karyawan')" class="btn btn-primary btn-xs" :to="'/karyawan/'+project.id">Edit</router-link>
+                      <button v-if="$can('delete-karyawan')" class="btn btn-danger btn-xs" v-on:click="deleteData(project.id)">Delete</button>
                     </td>
                 </tr>
                 <tr v-if="paginated.length <= 0">
@@ -109,7 +109,7 @@ export default {
         return index+1
       },
         getProjects(url = '/person') {
-            axios.get('pengguna', {params: this.tableData})
+            axios.get('karyawan', {params: this.tableData})
                 .then(response => {
                     this.projects = response.data;
                     this.pagination.total = this.projects.length;
@@ -120,7 +120,7 @@ export default {
         },
         deleteData(id) {
         // delete data
-          axios.delete("pengguna/" + id).then(response => {
+          axios.delete("karyawan/" + id).then(response => {
             this.getProjects();
             // $swal function calls SweetAlert into the application with the specified configuration.
             this.$swal('Hapus', 'Data Karyawan Berhasil dihapus.', 'success');

@@ -27,7 +27,7 @@
                     <div class="col-md-6 mb-2">
                     </div>
                     <div class="col-md-6">
-                        <router-link v-if="$can('read-pengguna')" class="btn btn-primary w-100" to="pengguna/create">+ Tambah</router-link>
+                        <router-link v-if="$can('read-role')" class="btn btn-primary w-100" to="role/create">+ Tambah</router-link>
                     </div>
                 </div>
             </div>
@@ -38,10 +38,11 @@
         <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy">
             <tbody>
                 <tr v-for="(project, index) in paginated" :key="project.id">
-                    <td>{{project.name}}</td>
+                    <td>{{project.roles}}</td>
+                    <td>{{project.permissions != NULL ? project.permissions : '-'}}</td>
                     <td>
-                      <router-link v-if="$can('edit-pengguna')" class="btn btn-primary btn-xs" :to="'/pengguna/'+project.id">Edit</router-link>
-                      <button v-if="$can('delete-pengguna')" class="btn btn-danger btn-xs" v-on:click="deleteData(project.id)">Delete</button>
+                      <router-link v-if="$can('edit-role')" class="btn btn-primary btn-xs" :to="'/role/'+project.id">Edit</router-link>
+                      <button v-if="$can('delete-role')" class="btn btn-danger btn-xs" v-on:click="deleteData(project.id)">Delete</button>
                     </td>
                 </tr>
                 <tr v-if="paginated.length <= 0">
@@ -69,6 +70,7 @@ export default {
         let sortOrders = {};
         let columns = [
             {label: 'Nama Role', name: 'nama_role'},
+            {label: 'Akses Menu', name: 'akses_menu'},
             {label: 'Aksi', name: 'action'}
         ];
         columns.forEach((column) => {
@@ -110,10 +112,10 @@ export default {
         },
         deleteData(id) {
         // delete data
-          axios.delete("role" + id).then(response => {
+          axios.delete("role/" + id).then(response => {
             this.getProjects();
             // $swal function calls SweetAlert into the application with the specified configuration.
-            this.$swal('Hapus', 'Data Karyawan Berhasil dihapus.', 'success');
+            this.$swal('Hapus', 'Data Role Berhasil dihapus.', 'success');
           });
         },
         paginate(array, length, pageNumber) {

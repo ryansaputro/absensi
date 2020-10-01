@@ -16,8 +16,7 @@
                 <div id="content" class="main-content">
                     <div v-cloak>
                         <div class="main-content">
-                            <!-- <h3>{{currentRouteName}}</h3>
-                            <h3>{{storageToken}}</h3> -->
+                            <h3 class="ml-5 text-uppercase">{{currentRouteName}}</h3>
                             <div class="section__content section__content--p30">
                                 <div class="container-fluid">
                                     <router-view></router-view>
@@ -75,81 +74,6 @@
     data() {
       return {
         menu:JSON.parse(localStorage.getItem('role'))
-        // menu: [
-        //             {
-        //                 href: '/dashboard',
-        //                 title: 'Dashboard',
-        //                 icon: 'fa fa-area-chart'
-        //             },
-        //             {
-        //                 href: '/absensi',
-        //                 title: 'Absensi',
-        //                 icon: 'fa fa-user'
-        //             },
-        //             {
-        //                 href: '/lacak',
-        //                 title: 'Lacak Personnel',
-        //                 icon: 'fa fa-blind'
-        //             },
-        //             {
-        //                 href: '/pantau',
-        //                 title: 'Pantau Personnel',
-        //                 icon: 'fa fa-eye'
-        //             },
-        //             {
-        //                 href: '/data-kehadiran',
-        //                 title: 'Data Kehadiran',
-        //                 icon: 'fa fa-calendar'
-        //             },
-        //             {
-        //                 title: 'Laporan',
-        //                 icon: 'fa fa-book',
-        //                 child: [
-        //                     {
-        //                         href: '/laporan-absensi',
-        //                         title: 'Laporan Kehadiran'
-        //                     },
-        //                     {
-        //                         href: '/rekap-absensi',
-        //                         title: 'Rekap Absensi'
-        //                     },
-        //                     {
-        //                         href: '/rekap-keterlambatan',
-        //                         title: 'Rekap Keterlambatan'
-        //                     },
-        //                     // {
-        //                     //     href: '/laporan-terlambat',
-        //                     //     title: 'Laporan Terlambat & PLA'
-        //                     // },
-        //                     // {
-        //                     //     href: '/laporan-overtime',
-        //                     //     title: 'Laporan Overtime'
-        //                     // },
-        //                     // {
-        //                     //     href: '/laporan-semua',
-        //                     //     title: 'Laporan Absensi'
-        //                     // },
-        //                 ]
-        //             },
-        //             {
-        //                 title: 'Master Data',
-        //                 icon: 'fa fa-database',
-        //                 child: [
-        //                     {
-        //                         href: '/pengguna',
-        //                         title: 'Karyawan'
-        //                     },
-        //                     // {
-        //                     //     href: '/lokasi',
-        //                     //     title: 'Lokasi'
-        //                     // },
-        //                     // {
-        //                     //     href: '/jadwal_libur',
-        //                     //     title: 'Jadwal Libur Tahunan'
-        //                     // }
-        //                 ]
-        //             },
-        //         ]
       }
     },
     components: {

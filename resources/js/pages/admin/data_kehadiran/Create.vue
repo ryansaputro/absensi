@@ -21,6 +21,7 @@
               <div class="form-group">
                 <label>Jenis Absensi</label>
                 <select class="form-control" v-model="form.status" required placeholder="pilih jenis absen">
+                  <option value="" disabled>Pilih Jenis Absen</option>
                   <option value="I">Izin</option>
                   <option value="S">Sakit</option>
                   <option value="A">Alasan</option>

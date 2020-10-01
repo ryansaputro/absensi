@@ -75,11 +75,24 @@ class AuthController extends Controller
         //     return response()->json(['status' => 'success'], 200)->header('Authorization', $token);
         // }
         // return response()->json(['error' => 'login_error'], 200);
+
+        //checking data
+        $usercek = User::where('email', $request->email)->value('id');
+        $cek = DB::table('model_has_roles')->where('model_id', $usercek)->count();
+
+        //cek jika user tidak terdaftar maka akan memproses proses ini
+        if($cek == 0){
+            return response([
+                    'status' => 'errory',
+                    'error' => 'invalid.credentials',
+                    'msg' => 'Invalid Credentials.'
+                ], 401);
+        }
         $credentials = $request->only('email', 'password');
         if ( ! $token = $this->guard()->attempt($credentials)) {
         // if ( ! $token = JWTAuth::attempt($credentials)) {
                 return response([
-                    'status' => 'error',
+                    'status' => 'errors',
                     'error' => 'invalid.credentials',
                     'msg' => 'Invalid Credentials.'
                 ], 401);

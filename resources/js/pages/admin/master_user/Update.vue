@@ -127,14 +127,14 @@
                 </div>
               </div>
               <div class="col-md-6">
-                <div class="form-group" v-if="form.status_karyawan === 'kontrak'">
-                  <label>Tanggal Akhir Kontrak</label>
-                  <date-picker :placeholder="waterMark" style="width:100%;" id="periode"  v-model="form.tgl_akhir_kontrak" valueType="format"></date-picker>
-                </div>
-
                 <div class="form-group">
                   <label>Tanggal Masuk</label>
                   <date-picker :placeholder="waterMark" style="width:100%;" id="periode"  v-model="form.tgl_masuk" valueType="format"></date-picker>
+                </div>
+
+                <div class="form-group" v-if="form.status_karyawan === 'kontrak'">
+                  <label>Tanggal Akhir Kontrak</label>
+                  <date-picker :placeholder="waterMark" style="width:100%;" id="periode"  v-model="form.tgl_akhir_kontrak" valueType="format"></date-picker>
                 </div>
 
                 <div class="form-group">
@@ -232,7 +232,7 @@
               </div>
             </div>
             <div class="form-group">
-              <router-link class="btn btn-danger" to="/pengguna">Kembali</router-link>
+              <router-link class="btn btn-danger" to="/karyawan">Kembali</router-link>
               <button class="btn btn-primary">Simpan</button>
             </div>
 
@@ -302,9 +302,8 @@ export default {
     loadData() {
       // load data berdasarkan id
       axios
-        .get("pengguna/" + this.$route.params.id)
+        .get("karyawan/" + this.$route.params.id)
         .then(response => {
-          console.log(response.data[0].kelurahan)
           // post value yang dari response ke form
           this.form.nik_pegawai = response.data[0].nik_pegawai;
           this.form.nik_ktp = response.data[0].nik_ktp;
@@ -352,7 +351,7 @@ export default {
     updateData() {
       // put data ke api menggunakan axios
       axios
-        .put("pengguna/" + this.$route.params.id, {
+        .put("karyawan/" + this.$route.params.id, {
           nik_pegawai: this.form.nik_pegawai,
           nik_ktp: this.form.nik_ktp,
           nama_lengkap: this.form.nama_lengkap,
@@ -378,8 +377,8 @@ export default {
         })
         .then(response => {
           // push router ke read data
-          // this.$router.push("/pengguna");
-          // this.$swal('Berhasil', 'Data Karyawan Berhasil diperbarui', 'success');
+          this.$router.push("/karyawan");
+          this.$swal('Berhasil', 'Data Karyawan Berhasil diperbarui', 'success');
         })
         .catch(errors => {
             if (errors.response) {
@@ -399,7 +398,7 @@ export default {
         });
     },
     getDivisi() {
-            axios.get('divisi')
+            axios.get('get-divisi')
                 .then(response => {
                     this.divisi = response.data.data;
                     this.jabatan = response.data.jabatan;

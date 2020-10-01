@@ -27,7 +27,7 @@
                     <div class="col-md-6 mb-2">
                     </div>
                     <div class="col-md-6">
-                        <router-link v-if="$can('read-pengguna')" class="btn btn-primary w-100" to="pengguna/create">+ Tambah</router-link>
+                        <router-link v-if="$can('create-pengguna')" class="btn btn-primary w-100" to="user-login/create">+ Tambah</router-link>
                     </div>
                 </div>
             </div>
@@ -42,7 +42,7 @@
                     <td>{{project.nama_lengkap}}</td>
                     <td>{{project.name}}</td>
                     <td>
-                      <router-link v-if="$can('edit-pengguna')" class="btn btn-primary btn-xs" :to="'/pengguna/'+project.id">Edit</router-link>
+                      <router-link v-if="$can('edit-pengguna')" class="btn btn-primary btn-xs" :to="'/user-login/'+project.id">Edit</router-link>
                       <button v-if="$can('delete-pengguna')" class="btn btn-danger btn-xs" v-on:click="deleteData(project.id)">Delete</button>
                     </td>
                 </tr>

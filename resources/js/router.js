@@ -25,8 +25,21 @@ import NewDataKehadiran from './pages/admin/data_kehadiran/Create'
 import NotFound from './components/404'
 import gantiPassword from './components/gantiPassword'
 import AdminAppPenggunaApp from './pages/admin/pengguna_aplikasi/Read'
+import AdminAppPenggunaAppNew from './pages/admin/pengguna_aplikasi/Create'
+import AdminAppPenggunaAppUpdate from './pages/admin/pengguna_aplikasi/Update'
 import AdminAppRole from './pages/admin/role/Read'
+import AdminAppRoleNew from './pages/admin/role/Create'
+import AdminAppRoleUpdate from './pages/admin/role/Update'
 import AdminAppPermission from './pages/admin/permission/Read'
+import Lokasi from './pages/admin/master_lokasi/Read'
+import LokasiNew from './pages/admin/master_lokasi/Create'
+import LokasiUpdate from './pages/admin/master_lokasi/Update'
+import Divisi from './pages/admin/master_divisi/Read'
+import DivisiNew from './pages/admin/master_divisi/Create'
+import DivisiUpdate from './pages/admin/master_divisi/Update'
+import Jabatan from './pages/admin/master_jabatan/Read'
+import JabatanNew from './pages/admin/master_jabatan/Create'
+import JabatanUpdate from './pages/admin/master_jabatan/Update'
 // Routes
 const routes = [
     {
@@ -51,14 +64,6 @@ const routes = [
         path: '/display',
         name: 'display',
         component: Display,
-        meta: {
-            auth: undefined
-        }
-    },
-    {
-        path: '/about',
-        name: 'about',
-        component: About,
         meta: {
             auth: undefined
         }
@@ -179,22 +184,6 @@ const routes = [
             menus: 'read-absensi'
         }
     },
-    // {
-    //     path: '/laporan-diganti-sore',
-    //     name: 'Laporan Diganti Sore',
-    //     component: LaporanDigantiSore,
-    //     meta: {
-    //         auth: true
-    //     }
-    // },
-    // {
-    //     path: '/laporan-overtime',
-    //     name: 'Laporan Overtime',
-    //     component: LaporanOvertime,
-    //     meta: {
-    //         auth: true
-    //     }
-    // },
     {
         path: '/laporan-semua',
         name: 'Laporan Absensi',
@@ -214,12 +203,48 @@ const routes = [
         }
     },
     {
+        path: '/user-login/create',
+        name: 'Pengguna Aplikasi Baru',
+        component: AdminAppPenggunaAppNew,
+        meta: {
+            auth: true,
+            menus: 'create-pengguna'
+        }
+    },
+    {
+        path: '/user-login/:id',
+        name: 'Perbarui Pengguna Aplikasi',
+        component: AdminAppPenggunaAppUpdate,
+        meta: {
+            auth: true,
+            menus: 'edit-pengguna'
+        }
+    },
+    {
         path: '/role',
         name: 'Role',
         component: AdminAppRole,
         meta: {
             auth: true,
-            menus: 'read-pengguna'
+            menus: 'read-role'
+        }
+    },
+    {
+        path: '/role/create',
+        name: 'Role Baru',
+        component: AdminAppRoleNew,
+        meta: {
+            auth: true,
+            menus: 'create-role'
+        }
+    },
+    {
+        path: '/role/:id',
+        name: 'Perbarui Role',
+        component: AdminAppRoleUpdate,
+        meta: {
+            auth: true,
+            menus: 'edit-role'
         }
     },
     {
@@ -232,32 +257,114 @@ const routes = [
         }
     },
     {
-        path: '/pengguna',
+        path: '/karyawan',
         name: 'karyawan',
         component: PenggunaRead,
         meta: {
             auth: true,
-            menus: 'read-pengguna'
+            menus: 'read-karyawan'
         }
     },
     {
-        path: '/pengguna/create',
+        path: '/karyawan/create',
         name: 'karyawan baru',
         component: PenggunaCreate,
         meta: {
             auth: true,
-            menus: 'create-pengguna'
+            menus: 'create-karyawan'
         }
     },
     {
-        path: '/pengguna/:id',
+        path: '/karyawan/:id',
         name: 'perbarui karyawan',
         component: PenggunaUpdate,
         meta: {
             auth: true,
-            menus: 'edit-pengguna'
+            menus: 'edit-karyawan'
         }
     },
+    {
+        path: '/lokasi',
+        name: 'Lokasi Antena',
+        component: Lokasi,
+        meta: {
+            auth: true,
+            menus: 'read-lokasi'
+        }
+    },
+    {
+        path: '/lokasi/create',
+        name: 'Lokasi Antena Baru',
+        component: LokasiNew,
+        meta: {
+            auth: true,
+            menus: 'create-lokasi'
+        }
+    },
+    {
+        path: '/lokasi/:id',
+        name: 'Perbarui Lokasi Antena',
+        component: LokasiUpdate,
+        meta: {
+            auth: true,
+            menus: 'edit-lokasi'
+        }
+    },
+    {
+        path: '/divisi',
+        name: 'Divisi',
+        component: Divisi,
+        meta: {
+            auth: true,
+            menus: 'read-divisi'
+        }
+    },
+    {
+        path: '/divisi/create',
+        name: 'Divisi Baru',
+        component: DivisiNew,
+        meta: {
+            auth: true,
+            menus: 'create-divisi'
+        }
+    },
+    {
+        path: '/divisi/:id',
+        name: 'Perbarui Divisi',
+        component: DivisiUpdate,
+        meta: {
+            auth: true,
+            menus: 'edit-divisi'
+        }
+    },
+    {
+        path: '/jabatan',
+        name: 'Jabatan',
+        component: Jabatan,
+        meta: {
+            auth: true,
+            menus: 'read-jabatan'
+        }
+    },
+    {
+        path: '/jabatan/create',
+        name: 'Jabatan Baru',
+        component: JabatanNew,
+        meta: {
+            auth: true,
+            menus: 'create-jabatan'
+        }
+    },
+    {
+        path: '/jabatan/:id',
+        name: 'Perbarui Jabatan',
+        component: JabatanUpdate,
+        meta: {
+            auth: true,
+            menus: 'edit-jabatan'
+        }
+    },
+
     
 ]
 const router = new VueRouter({
@@ -290,11 +397,8 @@ router.beforeEach((to, from, next) => {
         }else{
             console.log(to.meta.auth)
             if (to.meta.auth === true){
-                console.log(to.meta)
-                console.log(JSON.parse(localStorage.user))
                 var menusRole = to.meta.menus;
                 if (jQuery.inArray(menusRole, JSON.parse(localStorage.user)) !== -1){
-                    console.log("ada")
                     next();
                 }else{
                     next({ name:'NotFound'});

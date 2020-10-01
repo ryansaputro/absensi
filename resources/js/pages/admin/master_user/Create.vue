@@ -124,16 +124,17 @@
                 </div>
               </div>
               <div class="col-md-6">
-                <div class="form-group" v-if="form.status_karyawan === 'kontrak'">
-                  <label>Tanggal Akhir Kontrak</label>
-                  <date-picker :placeholder="waterMark" style="width:100%;" id="periode"  v-model="form.tgl_akhir_kontrak"  valueType="format"></date-picker>
-                </div>
 
                 <div class="form-group">
                   <label>Tanggal Masuk</label>
                   <date-picker :placeholder="waterMark" style="width:100%;" id="periode"  v-model="form.tgl_masuk"  valueType="format"></date-picker>
                 </div>
 
+                <div class="form-group" v-if="form.status_karyawan === 'kontrak'">
+                  <label>Tanggal Akhir Kontrak</label>
+                  <date-picker :placeholder="waterMark" style="width:100%;" id="periode"  v-model="form.tgl_akhir_kontrak"  valueType="format"></date-picker>
+                </div>
+                
                 <div class="form-group">
                   <label>Kantor</label>
                   <select class="form-control" v-model="form.kantor" required>
@@ -230,7 +231,7 @@
               </div>
             </div>
             <div class="form-group">
-              <router-link class="btn btn-danger" to="/pengguna">Kembali</router-link>
+              <router-link class="btn btn-danger" to="/karyawan">Kembali</router-link>
               <button class="btn btn-primary">Simpan</button>
             </div>
 
@@ -317,7 +318,7 @@ export default {
     addData() {
       // post data ke api menggunakan axios
       axios
-        .post("pengguna/create", {
+        .post("karyawan/create", {
           nik_pegawai: this.form.nik_pegawai,
           no_ktp: this.form.no_ktp,
           nama_lengkap: this.form.nama_lengkap,
@@ -343,7 +344,7 @@ export default {
         })
         .then(response => {
           // push router ke read data
-          this.$router.push("/pengguna");
+          this.$router.push("/karyawan");
           this.$swal('Berhasil', 'Karyawan Baru sukses di input.', 'success');
         })
         .catch(errors => {

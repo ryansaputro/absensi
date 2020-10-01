@@ -1,4 +1,11 @@
 <?php
+/**
+ * @author ryan saputro
+ * @email ryansaputro52@gmail.com
+ * @create date 2020-10-01 13:26:03
+ * @modify date 2020-10-01 13:26:03
+ * @desc handle master data karyawan
+ */
 
 namespace App\Http\Controllers;
 
@@ -135,7 +142,7 @@ class PersonController extends Controller
         $data = DB::table('users')
                 ->select('nik_pegawai', 'nik_ktp', 'id_divisi', 'id_jabatan', 'nama_lengkap', 'gol_darah', 'no_telp', 'email', 'id_epc_tag', 'foto', 'tgl_masuk', 'tgl_habis_kontrak', 'status_pegawai', 'masa_kerja', 'id_cabang', 'rt', 'rw', 'kelurahan', 'kecamatan', 'kota', 'provinsi', 'kode_pos', 'alamat')
                 ->join('users_status_pegawai', 'users_status_pegawai.id_karyawan', '=', 'users.id')
-                ->join('users_alamat', 'users_alamat.id_karyawan', '=', 'users.id')
+                ->leftJoin('users_alamat', 'users_alamat.id_karyawan', '=', 'users.id')
                 ->where('users.id', $id)
                 ->first();
 
@@ -252,7 +259,7 @@ class PersonController extends Controller
         $data = DB::table('users')
             ->select('nik_pegawai', 'nik_ktp', 'id_divisi', 'id_jabatan', 'nama_lengkap', 'gol_darah', 'no_telp', 'email', 'id_epc_tag', 'foto', 'tgl_masuk', 'tgl_habis_kontrak', 'status_pegawai', 'masa_kerja', 'id_cabang', 'rt', 'rw', 'kelurahan', 'kecamatan', 'kota', 'provinsi', 'kode_pos', 'alamat')
             ->join('users_status_pegawai', 'users_status_pegawai.id_karyawan', '=', 'users.id')
-            ->join('users_alamat', 'users_alamat.id_karyawan', '=', 'users.id')
+            ->leftJoin('users_alamat', 'users_alamat.id_karyawan', '=', 'users.id')
             ->where('users.id', $id)
             ->first(); 
 
@@ -286,19 +293,24 @@ class PersonController extends Controller
         ];
 
         $this->validate($request, $rules, $customMessages);
-        // dd($request->all());
+
+        $kelurahan = (int)$request->kelurahan;
+
         DB::beginTransaction();
         try {
 
-            //cek jika gambar ada di folder images/karyawan maka akan di lakukan proses penghapusan
-            if(file_exists($path . '/' . $data->foto)){
-                
-                //delete file exist
-                unlink($path . '/' . $data->foto);
+            //cek jika ada foto maka lakukan proses ini
+            if($data->foto != ""){
+
+                //cek jika gambar ada di folder images/karyawan maka akan di lakukan proses penghapusan
+                if(file_exists($path . '/' . $data->foto)){
+                    //delete file exist
+                    unlink($path . '/' . $data->foto);
+                }
             }
 
                 //jika foto diset maka proses ini akan dijalankan
-                if($request->foto !== '/images/karyawan/'.$data->foto){
+                if($request->foto !== '/images/karyawan/'.$data->foto || $data->foto == ''){
 
                     //proses simpan foto
                     $img = $request->foto;  // your base64 encoded
@@ -309,6 +321,7 @@ class PersonController extends Controller
                     $image_base64 = base64_decode($image_parts[1]);
                     $file = $path.'/' . $imageName . '.'.$image_type;
                     file_put_contents($file, $image_base64);
+                    $data = User::where('id', $id)->update(['foto' => $imageName . '.'.$image_type]);
                 }
 
                 //proses simpan data
@@ -324,7 +337,10 @@ class PersonController extends Controller
                     'id_epc_tag' => $request->id_epc_tag,
                 ]);
 
-                $data2 = UserStatusPegawai::where('id_karyawan', $id)->update([
+
+
+                $data2 = UserStatusPegawai::updateOrCreate([
+                    'id_karyawan' => $id],[
                     'tgl_masuk' => $request->tgl_masuk,
                     'tgl_habis_kontrak' => $request->tgl_akhir_kontrak,
                     'status_pegawai' => $request->status_karyawan,
@@ -332,10 +348,11 @@ class PersonController extends Controller
                     'id_cabang' => $request->kantor
                 ]);
 
-                $data3 = UserAlamat::where('id_karyawan', $id)->update([
+                $data3 = UserAlamat::updateOrCreate([
+                    'id_karyawan' => $id],[
                     'rt' => $request->rt,
                     'rw' => $request->rw,
-                    'kelurahan' => $request->kelurahan,
+                    'kelurahan' => $kelurahan,
                     'kecamatan' => $request->kecamatan,
                     'kota' => $request->kota,
                     'provinsi' => $request->provinsi,

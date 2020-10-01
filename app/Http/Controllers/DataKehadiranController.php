@@ -73,10 +73,19 @@ class DataKehadiranController extends Controller
         return ['data' => $projects, 'draw' => $request->input('draw')];
     }
 
-    public function getNik()
+    public function getNik(Request $request)
     {
         //get data nik semua karyawan menggunakan axios get
-        $data = DB::table('users')->select('nik_pegawai AS text', 'id AS value')->get();
+        $data = DB::table('users')->select(DB::raw('CONCAT(nik_pegawai, " - ", nama_lengkap) AS text'), 'id AS value')->where('id', '<>', '5')->get();
+
+        //get data request dari menu pengguna aplikasi utk create
+        if(isset($request->from)){
+
+            //get roles di menu roles
+            $roles = DB::table('roles')->select('name', 'id')->get();
+            return ['data' => $data, 'roles' => $roles];
+        }
+
         return ['data' => $data];
     }
 
