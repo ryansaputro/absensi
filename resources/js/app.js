@@ -17,6 +17,7 @@ import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 
+
 Vue.mixin(Permissions)
 Vue.use(VueSidebarMenu)
 Vue.use(BootstrapVue)

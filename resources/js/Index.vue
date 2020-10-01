@@ -1,5 +1,5 @@
 <template>
-    <div id="main">
+    <div id="main" v-if="isMobile === false">
         <div id="header">
           <div v-if="$auth.check()">
             <!-- <Mobile></Mobile> -->
@@ -53,6 +53,9 @@
                 <!-- </div> -->
             </div>
         </div>
+        <div v-else>
+          <h3 class="text-center text-uppercase">maaf hanya dapat diakses menggunakan desktop</h3>
+        </div>
     </div>
 </template>
 <style>
@@ -69,11 +72,14 @@
   import Sidebar from './components/Sidebar.vue'
   import Mobile from './components/Mobile.vue'
   import { SidebarMenu } from 'vue-sidebar-menu'
+  import { isMobile } from 'mobile-device-detect';
 
   export default {
     data() {
       return {
-        menu:JSON.parse(localStorage.getItem('role'))
+        menu:JSON.parse(localStorage.getItem('role')),
+        isMobile:isMobile ? true : false
+
       }
     },
     components: {
@@ -82,6 +88,7 @@
       Mobile
     },
     created() {
+      console.log(isMobile)
     },
     computed: {
         currentRouteName() {

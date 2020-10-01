@@ -259,6 +259,51 @@ a.nav-link {
   border-radius: 10px;
 }
 
+@media only screen and (max-width: 600px) {
+  .v-sidebar-menu {
+        top: -90px !important;
+  }
+
+  .v-sidebar-menu .vsm--toggle-btn{
+      display: block !important;
+  }
+
+  .v-sidebar-menu .vsm--link{
+      margin-left: 0px !important;
+  }
+
+  .upper-sidebar{
+      display: none !important;
+  }
+
+  .navbar {
+        background: rgb(229 229 229) !important;
+        color: #fafafa !important;
+        position: fixed !important;
+        margin-bottom: 68px !important;
+        z-index: 2 !important;
+        width: 84% !important;
+        left: 50px !important;
+        border-bottom: 1px solid #e0e0e0 !important;
+        top: 0px;
+        border-radius: 0px !important;
+    }
+
+    .v-sidebar-menu .vsm--link_level-1.vsm--link_exact-active, .v-sidebar-menu .vsm--link_level-1.vsm--link_active {
+        background: green !important;
+        width: 50px;
+        border-radius: 15px;
+        box-shadow: 3px 3px 3px #949393;
+        color: #fff !important;
+        padding: 5px 15px;
+    }
+
+    .main-content {
+        padding-left: 30px !important;
+    }
+
+}
+
 /* Handle on hover */
 /* ::-webkit-scrollbar-thumb:hover {
   background: #b1bb5c; 
