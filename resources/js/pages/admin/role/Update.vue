@@ -1,6 +1,7 @@
 <template>
   <div>
     <form @submit.prevent="updateData()">
+      <div class="loader" v-if="loading"></div>
       <div class="row">
         <div class="col-md-12">
           <div class="user-data p-3">
@@ -51,7 +52,8 @@ export default {
       },
       items:[],
       lastSelectItem: {},
-      searchText: ''
+      searchText: '',
+      loading: false,
 
     }
   },
@@ -75,16 +77,20 @@ export default {
       this.searchText = searchText
     },    
     getPermissions() {
+      this.loading = true
       axios.get('/role/get-permissions')
             .then(response => {
                 this.options = response.data;
             })
             .catch(errors => {
                 console.log(errors);
+            }).finally(() => {
+                this.loading =  false
             });
     },
     loadData() {
       // load data berdasarkan id
+      this.loading = true
       axios
         .get("role/" + this.$route.params.id)
         .then(response => {
@@ -92,11 +98,14 @@ export default {
           this.form.roles = response.data.roles.name;
           this.form.permissions = response.data.permissions;
           this.items = response.data.permissions;
+        }).finally(() => {
+            this.loading =  false
         });
     },
 
     updateData() {
       // post data ke api menggunakan axios
+      this.loading = true
       axios
         .put("role/" + this.$route.params.id, {
           permissions: this.form.permissions,
@@ -125,6 +134,8 @@ export default {
             } else {
               console.log("lainnya")
             }
+        }).finally(() => {
+            this.loading =  false
         });
     },
   }

@@ -158,7 +158,7 @@ class ReportController extends Controller
                 $status->where(DB::raw('DATE(tanggal)'), $request->input('tanggal'));
             }
             
-            $karyawan = User::where('users.id', '<>', '5')->get();
+            $karyawan = User::where('users.id', '<>', '5')->orderby('nama_lengkap', 'ASC')->get();
             
             if ($searchValue) {
                 $absen->where(function($absen) use ($searchValue) {
@@ -196,11 +196,12 @@ class ReportController extends Controller
 
         if ( $request->input('client') || ($request->input('search'))) {
 
-            $karyawan = User::where('users.id', '<>', '5')->get();
+            $karyawan = User::where('users.id', '<>', '5')->orderby('nama_lengkap', 'ASC')->get();
 
             $absen = DB::table('view_absensi')->select(DB::raw('COUNT(masuk) AS kehadiran'), 'users.nik_pegawai AS no_ktp', 'users.id AS id_user','view_absensi.nama_lengkap', 'masuk', 'keluar', 'tanggal', DB::raw('DATE_FORMAT(tanggal, "%Y-%c-%e") as tgl'))
             ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
             ->where('tanggal', date('Y-m-d'))
+            ->orderby('nama_lengkap', 'ASC')
             // ->where('users.id', '<>', '5')
             ->groupBy('users.id');
             
@@ -224,7 +225,7 @@ class ReportController extends Controller
                 });
 
                 $karyawan = User::where('nama_lengkap', 'like', '%' . $searchValue . '%')
-                    ->orWhere('nik_pegawai', 'like', '%' . $searchValue . '%')->get();
+                    ->orWhere('nik_pegawai', 'like', '%' . $searchValue . '%')->orderby('nama_lengkap', 'ASC')->get();
 
             }
 
@@ -307,13 +308,13 @@ class ReportController extends Controller
                 //filter user 
                 if($request->input('filterby')){
                     if($request->filterby == 'terlambat_paling_banyak'){
-                        $status->orderBy('jml_telat', 'DESC');
+                        $status->orderBy('jml_telat', 'DESC')->orderBy('nama_lengkap', 'ASC');
                     }elseif($request->filterby == 'terlambat_paling_sedikit'){
-                        $status->orderBy('jml_telat', 'ASC');
+                        $status->orderBy('jml_telat', 'ASC')->orderBy('nama_lengkap', 'ASC');
                     }elseif($request->filterby == 'total_terlambat_paling_banyak'){
-                        $status->orderBy('menit_telat', 'DESC');
+                        $status->orderBy('menit_telat', 'DESC')->orderBy('nama_lengkap', 'ASC');
                     }elseif($request->filterby == 'total_terlambat_paling_sedikit'){
-                        $status->orderBy('menit_telat', 'ASC');
+                        $status->orderBy('menit_telat', 'ASC')->orderBy('nama_lengkap', 'ASC');
                     }
                 }else{
                     $status->orderBy('jml_telat', 'DESC');
@@ -379,10 +380,10 @@ class ReportController extends Controller
             }
 
             //get data karyawan yg tidak absen 
-            $karyawanNotAbsen = User::where('users.id', '<>', '5')->whereNotIn('id', $id_karyawan);
+            $karyawanNotAbsen = User::where('users.id', '<>', '5')->whereNotIn('id', $id_karyawan)->orderBy('nama_lengkap', 'ASC');
             
             //get data karyawan yg melakukan absen 
-            $karyawanAbsen = User::where('users.id', '<>', '5')->whereIn('id', $id_karyawan);
+            $karyawanAbsen = User::where('users.id', '<>', '5')->whereIn('id', $id_karyawan)->orderBy('nama_lengkap', 'ASC');
             
             //jika user melakukan pencarian maka akan dieksekusi proses ini 
             if($searchValue){
@@ -407,6 +408,7 @@ class ReportController extends Controller
             $absen = DB::table('view_absensi')->select(DB::raw('COUNT(masuk) AS kehadiran'), 'users.nik_pegawai AS no_ktp', 'users.id AS id_user','view_absensi.nama_lengkap', 'masuk', 'keluar', 'tanggal', DB::raw('DATE_FORMAT(tanggal, "%Y-%c-%e") as tgl'))
                 ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
                 ->where('tanggal', date('Y-m-d'))
+                ->orderBy('nama_lengkap', 'ASC')
                 // ->where('users.id', '<>', '5')
                 ->groupBy('users.id');
             
@@ -483,10 +485,10 @@ class ReportController extends Controller
             }
 
             //get karyawan yg tidak absen
-            $karyawanNotAbsen = User::where('users.id', '<>', '5')->whereNotIn('id', $id_karyawan);
+            $karyawanNotAbsen = User::where('users.id', '<>', '5')->whereNotIn('id', $id_karyawan)->orderBy('nama_lengkap', 'ASC');
 
             //get karyawan yg absen
-            $karyawanAbsen = User::where('users.id', '<>', '5')->whereIn('id', $id_karyawan);
+            $karyawanAbsen = User::where('users.id', '<>', '5')->whereIn('id', $id_karyawan)->orderBy('nama_lengkap', 'ASC');
             
             //jika user melakukan pencarian maka fungsi ini akan diproses 
             if($searchValue){
@@ -584,8 +586,8 @@ class ReportController extends Controller
                 $id_karyawan[] = ''; 
         }
 
-        $karyawanNotAbsen = User::where('users.id', '<>', '5')->whereNotIn('id', $id_karyawan);//->get();
-        $karyawanAbsen = User::where('users.id', '<>', '5')->whereIn('id', $id_karyawan);//->get();
+        $karyawanNotAbsen = User::where('users.id', '<>', '5')->whereNotIn('id', $id_karyawan)->orderBy('nama_lengkap', 'ASC');//->get();
+        $karyawanAbsen = User::where('users.id', '<>', '5')->whereIn('id', $id_karyawan)->orderBy('nama_lengkap', 'ASC');//->get();
         
         if($searchValue){
             $karyawanNotAbsen = $karyawanNotAbsen->where('nama_lengkap', 'like', '%' . $searchValue . '%')
@@ -848,7 +850,7 @@ class ReportController extends Controller
     public function exportExcel(Request $request)
     {
             $tgl = is_array($request->input('tanggal'));
-            $karyawan = User::where('users.id', '<>', '5')->get();
+            $karyawan = User::where('users.id', '<>', '5')->orderBy('nama_lengkap', 'ASC')->get();
 
             $absen = DB::table('view_absensi')->select(DB::raw('COUNT(masuk) AS kehadiran'), 'users.nik_pegawai AS no_ktp', 'users.id AS id_user','view_absensi.nama_lengkap', 'masuk', 'keluar', 'tanggal', DB::raw('DATE_FORMAT(tanggal, "%Y-%c-%e") as tgl'))
             ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
@@ -911,7 +913,8 @@ class ReportController extends Controller
                     ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
                     ->whereBetween('tanggal', $request->input('tanggal'))
                     ->where('users.id', '<>', '5')
-                    ->orderBy('tanggal', 'DESC')
+                    ->orderBy('tanggal', 'ASC')
+                    ->orderBy('nama_lengkap', 'ASC')
                     ->get();
             return $a;
     	}
@@ -921,7 +924,8 @@ class ReportController extends Controller
                     ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
                     ->where('tanggal', date('Y-m-d'))
                     ->where('users.id', '<>', '5')
-                    ->orderBy('tanggal', 'DESC')
+                    ->orderBy('tanggal', 'ASC')
+                    ->orderBy('nama_lengkap', 'ASC')
                     ->get();
             return $a;
     	}

@@ -76,7 +76,7 @@ class DataKehadiranController extends Controller
     public function getNik(Request $request)
     {
         //get data nik semua karyawan menggunakan axios get
-        $data = DB::table('users')->select(DB::raw('CONCAT(nik_pegawai, " - ", nama_lengkap) AS text'), 'id AS value')->where('id', '<>', '5')->get();
+        $data = DB::table('users')->select(DB::raw('CONCAT(nik_pegawai, " - ", nama_lengkap) AS text'), 'id AS value')->where('id', '<>', '5')->orderBy('nama_lengkap', 'ASC')->get();
 
         //get data request dari menu pengguna aplikasi utk create
         if(isset($request->from)){

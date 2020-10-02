@@ -40,6 +40,9 @@ import DivisiUpdate from './pages/admin/master_divisi/Update'
 import Jabatan from './pages/admin/master_jabatan/Read'
 import JabatanNew from './pages/admin/master_jabatan/Create'
 import JabatanUpdate from './pages/admin/master_jabatan/Update'
+import Kantor from './pages/admin/master_kantor/Read'
+import KantorNew from './pages/admin/master_kantor/Create'
+import KantorUpdate from './pages/admin/master_kantor/Update'
 // Routes
 const routes = [
     {
@@ -362,6 +365,33 @@ const routes = [
         meta: {
             auth: true,
             menus: 'edit-jabatan'
+        }
+    },
+    {
+        path: '/kantor',
+        name: 'Kantor',
+        component: Kantor,
+        meta: {
+            auth: true,
+            menus: 'read-kantor'
+        }
+    },
+    {
+        path: '/kantor/create',
+        name: 'Kantor Baru',
+        component: KantorNew,
+        meta: {
+            auth: true,
+            menus: 'create-kantor'
+        }
+    },
+    {
+        path: '/kantor/:id',
+        name: 'Perbarui Kantor',
+        component: KantorUpdate,
+        meta: {
+            auth: true,
+            menus: 'edit-kantor'
         }
     },
 

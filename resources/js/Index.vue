@@ -16,7 +16,7 @@
                 <div id="content" class="main-content">
                     <div v-cloak>
                         <div class="main-content">
-                            <h3 class="ml-5 text-uppercase">{{currentRouteName}}</h3>
+                            <h5 class="ml-5 text-uppercase">{{currentRouteName}}</h5>
                             <div class="section__content section__content--p30">
                                 <div class="container-fluid">
                                     <router-view></router-view>
@@ -88,7 +88,6 @@
       Mobile
     },
     created() {
-      console.log(isMobile)
     },
     computed: {
         currentRouteName() {

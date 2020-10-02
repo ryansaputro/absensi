@@ -1,5 +1,6 @@
 <template>
     <div class="projects">
+        <div class="loader" v-if="loading"></div>
         <div class="user-data m-b-30 p-3">
           <div class="row">
             <div class="col-md-6">
@@ -8,7 +9,7 @@
                         <label for="filterBy">Pencarian</label>
                     </div>
                     <div class="col-md-6">
-                        <input class="input form-control input-sm" type="text" @input="filterTanggal()" v-model="search" placeholder="NIK, Nama">
+                        <input class="input form-control input-sm" type="text" v-model="search" placeholder="NIK, Nama">
                     </div>
                     <div class="col-md-6">
                         <label for="filterBy">Data/Halaman</label>
@@ -86,6 +87,7 @@ export default {
             tableData: {
                 client: true,
             },
+            loading: false,
             pagination: {
                 currentPage: 1,
                 total: '',
@@ -97,10 +99,8 @@ export default {
         }
     },
     methods: {
-      doMath: function (index) {
-        return index+1
-      },
         getProjects() {
+            this.loading = true
             axios.get('role', {params: this.tableData})
                 .then(response => {
                     this.projects = response.data;
@@ -108,15 +108,20 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });
         },
         deleteData(id) {
-        // delete data
-          axios.delete("role/" + id).then(response => {
+            this.loading = true
+            // delete data
+            axios.delete("role/" + id).then(response => {
             this.getProjects();
             // $swal function calls SweetAlert into the application with the specified configuration.
             this.$swal('Hapus', 'Data Role Berhasil dihapus.', 'success');
-          });
+          }).finally(() => {
+            this.loading =  false
+        });
         },
         paginate(array, length, pageNumber) {
             this.pagination.from = array.length ? ((pageNumber - 1) * length) + 1 : ' ';
@@ -153,7 +158,7 @@ export default {
             let order = this.sortOrders[sortKey] || 1;
             if (sortKey) {
                 projects = projects.slice().sort((a, b) => {
-                    let index = this.getIndex(this.columns, 'nik_pegawai', sortKey);
+                    let index = this.getIndex(this.columns, 'name', sortKey);
                     a = String(a[sortKey]).toLowerCase();
                     b = String(b[sortKey]).toLowerCase();
                     // if (this.columns[index].type && this.columns[index].type === 'date') {

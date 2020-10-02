@@ -1,28 +1,17 @@
 <template>
   <div>
     <form @submit.prevent="updateData()">
+      <div class="loader" v-if="loading"></div>
       <div class="row">
         <div class="col-md-12">
           <div class="user-data p-3">
             <!-- prevent form submit untuk reload halaman, kemudian memanggil function addData() -->
               <div class="form-group">
                 <label>Periode</label>
-                <!-- <date-picker 
-                      ref="datePicker" 
-                      v-model="tanggal" 
-                      @change="getDataNik()" 
-                      range
-                      valueType="format"
-                      range
-                      format='DD-MM-YYYY'
-                      confirm
-                      width="100%"
-                      input-class="form-control"
-                  >
-                </date-picker> -->
                 <date-picker
                     @change="getDataNik()" 
-                    v-model="form.periode" 
+                    v-model="form.tanggal" 
+                    :placeholder="waterMark" 
                     ref="datePicker"
                     name="contract_period"
                     format='DD-MM-YYYY'
@@ -108,6 +97,8 @@ export default {
       },
       projects:[],
       lastData:[],
+      waterMark : '',
+      loading: false,
     }
   },
   created() {
@@ -125,16 +116,19 @@ export default {
       },
     
     getNik() {
+      this.loading = true
       axios.get('data-kehadiran/get-nik')
             .then(response => {
                 this.options = response.data.data;
-               
             })
             .catch(errors => {
                 console.log(errors);
+            }).finally(() => {
+                this.loading =  false
             });
     },
      getDataNik() {
+       this.loading = true
         axios.get('data-kehadiran/get-data-nik', {
               params:{
                 tanggal:this.form.tanggal,
@@ -146,9 +140,12 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });
       },  
     loadData() {
+      this.loading = true
       // load data berdasarkan id
       axios
         .get("data-kehadiran/" + this.$route.params.id)
@@ -157,11 +154,15 @@ export default {
           this.form.tanggal = response.data.tanggal;
           this.form.nik = response.data.id_karyawan;
           this.form.status = response.data.status;
+          this.waterMark = response.data.tanggal;
 
           this.getDataNik();
+        }).finally(() => {
+            this.loading =  false
         });
     },
     updateData() {
+      this.loading = true
       // put data ke api menggunakan axios
       axios
         .put("data-kehadiran/" + this.$route.params.id, {
@@ -172,11 +173,26 @@ export default {
         .then(response => {
           // push router ke read data
           this.$router.push("/data-kehadiran");
-          this.$swal('Updated', 'You successfully Updated this file', 'success');
+          this.$swal('Berhasil', 'Data Kehadiran berhasil diperbaui', 'success');
         })
         .catch(errors => {
-              console.log(errors);
-              this.$swal('Fail', 'You failed Updated this file', 'error');
+            if (errors.response) {
+                var data = '';
+                $.each(errors.response.data.errors, function(k,v){
+                  data += v[0]+"\n";
+                });
+                this.$swal('Gagal', data, 'error');
+              // client received an error response (5xx, 4xx)
+            } else if (errors.request) {
+                console.log(errors.request);
+                console.log("request never left")
+              // client never received a response, or request never left
+            } else {
+              console.log("lainnya")
+            }
+
+        }).finally(() => {
+            this.loading =  false
         });
     },
     

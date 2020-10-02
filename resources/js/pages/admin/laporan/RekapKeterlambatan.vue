@@ -1,5 +1,6 @@
 <template>
     <div class="projects">
+        <div class="loader" v-if="loading"></div>
       <div class="user-data m-b-30 p-3">
           <div class="row">
             <div class="col-md-6">
@@ -135,6 +136,7 @@ export default {
             statusMasuk: [],
             jmlMenit: [],
             jmlTelat: [],
+            loading: false,
             kehadiran: [],
             tanggal: [],
             karyawanAbsen: [],
@@ -207,6 +209,7 @@ export default {
         },
       
         getProjects() {
+            this.loading = true
             axios.get('rekap-keterlambatan', {params: this.tableData})
                 .then(response => {
                     var waktu = this.time1;
@@ -256,9 +259,12 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });
         },
         filterTanggal() {
+            this.loading = true
             axios.get('rekap-keterlambatan', 
              {
                 params: {
@@ -311,9 +317,12 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });
         },
         filterWith() {
+            this.loading = true
             axios.get('rekap-keterlambatan', 
              {
                 params: {
@@ -366,6 +375,8 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });
         },
     },

@@ -1,5 +1,6 @@
 <template>
     <div class="projects">
+        <div class="loader" v-if="loading"></div>
         <div class="user-data m-b-30 p-3">
           <div class="row">
             <div class="col-md-6">
@@ -137,6 +138,7 @@ export default {
             sortKey: 'first_name',
             sortOrders: sortOrders,
             length: 10,
+            loading: false,
             search: '',
             tableData: {
                 client: true,
@@ -211,6 +213,7 @@ export default {
       },
       
         getProjects() {
+            this.loading = true
             axios.get('laporan-semua', {params: this.tableData})
                 .then(response => {
                     var waktu = this.time1;
@@ -288,9 +291,12 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });
         },
         filterTanggal() {
+            this.loading = true
             axios.get('laporan-semua', 
              {
                 params: {
@@ -373,6 +379,8 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });
         },
     },

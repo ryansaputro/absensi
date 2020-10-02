@@ -1,6 +1,7 @@
 <template>
   <div>
     <form @submit.prevent="addData()">
+      <div class="loader" v-if="loading"></div>
       <div class="row">
         <div class="col-md-12">
           <div class="user-data p-3">
@@ -50,6 +51,7 @@ export default {
         nik: '',
         id_roles: '',
       },
+      loading: false,
 
     }
   },
@@ -63,6 +65,7 @@ export default {
       },
     
     getNik() {
+      this.loading = true
       axios.get('data-kehadiran/get-nik', {params:{from:'user-login'}})
             .then(response => {
                 this.options = response.data.data;
@@ -71,14 +74,14 @@ export default {
             })
             .catch(errors => {
                 console.log(errors);
+            }).finally(() => {
+                this.loading =  false
             });
     },
 
     addData() {
       // post data ke api menggunakan axios
-      console.log(this.form.roles)
-      console.log(this.form.nik)
-      console.log(this.form)
+      this.loading = true
       axios
         .post("user-login/create", {
           nik: this.form.nik,
@@ -107,6 +110,8 @@ export default {
             } else {
               console.log("lainnya")
             }
+        }).finally(() => {
+            this.loading =  false
         });
     },
   }

@@ -1,6 +1,7 @@
 <template>
   <div>
     <form @submit.prevent="addData()">
+      <div class="loader" v-if="loading"></div>
       <div class="row">
         <div class="col-md-12">
           <div class="user-data p-3">
@@ -42,6 +43,7 @@ export default {
         deskripsi: '',
         status: '',
       },
+      loading: false,
     }
   },
   created() {
@@ -49,6 +51,7 @@ export default {
   },
   methods: {
     addData() {
+      this.loading = true
       // post data ke api menggunakan axios
       axios
         .post("lokasi/create", {
@@ -78,6 +81,8 @@ export default {
             } else {
               console.log("lainnya")
             }
+        }).finally(() => {
+            this.loading =  false
         });
     },
   }

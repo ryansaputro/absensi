@@ -1,5 +1,6 @@
 <template>
     <div class="projects">
+        <div class="loader" v-if="loading"></div>
         <div class="user-data m-b-30 p-3">
           <div class="row">
             <div class="col-md-6">
@@ -104,6 +105,7 @@ export default {
             },
             time1: null,
             waterMark : new Date().toISOString().slice(0,10),
+            loading: false,
         }
     },
     methods: {
@@ -114,18 +116,8 @@ export default {
         return classes
       },
       
-      doMath: function (index) {
-        return index+1
-      },
-      
-      statusMasuk: function (status){
-          console.log(status)
-          if(status == 'Terlambat')
-          return "danger"
-          else
-          return "success"
-      },
         getProjects() {
+        this.loading = true
             axios.get('list-absensi', {params: this.tableData})
                 .then(response => {
                     this.projects = response.data;
@@ -133,10 +125,12 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });
         },
         filterTanggal() {
-            console.log(this.time1)
+        this.loading = true
             axios.get('list-absensi', 
              {
                 params: {
@@ -149,15 +143,20 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });
         },
         deleteData(id) {
+        this.loading = true
         // delete data
           axios.delete("pengguna/" + id).then(response => {
             this.getProjects();
             // $swal function calls SweetAlert into the application with the specified configuration.
             this.$swal('Deleted', 'You successfully deleted this file', 'success');
-          });
+          }).finally(() => {
+            this.loading =  false
+        });
         },
         paginate(array, length, pageNumber) {
             this.pagination.from = array.length ? ((pageNumber - 1) * length) + 1 : ' ';

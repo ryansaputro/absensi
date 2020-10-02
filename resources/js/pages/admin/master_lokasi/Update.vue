@@ -1,6 +1,7 @@
 <template>
   <div>
     <form @submit.prevent="updateData()">
+      <div class="loader" v-if="loading"></div>
       <div class="row">
         <div class="col-md-12">
           <div class="user-data p-3">
@@ -39,8 +40,8 @@ export default {
         nama_gerbang:'',
         deskripsi: '',
         status: '',
-
       },
+      loading: false,
     };
   },
   created() {
@@ -50,6 +51,7 @@ export default {
   },
   methods: {
     loadData() {
+      this.loading = true
       // load data berdasarkan id
       axios
         .get("lokasi/" + this.$route.params.id)
@@ -58,9 +60,12 @@ export default {
           this.form.nama_gerbang = response.data[0].nama_gerbang;
           this.form.deskripsi = response.data[0].deskripsi;
           this.form.status = response.data[0].status;
+        }).finally(() => {
+            this.loading =  false
         });
     },
     updateData() {
+      this.loading = true
       // put data ke api menggunakan axios
       axios
         .put("lokasi/" + this.$route.params.id, {
@@ -88,6 +93,8 @@ export default {
             } else {
               console.log("lainnya")
             }
+        }).finally(() => {
+            this.loading =  false
         });
     },
   }

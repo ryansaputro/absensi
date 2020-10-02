@@ -1,6 +1,7 @@
 <template>
   <div>
     <form @submit.prevent="updateData()">
+      <div class="loader" v-if="loading"></div>
       <div class="row">
         <div class="col-md-12">
           <div class="user-data p-3">
@@ -51,6 +52,7 @@ export default {
         nik: '',
         id_roles: '',
       },
+      loading: false,
 
     }
   },
@@ -73,6 +75,8 @@ export default {
             })
             .catch(errors => {
                 console.log(errors);
+            }).finally(() => {
+                this.loading =  false
             });
     },
     loadData() {
@@ -83,6 +87,8 @@ export default {
           // post value yang dari response ke form
           this.form.nik = response.data[0].model_id;
           this.form.id_roles = response.data[0].role_id;
+        }).finally(() => {
+          this.loading =  false
         });
     },
 
@@ -113,6 +119,8 @@ export default {
             } else {
               console.log("lainnya")
             }
+        }).finally(() => {
+            this.loading =  false
         });
     },
 

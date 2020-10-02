@@ -411,7 +411,7 @@ class HomeController extends Controller
 
             //proses ini akan mengambil data dari absensi
             return DB::table('absensi')
-                    ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'nik_pegawai','nama_lengkap', 'nama_gerbang')
+                    ->select('absensi.id',DB::raw('DATE(tanggal) AS tanggal'), DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'nik_pegawai','nama_lengkap', 'nama_gerbang')
                     ->join('gate','absensi.id_gate', '=', 'gate.id')
                     ->join('users', 'users.id', '=', 'id_karyawan')
                     ->where('gate.id', $request->lantai)
@@ -429,10 +429,10 @@ class HomeController extends Controller
 
             //proses ini akan meng ekseskusi data absensi 
             return DB::table('absensi')
-                    ->select('absensi.id', DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'nama_lengkap', 'nik_pegawai','nama_gerbang')
+                    ->select('absensi.id', DB::raw('DATE(tanggal) AS tanggal'), DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'nama_lengkap', 'nik_pegawai','nama_gerbang')
                     ->join('gate','absensi.id_gate', '=', 'gate.id')
                     ->join('users', 'users.id', '=', 'id_karyawan')
-                    ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
+                    // ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
                     ->whereIn('absensi.id', function($query){
                         $query->select(DB::raw('MAX(id)'))
                         ->from('absensi')
@@ -496,6 +496,7 @@ class HomeController extends Controller
                 ->select('nama_lengkap', 'nik_pegawai', 'nama_divisi AS bagian_divisi', 'foto')
                 ->join('divisi', 'users.id_divisi', '=', 'divisi.id')
                 ->where('users.id', '<>', 5)
+                ->orderBy('nama_lengkap', 'ASC')
                 ->get();
         
         //get list absen tambahan seperti ijin sakit alpa dan cuti utk ditampilkan di display absensi

@@ -21,8 +21,13 @@
           </li>
       </ul>
       <ul class="navbar-nav ml-auto" v-if="$auth.check()">
+          <li class="nav-item">
+            <h4 class="title-app text-uppercase text-left" style="margin-left:-205px;">Sistem Absensi <br>dan Penelusuran Personil Berbasis RFID</h4>
+          </li>
+      </ul>
+      <ul class="navbar-nav ml-auto" v-if="$auth.check()">
         <li class="nav-item">
-          <router-link to="/ganti-password" class="nav-link"><i class="fa fa-key" aria-hidden="true"></i> ganti password </router-link>
+          <router-link to="/ganti-password" style="margin-right: 0px;" class="nav-link"><i class="fa fa-key" aria-hidden="true"></i> ganti password </router-link>
             
         </li>
         <li class="nav-item">

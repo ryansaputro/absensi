@@ -1,5 +1,6 @@
 <template>
     <div class="projects">
+        <div class="loader" v-if="loading"></div>
         <div class="user-data m-b-30 p-3">
           <div class="row">
             <div class="col-md-12">
@@ -16,7 +17,7 @@
       </div>
       <div class="user-data m-b-30 p-3" style="height:700px;">
           <div class="row">
-              <div class="col-md-6">
+              <div class="col-md-5">
                     <div class="gambarGedung">
                         <img 
                             :src="currentImageLt3" 
@@ -37,7 +38,7 @@
                     </div>
                 </div>
           
-              <div class="col-md-6" style="height:600px;overflow-y:scroll;">
+              <div class="col-md-7" style="height:600px;overflow-y:scroll;">
                 <!-- <div class="form-group">
                     <label for="email"><strong>Pencarian:</strong></label>
                     <input class="input form-control d-inline" style="width:81%;" type="text" v-model="search" placeholder="Nama, NIK"
@@ -47,9 +48,10 @@
                 <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy">
                     <tbody>
                         <tr v-if="paginated.length > 0" v-for="(project, index) in paginated" :key="project.id">
+                            <td>{{project.tanggal}}</td>
+                            <td>{{project.jam}}</td>
                             <td>{{ project.nik_pegawai }}</td>
                             <td>{{project.nama_lengkap}}</td>
-                            <td>{{project.jam}}</td>
                             <td>{{project.nama_gerbang}}</td>
                         </tr>
                         <tr v-if="paginated.length <= 0">
@@ -130,10 +132,11 @@ export default {
     data() {
         let sortOrders = {};
         let columns = [
-            {width: '10%', label: 'NIK', name: 'nik_pegawai' },
-            {width: '30%', label: 'Nama'},
-            {width: '30%', label: 'Jam'},
-            {width: '30%', label: 'Lokasi'},
+            {width: '20%', label: 'Tanggal'},
+            {width: '20%', label: 'Jam'},
+            {width: '20%', label: 'NIK', name: 'nik_pegawai' },
+            {width: '20%', label: 'Nama'},
+            {width: '20%', label: 'Lokasi'},
         ];
         columns.forEach((column) => {
            sortOrders[column.name] = -1;
@@ -144,6 +147,7 @@ export default {
             isActive1: false,
             projects: [],
             columns: columns,
+            loading: false,
             sortKey: 'first_name',
             sortOrders: sortOrders,
             length: 10,
@@ -181,12 +185,13 @@ export default {
             var newEvent2 = this.isActive2 === true ? '/images/lantai2-sorot.png' : '/images/lantai2.png';
             this.isActive1 = false;
             var newEvent1 = this.isActive1 === true ? '/images/lantai1-sorot.png' : '/images/lantai1.png';
-            console.log(this.isActive2)
             // this.isActive2 = false;
             this.currentImageLt1 = newEvent1
             this.currentImageLt2 = newEvent2
             this.currentImageLt3 = newEvent
+
             if(this.isActive === true) {
+                this.loading = true
                 axios.get('pantau', 
                  {
                     params: {
@@ -199,8 +204,11 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
-                });  
+                }).finally(() => {
+                    this.loading =  false
+                }); 
             }else{
+                this.loading = true
                 axios.get('pantau', 
                  {
                     params: this.tableData
@@ -211,6 +219,8 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });  
 
             }
@@ -224,12 +234,12 @@ export default {
             var newEvent3 = this.isActive === true ? '/images/lantai3-sorot.png' : '/images/lantai3.png';
             this.isActive1 = false;
             var newEvent1 = this.isActive1 === true ? '/images/lantai1-sorot.png' : '/images/lantai1.png';
-            console.log(this.isActive2)
             // this.isActive2 = false;
             this.currentImageLt1 = newEvent1
             this.currentImageLt3 = newEvent3
             this.currentImageLt2 = newEvent
             if(this.isActive2 === true) {
+                this.loading = true
                 axios.get('pantau', 
                  {
                     params: {
@@ -242,8 +252,11 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });  
             }else{
+                this.loading = true
                 axios.get('pantau', 
                  {
                     params: this.tableData
@@ -254,6 +267,8 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });  
 
             }
@@ -270,6 +285,7 @@ export default {
             this.currentImageLt3 = newEvent3
             
             if(this.isActive1 === true) {
+                this.loading = true
                 axios.get('pantau', 
                  {
                     params: {
@@ -282,8 +298,11 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });  
             }else{
+                this.loading = true
                 axios.get('pantau', 
                  {
                     params: this.tableData
@@ -294,7 +313,9 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
-                });  
+                }).finally(() => {
+                    this.loading =  false
+                }); 
 
             }
                 
@@ -311,6 +332,7 @@ export default {
       },
       
         getProjects() {
+            this.loading = true
             axios.get('pantau', {params: this.tableData})
                 .then(response => {
                     this.projects = response.data;
@@ -318,30 +340,35 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });
         },
         filterTanggal() {
+            this.loading = true
             axios.get('pantau', 
-             {
-                params: {
-                tanggal: this.time1
-                }
-            })
+                {params: this.tableData}
+            )
                 .then(response => {
                     this.projects = response.data;
                     this.pagination.total = this.projects.length;
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });
         },
         deleteData(id) {
+            this.loading = true
         // delete data
           axios.delete("pengguna/" + id).then(response => {
             this.getProjects();
             // $swal function calls SweetAlert into the application with the specified configuration.
             this.$swal('Deleted', 'You successfully deleted this file', 'success');
-          });
+          }).finally(() => {
+            this.loading =  false
+        });
         },
         paginate(array, length, pageNumber) {
             this.pagination.from = array.length ? ((pageNumber - 1) * length) + 1 : ' ';

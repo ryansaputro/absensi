@@ -1,6 +1,7 @@
 <template>
   <div>
     <form @submit.prevent="addData()">
+      <div class="loader" v-if="loading"></div>
       <div class="row">
         <div class="col-md-12">
           <div class="user-data p-3">
@@ -52,8 +53,8 @@ export default {
       },
       items:[],
       lastSelectItem: {},
-      searchText: ''
-
+      searchText: '',
+      loading: false,
     }
   },
   created() {
@@ -63,7 +64,6 @@ export default {
     onSelect (items, lastSelectItem) {
       this.items = items
       this.form.permissions = this.items;
-      console.log(this.form.permissions)
       this.lastSelectItem = lastSelectItem
     },
     reset () {
@@ -76,16 +76,20 @@ export default {
       this.searchText = searchText
     },    
     getPermissions() {
+      this.loading = true
       axios.get('/role/get-permissions')
             .then(response => {
                 this.options = response.data;
             })
             .catch(errors => {
                 console.log(errors);
-            });
+            }).finally(() => {
+            this.loading =  false
+        });
     },
 
     addData() {
+      this.loading = true
       // post data ke api menggunakan axios
       axios
         .post("role/create", {
@@ -115,6 +119,8 @@ export default {
             } else {
               console.log("lainnya")
             }
+        }).finally(() => {
+            this.loading =  false
         });
     },
   }

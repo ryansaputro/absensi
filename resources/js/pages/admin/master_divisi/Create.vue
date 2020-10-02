@@ -1,6 +1,7 @@
 <template>
   <div>
     <form @submit.prevent="addData()">
+      <div class="loader" v-if="loading"></div>
       <div class="row">
         <div class="col-md-12">
           <div class="user-data p-3">
@@ -42,14 +43,13 @@ export default {
         deskripsi: '',
         status: '',
       },
+      loading: false,
     }
-  },
-  created() {
-    this.getPermissions();
   },
   methods: {
     addData() {
       // post data ke api menggunakan axios
+      this.loading = true
       axios
         .post("divisi/create", {
           nama_divisi: this.form.nama_divisi,
@@ -78,6 +78,8 @@ export default {
             } else {
               console.log("lainnya")
             }
+        }).finally(() => {
+            this.loading =  false
         });
     },
   }

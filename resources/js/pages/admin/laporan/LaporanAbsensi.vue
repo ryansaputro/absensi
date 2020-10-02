@@ -1,5 +1,6 @@
 <template>
     <div class="projects">
+        <div class="loader" v-if="loading"></div>
         <div class="user-data m-b-30 p-3">
           <div class="row">
             <div class="col-md-6">
@@ -56,9 +57,9 @@
         <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy" id="my-table">
             <tbody>
                 <tr v-for="(project, index) in paginated" :key="project.id">
+                    <td>{{project.tanggal}}</td>
                     <td>{{project.no_ktp }}</td>
                     <td>{{project.nama_lengkap}}</td>
-                    <td>{{project.tanggal}}</td>
                     <td>{{project.masuk}}</td>
                     <td>{{project.keluar}}</td>
                 </tr>
@@ -96,9 +97,9 @@ export default {
     data() {
         let sortOrders = {};
         let columns = [
+            {width: '20%', label: 'Tanggal'},
             {width: '20%', label: 'NIK', name: 'no' },
             {width: '20%', label: 'Nama'},
-            {width: '20%', label: 'Tanggal'},
             {width: '20%', label: 'Jam Masuk'},
             {width: '20%', label: 'Jam Keluar'},
         ];
@@ -110,6 +111,7 @@ export default {
             columns: columns,
             sortKey: 'first_name',
             sortOrders: sortOrders,
+            loading: false,
             length: 10,
             search: '',
             tableData: {
@@ -133,22 +135,7 @@ export default {
                 "JAM KELUAR": "keluar", //Supports nested properties
             },
 
-            json_data: [
-            {
-                no_ktp: "Ryan Saputro",
-                nama_lengkap: "Magetan",
-                tanggal: "2020-09-10",
-                masuk: "16:28",
-                keluar: "16:44",
-            },
-            {
-                no_ktp: "Ilman",
-                nama_lengkap: "Tasikmalaya",
-                tanggal: "2020-09-10",
-                masuk: "16:27",
-                keluar: "16:44",
-            }
-            ],
+            json_data: [],
             json_meta: [
                 [{
                     " key ": " charset ",
@@ -175,7 +162,6 @@ export default {
                 tanggal: this.time1
                 }
             });
-        console.log(response.data);
         return response.data;
         },
         startDownload(){
@@ -191,18 +177,8 @@ export default {
         return classes
       },
       
-      doMath: function (index) {
-        return index+1
-      },
-      
-      statusMasuk: function (status){
-          console.log(status)
-          if(status == 'Terlambat')
-          return "danger"
-          else
-          return "success"
-      },
         getProjects() {
+            this.loading = true
             axios.get('laporan-kehadiran', {params: this.tableData})
                 .then(response => {
                     this.projects = response.data;
@@ -210,10 +186,12 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });
         },
         filterTanggal() {
-            console.log(this.time1)
+            this.loading = true
             axios.get('laporan-kehadiran', 
              {
                 params: {
@@ -226,15 +204,9 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });
-        },
-        deleteData(id) {
-        // delete data
-          axios.delete("pengguna/" + id).then(response => {
-            this.getProjects();
-            // $swal function calls SweetAlert into the application with the specified configuration.
-            this.$swal('Deleted', 'You successfully deleted this file', 'success');
-          });
         },
         paginate(array, length, pageNumber) {
             this.pagination.from = array.length ? ((pageNumber - 1) * length) + 1 : ' ';

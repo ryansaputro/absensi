@@ -1,5 +1,6 @@
 <template>
     <div class="projects">
+        <div class="loader" v-if="loading"></div>
         <div class="user-data m-b-30 p-3">
           <div class="row">
             <div class="col-md-6">
@@ -84,9 +85,10 @@ export default {
         return {
             projects: [],
             columns: columns,
-            sortKey: 'nama_lengkap',
+            sortKey: 'nama_divisi',
             sortOrders: sortOrders,
             length: 10,
+            loading: false,
             search: '',
             tableData: {
                 client: true,
@@ -106,6 +108,7 @@ export default {
         return index+1
       },
         getProjects() {
+            this.loading = true
             axios.get('divisi', {params: this.tableData})
                 .then(response => {
                     this.projects = response.data;
@@ -113,14 +116,19 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });
         },
         deleteData(id) {
         // delete data
+          this.loading = true
           axios.delete("divisi/" + id).then(response => {
             this.getProjects();
             // $swal function calls SweetAlert into the application with the specified configuration.
             this.$swal('Hapus', 'Data Divisi Berhasil dihapus.', 'success');
+          }).finally(() => {
+            this.loading =  false
           });
         },
         paginate(array, length, pageNumber) {

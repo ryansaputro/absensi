@@ -1,6 +1,7 @@
 <template>
   <div>
     <form @submit.prevent="addData()">
+      <div class="loader" v-if="loading"></div>
       <div>
         <b-tabs content-class="mt-3">
           <b-tab title="Data" active>
@@ -230,13 +231,12 @@
 
               </div>
             </div>
-            <div class="form-group">
-              <router-link class="btn btn-danger" to="/karyawan">Kembali</router-link>
-              <button class="btn btn-primary">Simpan</button>
-            </div>
-
           </b-tab>
         </b-tabs>
+        <div class="form-group">
+          <router-link class="btn btn-danger" to="/karyawan">Kembali</router-link>
+          <button class="btn btn-primary">Simpan</button>
+        </div>
       </div>
     </form>
   </div>
@@ -286,6 +286,7 @@ export default {
       kelurahan:[],
       divisi:[],
       jabatan:[],
+      loading: false,
 
     }
   },
@@ -316,6 +317,7 @@ export default {
           this.form.foto = '';
     },
     addData() {
+      this.loading = true
       // post data ke api menggunakan axios
       axios
         .post("karyawan/create", {
@@ -363,9 +365,12 @@ export default {
             } else {
               console.log("lainnya")
             }
+        }).finally(() => {
+            this.loading =  false
         });
     },
       getDivisi() {
+        this.loading = true
             axios.get('divisi')
                 .then(response => {
                     this.divisi = response.data.data;
@@ -374,18 +379,24 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });
         },
       getProjects() {
+        this.loading = true
             axios.get('provinsi')
                 .then(response => {
                     this.projects = response.data.data;
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });
         },
       getKecamatan() {
+        this.loading = true
         axios.get('kecamatan', {
               params:{
                 id:this.form.kota
@@ -396,9 +407,12 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });
       },  
       getKota() {
+        this.loading = true
         axios.get('kota', {
               params:{
                 id:this.form.provinsi
@@ -409,9 +423,12 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });
       },  
       getKelurahan() {
+        this.loading = true
         axios.get('kelurahan', {
               params:{
                 id:this.form.kecamatan
@@ -422,6 +439,8 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });
       }  
   }

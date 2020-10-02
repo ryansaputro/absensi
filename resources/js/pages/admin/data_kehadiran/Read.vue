@@ -1,5 +1,6 @@
 <template>
     <div class="projects">
+        <div class="loader" v-if="loading"></div>
         <div class="user-data m-b-30 p-3">
           <div class="row">
             <div class="col-md-6">
@@ -42,9 +43,9 @@
                     <td>{{project.no_ktp}}</td>
                     <td>{{project.nama_lengkap}}</td>
                     <td>{{project.tanggal}}</td>
-                    <td v-if="project.status === 'I' ">Izin</td>
-                    <td v-else-if="project.status === 'S' ">Sakit</td>
-                    <td v-else-if="project.status === 'A' ">Alpa</td>
+                    <td v-if="project.status === 'I' "><span class="badge badge-primary">Izin</span></td>
+                    <td v-else-if="project.status === 'S' "><span class="badge badge-warning">Sakit</span></td>
+                    <td v-else-if="project.status === 'A' "><span class="badge badge-danger">Alpa</span></td>
                     <td v-else>Cuti</td>
                     <td>
                       <router-link v-if="$can('edit-data-kehadiran')" class="btn btn-primary btn-xs" :to="'/data-kehadiran/'+project.id">Edit</router-link>
@@ -89,6 +90,7 @@ export default {
             sortKey: 'nama_lengkap',
             sortOrders: sortOrders,
             length: 10,
+            loading: false,
             search: '',
             tableData: {
                 client: true,
@@ -108,6 +110,7 @@ export default {
         return index+1
       },
         getProjects() {
+            this.loading = true
             axios.get('data-kehadiran', {params: this.tableData})
                 .then(response => {
                     this.projects = response.data;
@@ -115,14 +118,19 @@ export default {
                 })
                 .catch(errors => {
                     console.log(errors);
+                }).finally(() => {
+                    this.loading =  false
                 });
         },
         deleteData(id) {
         // delete data
+        this.loading = true
           axios.delete("data-kehadiran/" + id).then(response => {
             this.getProjects();
             // $swal function calls SweetAlert into the application with the specified configuration.
             this.$swal('Deleted', 'You successfully deleted this file', 'success');
+          }).finally(() => {
+            this.loading =  false
           });
         },
         paginate(array, length, pageNumber) {

@@ -142,6 +142,15 @@ Route::prefix('v1')->group(function () {
         Route::delete('/{id}','LokasiController@delete');
     });
 
+    //master data > kantor
+    Route::prefix('kantor')->group(function() {
+        Route::get('/','KantorController@index');
+        Route::post('/create','KantorController@store');
+        Route::get('/{id}','KantorController@show');
+        Route::put('/{id}','KantorController@update');
+        Route::delete('/{id}','KantorController@delete');
+    });
+
     //master data > divisi
     Route::prefix('divisi')->group(function() {
         Route::get('/','DivisiController@index');
