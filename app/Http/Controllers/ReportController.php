@@ -335,6 +335,10 @@ class ReportController extends Controller
                     $absen->where('view_absensi.nama_lengkap', 'like', '%' . $searchValue . '%')
                     ->orWhere('users.nik_pegawai', 'like', '%' . $searchValue . '%');
                 });
+                $status->where(function($status) use ($searchValue) {
+                    $status->where('view_absensi.nama_lengkap', 'like', '%' . $searchValue . '%')
+                    ->orWhere('users.nik_pegawai', 'like', '%' . $searchValue . '%');
+                });
             }
 
             //data di get dengan bentuk array
@@ -367,9 +371,9 @@ class ReportController extends Controller
             if(count($status) > 0){
                 foreach($status AS $k => $v){
                     $jmlTelat[$v->id_karyawan] = $v->jml_telat;  
-                    $jmlMenit[$v->id_karyawan] = $v->hours. " jam ". $v->minutes. " menit";//substr($v->menit_telat,0,8);  
+                    $jmlMenit[$v->id_karyawan] = ($v->hours*60) + $v->minutes. " menit";//$v->hours. " jam ". $v->minutes. " menit";//substr($v->menit_telat,0,8);  
                     $id_karyawan[] = $v->id_karyawan;
-                    $dataKehadiranTerlambat[] = array("nama_lengkap" => $v->nama_lengkap, "nik_pegawai" => $v->nik_pegawai, "kehadiran" => $jml[$v->id_karyawan],  "terlambat" => $v->jml_telat, "menit_terlambat" => $v->hours. " jam ". $v->minutes. " menit");
+                    $dataKehadiranTerlambat[] = array("nama_lengkap" => $v->nama_lengkap, "nik_pegawai" => $v->nik_pegawai, "kehadiran" => $jml[$v->id_karyawan],  "terlambat" => $v->jml_telat, "menit_terlambat" => number_format(($v->hours*60) + $v->minutes,0,",","."). " menit");
 
                 }
             }else{
@@ -468,13 +472,13 @@ class ReportController extends Controller
                     $jmlTelat[$v->id_karyawan] = $v->jml_telat;  
 
                     //membuat variable utk jumlah menit telat berdasarkan karyawan 
-                    $jmlMenit[$v->id_karyawan] = $v->hours. " jam ". $v->minutes. " menit";//substr($v->menit_telat,0,8); 
+                    $jmlMenit[$v->id_karyawan] = ($v->hours*60) + $v->minutes. " menit";//$v->hours. " jam ". $v->minutes. " menit";//substr($v->menit_telat,0,8); 
 
                     //membuat variable id karyawan ke dalam array utk digunakan sebagai filter karyawan yg hadir terlambat paling banyak 
                     $id_karyawan[] = $v->id_karyawan;
 
                     //data karyawan terlambat order by jumlah terlambat
-                    $dataKehadiranTerlambat[] = array("nama_lengkap" => $v->nama_lengkap, "nik_pegawai" => $v->nik_pegawai, "kehadiran" => $jml[$v->id_karyawan],  "terlambat" => $v->jml_telat, "menit_terlambat" => $v->hours. " jam ". $v->minutes. " menit");
+                    $dataKehadiranTerlambat[] = array("nama_lengkap" => $v->nama_lengkap, "nik_pegawai" => $v->nik_pegawai, "kehadiran" => $jml[$v->id_karyawan],  "terlambat" => $v->jml_telat, "menit_terlambat" => number_format(($v->hours*60) + $v->minutes,0,",","."). " menit");
 
                 }
             }else{

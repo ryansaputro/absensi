@@ -62,32 +62,32 @@
                 <tr>
                     <th>NIK</th>
                     <th>Nama</th>
-                    <th>Kehadiran</th>
-                    <th>Terlambat</th>
-                    <th>Total Durasi Terlambat</th>
+                    <th class="text-right">Kehadiran</th>
+                    <th class="text-right">Terlambat</th>
+                    <th class="text-right">Total Durasi Terlambat</th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-for="(project, index) in karyawanAbsen" :key="project.id" v-if="filterBy === 'terlambat_paling_banyak' || filterBy === 'total_terlambat_paling_banyak' ">
                     <td>{{project.nik_pegawai}}</td>
                     <td>{{project.nama_lengkap}}</td>
-                    <td>{{project.kehadiran}}</td>
-                    <td>{{project.terlambat}} kali</td>
-                    <td>{{project.menit_terlambat}}</td>
+                    <td class="text-right">{{project.kehadiran}}</td>
+                    <td class="text-right">{{project.terlambat}} kali</td>
+                    <td class="text-right">{{project.menit_terlambat}}</td>
                 </tr>
                 <tr v-for="(project, index) in karyawanNotAbsen" :key="project.id">
                     <td>{{project.nik_pegawai}}</td>
                     <td>{{project.nama_lengkap}}</td>
-                    <td>{{typeof(kehadiran[project.id]) === 'undefined' ? '0' : kehadiran[project.id] }}</td>
-                    <td>{{typeof(jmlTelat[project.id]) !== 'undefined' ?   jmlTelat[project.id] : '0'}} kali</td>
-                    <td>{{typeof(jmlMenit[project.id]) !== 'undefined' ?   jmlMenit[project.id] : '0'}}</td>
+                    <td class="text-right">{{typeof(kehadiran[project.id]) === 'undefined' ? '0' : kehadiran[project.id] }}</td>
+                    <td class="text-right">{{typeof(jmlTelat[project.id]) !== 'undefined' ?   jmlTelat[project.id] : '0'}} kali</td>
+                    <td class="text-right">{{typeof(jmlMenit[project.id]) !== 'undefined' ?   jmlMenit[project.id] : '0'}}</td>
                 </tr>
                 <tr v-for="(project, index) in karyawanAbsen" :key="project.id" v-if="filterBy === 'terlambat_paling_sedikit' || filterBy === 'total_terlambat_paling_sedikit' ">
                     <td>{{project.nik_pegawai}}</td>
                     <td>{{project.nama_lengkap}}</td>
-                    <td>{{project.kehadiran}}</td>
-                    <td>{{project.terlambat}} kali</td>
-                    <td>{{project.menit_terlambat}}</td>
+                    <td class="text-right">{{project.kehadiran}}</td>
+                    <td class="text-right">{{project.terlambat}} kali</td>
+                    <td class="text-right">{{project.menit_terlambat}}</td>
                 </tr>
             </tbody>
         </table>
