@@ -158,11 +158,11 @@ class PersonController extends Controller
 
         //validate the data before processing
         $rules = [
-            "no_ktp" => "required|numeric|digits_between:15,17",
+            "no_ktp" => "required|numeric|unique:users|digits_between:15,17",
             "nama_lengkap" => "required|string",
             "no_telp" => "required|numeric|digits_between:10,15",
             "email" => "required|email:rfc,dns",
-            "id_epc_tag" => "required|string",
+            "id_epc_tag" => "required|unique:users|string",
             "provinsi" => "required|numeric",
             "kota" => "required|numeric",
             "kecamatan" => "required|numeric",
@@ -174,6 +174,8 @@ class PersonController extends Controller
             "gol_darah" => "required|string",
             "divisi" => "required|numeric",
             "foto" => "required|",
+            "nik_pegawai" => "required|unique:users|",
+            
         ];
 
         $customMessages = [
@@ -399,6 +401,52 @@ class PersonController extends Controller
             //delete karyawan dari table user
             $person->delete(); 
 
+        } catch (\Illuminate\Database\QueryException $ex) {
+            //throw $th;
+            DB::rollback();
+            return response()->json(['status' => 'failed', 'message' => $ex->getMessage()], 500);
+        }
+        DB::commit();
+        return response()->json(['status' => 'success'], 200);
+    }
+
+    public function androidMappingTag(Request $request){
+         $rules = [
+            "nik_pegawai" => "required|string|unique:users",
+            "id_epc_tag" => "required|string|unique:users"
+         ];
+         $customMessages = [
+            'required' => 'Isian :attribute tidak boleh kosong.',
+            'numeric' => 'Isian :attribute harus berupa angka.',
+            'digits_between' => 'Isian :attribute harus berupa angka dengan minimal 10 karakter dan maksimal 15.',
+            'digits' => 'Isian :attribute harus berupa angka dengan 5 karakter.',
+            'size' => 'Isian :attribute harus 3 karakter.',
+            'unique' => ':attribute tidak unik atau sudah dipakai.'
+        ];
+
+        $this->validate($request, $rules, $customMessages);
+        $data = DB::table('users')
+            ->select('nik_pegawai', 'nik_ktp', 'id_divisi', 'id_jabatan', 'nama_lengkap', 'gol_darah', 'no_telp', 'email', 'id_epc_tag', 'foto', 'tgl_masuk', 'tgl_habis_kontrak', 'status_pegawai', 'masa_kerja', 'id_cabang', 'rt', 'rw', 'kelurahan', 'kecamatan', 'kota', 'provinsi', 'kode_pos', 'alamat')
+            ->join('users_status_pegawai', 'users_status_pegawai.id_karyawan', '=', 'users.id')
+            ->leftJoin('users_alamat', 'users_alamat.id_karyawan', '=', 'users.id')
+            ->where('users.nik_pegawai', $request->nik_pegawai)
+            ->first(); 
+            
+        
+        DB::beginTransaction();
+        try {
+           if($data->id_epc_tag == $request->id_epc_tag){
+                return response()->json(['status' => 'failed'], 400);
+           }
+           
+            $end = $request->id_epc_tag;
+            //Split string into an array.  Each element is 2 chars
+            $chunks = str_split($end, 2);
+            //Convert array to string.  Each element separated by the given separator.
+            krsort($chunks);
+            $hasil = implode("",$chunks);
+            
+            $data = User::where('nik_pegawai', $request->nik_pegawai)->update(['id_epc_tag' => $hasil]);
         } catch (\Illuminate\Database\QueryException $ex) {
             //throw $th;
             DB::rollback();

@@ -6,7 +6,6 @@ export default {
       } else {
         window.Permissions = [];
       }
-      // console.log(window.Permissions)
       return Permissions.indexOf(permissionName) !== -1;
     },
     

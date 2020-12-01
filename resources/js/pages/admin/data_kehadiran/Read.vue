@@ -46,6 +46,7 @@
                     <td v-if="project.status === 'I' "><span class="badge badge-primary">Izin</span></td>
                     <td v-else-if="project.status === 'S' "><span class="badge badge-warning">Sakit</span></td>
                     <td v-else-if="project.status === 'A' "><span class="badge badge-danger">Alpa</span></td>
+                    <td v-else-if="project.status === 'LK' "><span class="badge badge-default">Luar Kota</span></td>
                     <td v-else>Cuti</td>
                     <td>
                       <router-link v-if="$can('edit-data-kehadiran')" class="btn btn-primary btn-xs" :to="'/data-kehadiran/'+project.id">Edit</router-link>

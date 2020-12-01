@@ -1,9 +1,11 @@
 import VueRouter from 'vue-router'
 // Pages
 // import Home from './pages/home'
-import About from './pages/about'
-import Register from './pages/Register'
-import Login from './pages/login'
+// import About from './pages/about'
+// import Register from './pages/Register'
+const Register = () => import('./pages/Register');
+const Login = () => import('./pages/login');
+// import Login from './pages/login'
 import Display from './pages/user/Dashboard'
 import AdminDashboard from './pages/admin/Dashboard'
 import PenggunaRead from './pages/admin/master_user/Read'
@@ -413,9 +415,9 @@ router.beforeEach((to, from, next) => {
             next({ name: 'login' })
 
         }
-    } 
+    }
+    
     else{
-
         if (to.fullPath == '/dashboard' && from.fullPath == '/login'){
             next();
             if (!localStorage.getItem('firstLoad')){
@@ -425,8 +427,7 @@ router.beforeEach((to, from, next) => {
                 localStorage.removeItem('firstLoad');
             }
         }else{
-            console.log(to.meta.auth)
-            if (to.meta.auth === true){
+            if (localStorage.auth_stay_signed_in === 'true'){
                 var menusRole = to.meta.menus;
                 if (jQuery.inArray(menusRole, JSON.parse(localStorage.user)) !== -1){
                     next();

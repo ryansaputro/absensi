@@ -415,6 +415,7 @@ class HomeController extends Controller
                     ->join('gate','absensi.id_gate', '=', 'gate.id')
                     ->join('users', 'users.id', '=', 'id_karyawan')
                     ->where('gate.id', $request->lantai)
+                    ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
                     ->whereIn('absensi.id', function($query){
                         $query->select(DB::raw('MAX(id)'))
                         ->from('absensi')
@@ -432,7 +433,7 @@ class HomeController extends Controller
                     ->select('absensi.id', DB::raw('DATE(tanggal) AS tanggal'), DB::raw('DATE_FORMAT(tanggal, "%H:%i") AS jam'), 'nama_lengkap', 'nik_pegawai','nama_gerbang')
                     ->join('gate','absensi.id_gate', '=', 'gate.id')
                     ->join('users', 'users.id', '=', 'id_karyawan')
-                    // ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
+                    ->where(DB::raw('DATE(tanggal)'), date('Y-m-d'))
                     ->whereIn('absensi.id', function($query){
                         $query->select(DB::raw('MAX(id)'))
                         ->from('absensi')
@@ -470,9 +471,13 @@ class HomeController extends Controller
     //fungsi untuk menampilkan list karyawan di display absensi dengan url ..../display 
     public function cekAbsen(Request $request)
     {
+        date_default_timezone_set("Asia/Jakarta");
+        //jam masuk
+        $jam = DB::table('absensi_setting')->first();
+
         //get data absensi dari table absensi 
         $a = DB::table('view_absensi')
-                ->select('view_absensi.*', 'users.nik_pegawai', 'users.nama_lengkap', 'nama_divisi AS bagian_divisi', 'c.nama_gerbang AS gerbang_masuk', 'd.nama_gerbang AS gerbang_keluar', DB::raw("IF(masuk > '08:00', 'telat', 'tepat') AS status"))
+                ->select('view_absensi.*', 'users.id_epc_tag', 'users.nik_pegawai', 'users.nama_lengkap', 'nama_divisi AS bagian_divisi', 'c.nama_gerbang AS gerbang_masuk', 'd.nama_gerbang AS gerbang_keluar', DB::raw("IF(masuk > '08:00', 'telat', 'tepat') AS status"))
                 ->join('users', 'users.nama_lengkap', '=', 'view_absensi.nama_lengkap')
                 ->join('divisi', 'users.id_divisi', '=', 'divisi.id')
                 ->join('absensi AS a', 'a.id', '=', 'view_absensi.id_absen_masuk')
@@ -481,19 +486,23 @@ class HomeController extends Controller
                 ->join('gate AS d', 'd.id', '=', 'b.id_gate');
 
         //logika jika request dari api dengan parameter keluar(jam keluar) maka perintah ini di eksekusi
-        if($request->status_absen == 'keluar'){
-            $a->where('keluar', '!=', '-');
+        if(date("H:i") >= date("H:i", strtotime($jam->pergantian_jam))){
+            $hadir = DB::table('view_absensi')->where('tanggal', date('Y-m-d'))->count();
+            $a->where('keluar', '!=', '-')
+            ->orderBy('view_absensi.keluar', 'ASC')
+            ->where('keluar', '>', $jam->pergantian_jam);
+        }else{
+            $a->orderBy('view_absensi.masuk', 'ASC');
         }
 
         //data absensi 
         $a =  $a->where('view_absensi.tanggal', date('Y-m-d'))
                 ->where('users.id', '<>', '5')
-                ->orderBy('view_absensi.tanggal', 'DESC')
                 ->get();
 
         //get data karyawan
         $karyawan = DB::table('users')
-                ->select('nama_lengkap', 'nik_pegawai', 'nama_divisi AS bagian_divisi', 'foto')
+                ->select('nama_lengkap', 'nik_pegawai', 'nama_divisi AS bagian_divisi', 'foto', 'id_epc_tag')
                 ->join('divisi', 'users.id_divisi', '=', 'divisi.id')
                 ->where('users.id', '<>', 5)
                 ->orderBy('nama_lengkap', 'ASC')
@@ -506,8 +515,9 @@ class HomeController extends Controller
                 ->where(DB::raw('DATE(tanggal)'), '=', date('Y-m-d'))
                 ->pluck('status','nik_pegawai')
                 ->toArray();
+        
 
-        return ["record" => $a, "karyawan" => $karyawan, 'status_absen' => $status_absen];
+        return ["record" => $a, "karyawan" => $karyawan, 'status_absen' => $status_absen, 'jam' => $jam, 'hadir' => !isset($hadir) ? 0 : $hadir];
     }
 
     public function listAbsensi(Request $request)
@@ -561,4 +571,60 @@ class HomeController extends Controller
         return ['data' => $projects, 'draw' => $request->input('draw')];
     }
 
+    public function sync(Request $request)
+    {
+        // $status = "update";
+        DB::beginTransaction();
+        try {
+
+            // get data from local
+            $local = DB::table('log_data')->select('id_server')->pluck('id_server')->toArray();
+
+            //get data from server 
+            $data = DB::connection('secondary')
+                    ->table('log_data')
+                    ->select('*')
+                    ->whereNotIn('id', $local)
+                    ->limit(1)
+                    ->first();
+            
+            //select data 
+            $dataTable = DB::connection('secondary')->table($data->field)->where('id', $data->id_data)->first();
+            
+            //convert from array object to array
+            $dataTable = (array)$dataTable;
+            
+            //jika statusnya update eksekusi command ini
+            if($data->status == 'update'){
+                //update ke localdata 
+                $update = DB::table($data->field)->where('id', $data->id_data)->update($dataTable);
+                $log = DB::table('log_data')->where('id_data', $data->id_data)->update(['id_server' => $data->id, 'status' => 'update']);
+            }else if($data->status == 'create'){
+                //create ke localdata 
+                $create = DB::table($data->field)->insert($dataTable);
+                $log = DB::table('log_data')->where('id_data', $data->id_data)->update(['id_server' => $data->id, 'status' => 'create']);
+            }else if($data->status == 'delete'){
+                //update ke localdata 
+                $delete = DB::table($data->field)->where('id', $data->id_data)->delete();
+                $log = DB::table('log_data')->where('id_data', $data->id_data)->update(['id_server' => $data->id, 'status' => 'delete']);
+            }
+
+            $datas = DB::connection('secondary')->table('divisi')->where('id', 1)->update(['nama_divisi' => 'test']);
+            
+            // dd($data->id);
+            // if($update){
+                //update ke log data
+           
+            // }
+        } catch (\Illuminate\Database\QueryException $ex) {
+            //throw $th;
+            DB::rollback();
+            return response()->json(['status' => 'failed', 'message' => $ex->getMessage()], 500);
+        }
+        DB::commit();
+        //  $datas = DB::connection('secondary')->table('log_data')->where('id', $data->id)->update(['sync_client_1' => '1', 'old_value' => "test"]);
+        // if($datas) echo "sukses"; else "gagal";
+        return response()->json(['status' => 'success', 'data' => $dataTable, 'status_update' => $datas], 200);
+
+    }
 }

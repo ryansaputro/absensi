@@ -25,8 +25,9 @@
                   <option value="" disabled>Pilih Jenis Absen</option>
                   <option value="I">Izin</option>
                   <option value="S">Sakit</option>
-                  <option value="A">Alasan</option>
+                  <option value="A">Alpha</option>
                   <option value="C">Cuti</option>
+                  <option value="LK">Luar Kota</option>
                 </select>
               </div>
               <div class="form-group">

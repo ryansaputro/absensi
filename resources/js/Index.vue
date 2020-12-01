@@ -1,5 +1,6 @@
 <template>
-    <div id="main" v-if="isMobile === false">
+    <!-- <div id="main" v-if="isMobile === false"> -->
+    <div id="main">
         <div id="header">
           <div v-if="$auth.check()">
             <!-- <Mobile></Mobile> -->
@@ -53,9 +54,9 @@
                 <!-- </div> -->
             </div>
         </div>
-        <div v-else>
+        <!-- <div v-else>
           <h3 class="text-center text-uppercase">maaf hanya dapat diakses menggunakan desktop</h3>
-        </div>
+        </div> -->
     </div>
 </template>
 <style>
@@ -100,6 +101,14 @@
     },
     methods: {
     },
+    mounted(){
+        // Clear the browser cache data in localStorage when closing the browser window
+        // window.onbeforeunload = function (e) {
+            // var storage = window.localStorage;
+            // storage.clear()
+        // }
+    }
+
   
   }
 </script>

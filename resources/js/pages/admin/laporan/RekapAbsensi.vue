@@ -49,13 +49,14 @@
         <table class="table table-bordered table-hover" id="my-table">
             <thead>
                 <tr>
-                    <th>NIK</th>
-                    <th>Nama</th>
+                    <th style="width:15%;">NIKs</th>
+                    <th style="width:50%;">Nama</th>
                     <th>Kehadiran</th>
                     <th>I</th>
                     <th>S</th>
                     <th>A</th>
                     <th>C</th>
+                    <th>LK</th>
                     <!-- <th>Jml Hari</th> -->
                 </tr>
             </thead>
@@ -72,6 +73,7 @@
                     <td>{{typeof(statusMasuk[project.id]) !== 'undefined' ?  typeof(statusMasuk[project.id]['S']) !== 'undefined' ? statusMasuk[project.id]['S'] : '0'  : '0'}}</td>
                     <td>{{typeof(statusMasuk[project.id]) !== 'undefined' ?  typeof(statusMasuk[project.id]['A']) !== 'undefined' ? statusMasuk[project.id]['A'] : '0'  : '0'}}</td>
                     <td>{{typeof(statusMasuk[project.id]) !== 'undefined' ?  typeof(statusMasuk[project.id]['C']) !== 'undefined' ? statusMasuk[project.id]['C'] : '0'  : '0'}}</td>
+                    <td>{{typeof(statusMasuk[project.id]) !== 'undefined' ?  typeof(statusMasuk[project.id]['LK']) !== 'undefined' ? statusMasuk[project.id]['LK'] : '0'  : '0'}}</td>
                     <!-- <td>{{jmlKerja}} Hari</td> -->
                 </tr>
             </tbody>
@@ -162,6 +164,7 @@ export default {
                 "SAKIT": "sakit", //Supports nested properties
                 "ALPA": "alasan", //Supports nested properties
                 "CUTI": "cuti", //Supports nested properties
+                "LUAR KOTA": "lk", //Supports nested properties
             },
 
         }

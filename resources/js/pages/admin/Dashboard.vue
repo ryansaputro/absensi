@@ -190,6 +190,7 @@
             this.karyawan = karyawan;
             this.tepat = tepat;
             this.telat = telat;
+            console.log(this.telat)
 
             this.karyawanSby = karyawanSby;
             this.tepatSby = tepatSby;
@@ -283,11 +284,12 @@
           var ijin = typeof(this.kehadiran['bandung']['I']) !== 'undefined' ? this.kehadiran['bandung']['I'] : 0;
           var alpa = typeof(this.kehadiran['bandung']['A']) !== 'undefined' ? this.kehadiran['bandung']['A'] : 0;
           var cuti = typeof(this.kehadiran['bandung']['C']) !== 'undefined' ? this.kehadiran['bandung']['C'] : 0;
+          var lk = typeof(this.kehadiran['bandung']['LK']) !== 'undefined' ? this.kehadiran['bandung']['LK'] : 0;
           
           this.chart = new Chart(KehadiranBandung,{
             type: 'bar',
             data: {
-              labels: ['kehadiran', 'sakit', 'ijin', 'alpha', 'cuti'],
+              labels: ['kehadiran', 'sakit', 'ijin', 'alpha', 'cuti', 'luar kota'],
               datasets: [
                 {
                   label: 'Data Kehadiran',
@@ -296,7 +298,7 @@
                   hoverBackgroundColor: 'rgb(2 171 2 / 91%)',
                   hoverBorderColor:"white",
                   fill: true,
-                  data: [hadir, sakit, ijin, alpa, cuti]
+                  data: [hadir, sakit, ijin, alpa, cuti, lk]
                 }
               ]
             },
@@ -380,7 +382,7 @@
               labels: this.label,
               datasets: [
                 {
-                  backgroundColor: ['red', 'red', 'red', 'red', 'red', 'red', 'red' , 'red'],
+                  // backgroundColor: ['red', 'red', 'red', 'red', 'red', 'red', 'red' , 'red'],
                   borderColor: 'red',
                   borderWidth:3,
                   lineTension:0.1,
@@ -422,7 +424,7 @@
               labels: this.label,
               datasets: [
                 {
-                  backgroundColor: ['red', 'red', 'red', 'red', 'red', 'red', 'red' , 'red'],
+                  // backgroundColor: ['red', 'red', 'red', 'red', 'red', 'red', 'red' , 'red'],
                   borderColor: 'red',
                   borderWidth:3,
                   lineTension:0.1,

@@ -258,6 +258,41 @@ section {
     .section__content--p30 {
         padding: 0;
     }
+    
+    .detail {
+        min-height:115px !important;
+        min-width: 123px;
+    }
+    .row.mr-3 {
+        margin-left:10px !important;
+    }
+    .now {
+        font-size:12px !important;
+    }
+    div.top h1 {
+        font-size:14px;
+        font-weight:700;
+    }
+    div.top img {
+        width:50% !important;
+    }
+    .page-content--bge5.display div.row div.col-md-8.mt-2 {
+        display:none !important;
+    }
+    .page-content--bge5.display div.row div.col-md-12 {
+        display:none !important;
+    }
+    .table-ket {
+        position: absolute;
+        text-align: center;
+        left: 30px;
+        background: white;
+        z-index: 999;
+        font-size: 12px;
+        box-shadow: rgb(150, 152, 150) 0px -4px 5px -2px;
+        bottom: -81px;
+        width: 86% !important;
+    }
 }
 
 .section__content--p35 {
@@ -274,17 +309,17 @@ section {
 
 /*Page Objects*/
 .page-wrapper {
-    overflow: hidden;
+    overflow: hidden !important;
     background: #e5e5e5;
-    padding-bottom: 8vh;
+    /*padding-bottom: 8vh;*/
 }
 
 @media (max-width: 991px) {
     .page-wrapper {
-    overflow: auto;
-    background: #e5e5e5;
-    padding-bottom: 12vh;
-}
+        overflow: auto;
+        background: #e5e5e5;
+        padding-bottom: 12vh;
+    }
 }
 .page-container {
     background: #e5e5e5;
@@ -325,6 +360,10 @@ section {
     .main-content {
         padding-top: 50px;
 	padding-bottom: 100px;
+    }
+
+    .display {
+        height: 88vh !important;
     }
 }
 
@@ -4273,7 +4312,7 @@ section {
 }
 
 .table-striped tbody tr:nth-of-type(odd) {
-    background-color: #fff;
+    background-color: #fff !important;
 }
 
 .table-striped tbody tr:nth-of-type(even) {
@@ -14652,3 +14691,57 @@ section {
 .vue-lists ul, .vue-lists ol {
     padding-left: 30px;
 }
+
+.header {
+    background: #fff;
+    border-radius: 5px;
+    display: flex;
+    padding: 10px 0px;
+    width: 97%;
+    margin-left: 15px;
+}
+
+.data-body {
+    background: #fff;
+    padding: 10px 0px;
+    width: 97%;
+    margin-left: 15px;
+    height: 320px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin-top:10px;
+}
+
+.table-ket {
+    position: absolute;
+    text-align: center;
+    left: 30px;
+    background: white;
+    z-index: 999;
+    font-size: 12px;
+    box-shadow: rgb(150, 152, 150) 0px -4px 5px -2px;
+    bottom: 0px;
+    width: 90% !important;
+}
+
+.datas {
+    text-align: left;
+    font-weight: 600;
+    font-size:12px;
+}
+
+.head-datas {
+    text-align: left;
+    font-weight: 600;
+    font-size:14px;
+}
+
+.data-row {
+    display: flex;
+    width: 100%;
+    border:1px solid black;
+    margin-top:5px;
+    border-radius: 5px;
+}
+
+

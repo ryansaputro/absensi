@@ -36,13 +36,11 @@
   <link href="{{ asset('vendor/slick/slick.css') }}" rel="stylesheet" media="all">
   <link href="{{ asset('vendor/select2/select2.min.css') }}" rel="stylesheet" media="all">
   <link href="{{ asset('vendor/perfect-scrollbar/perfect-scrollbar.css') }}" rel="stylesheet" media="all">
+  <link href="//cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css" rel="stylesheet" media="all">
   <!-- Main CSS-->
   <link href="css/theme.css" rel="stylesheet" media="all">
 </head>
 <body class="animsition">
-  <?php
-    // print_r(Session::all());
-  ?>
     <div class="page-wrapper">
         <div id="RyanApp">
             <index></index>
@@ -70,14 +68,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
     
     <!-- Main JS-->
-    <script src="{{ asset('js/main.js') }}"></script>
-    <script>
-    //   console.log(json_encode(Auth::user()->allPermissions, true))
-    // @auth
-    //   window.Permissions = {!! json_encode(Auth::user()->allPermissions, true) !!};
-    // @else
-    //   window.Permissions = ["read-absensi","read-outlets","create-outlets","edit-outlets","read-user","create-user","edit-user","delete-user"];
-    // @endauth
-  </script>
+  <script src="{{ asset('js/main.js') }}"></script>
 </body>
 </html>

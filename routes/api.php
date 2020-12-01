@@ -25,7 +25,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-
 //auth
 Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
@@ -58,7 +57,11 @@ Route::prefix('v1')->group(function () {
 
     //url utk display
     Route::post('/absen','HomeController@absen');
+    Route::post('/android-mapping-tag','PersonController@androidMappingTag');
     Route::get('/cek-absen','HomeController@cekAbsen');
+    //sync
+    Route::get('/sync', 'HomeController@sync'); 
+
 
     Route::group(['middleware' => ['auth']], function() {
 
