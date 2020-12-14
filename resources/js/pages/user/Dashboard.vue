@@ -311,7 +311,8 @@
 
         //websocket from python
         // Create WebSocket connection.
-        const socket = new WebSocket('ws://192.168.0.157:5000');
+        // const socket = new WebSocket('ws://192.168.0.157:5000');
+        const socket = new WebSocket('ws://127.0.0.1:5000');
         var modalSwal = this;
         // Listen for messages
         socket.addEventListener('message', function (event, $swal, modalSwal) {

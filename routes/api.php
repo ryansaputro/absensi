@@ -56,11 +56,12 @@ Route::prefix('v1')->group(function () {
     Route::post('/update-password','AuthController@updatePassword');
 
     //url utk display
-    Route::post('/absen','HomeController@absen');
+    // Route::post('/absen','HomeController@absen');
     Route::post('/android-mapping-tag','PersonController@androidMappingTag');
     Route::get('/cek-absen','HomeController@cekAbsen');
     //sync
     Route::get('/sync', 'HomeController@sync'); 
+    Route::post('/absen', 'AbsenSyncServerController@absenTap');
 
 
     Route::group(['middleware' => ['auth']], function() {
